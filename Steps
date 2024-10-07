@@ -1,0 +1,231 @@
+- Virtual Machine -> Debian
+- Connect Virtual Machine and VS code
+- root: makefile srcs obj
+- Makefile:  build the Docker images using `docker-compose.yml`
+- docker compose
+- Docker image
+- write your own Dockerfiles, one per service
+- build yourself the Docker images of your project
+- You then have to set up:
+• A Docker container that contains NGINX with TLSv1.2 or TLSv1.3 only.
+• A Docker container that contains WordPress + php-fpm (it must be installed and configured) only without nginx.
+• A Docker container that contains MariaDB only without nginx.
+• A volume that contains your WordPress database.
+• A second volume that contains your WordPress website files.
+• A docker-network that establishes the connection between your containers.
+Your containers have to restart in case of a crash.
+- Read about how daemons work and whether it’s a good idea to use them or not.
+- PID 1 and the best practices for writing Dockerfiles.
+- In your WordPress database, there must be two users, one of them being the administrator (Ying Yang)
+- Your volumes will be available in the /home/login/data folder of the host machine using Docker. Of course, you have to replace the login with yours.
+- configure your domain name so it points to your local IP address.
+- This domain name must be login.42.fr. Example:  wil.42.fr will redirect to the IP address pointing to wil’s website.
+- expected directory structure:
+- ROOT: Makefile, srcs, secrets
+- ./secrets: credentials.txt, db_password.txt, db_root_password.txt
+- ./srcs: docker-compose.yml, .env, requirements
+- ./srcs/requirements: bonus, mariadb, nginx, tools, wordpress
+- . /srcs/requirements/mariadb: conf, Dockerfile, .dockerignore, tools
+- ./srcs/requirements/nginx: conf, Dockerfile, .dockerignore, tools
+- $> cat srcs/.env
+	DOMAIN_NAME=wil.42.fr
+	# MYSQL SETUP
+	MYSQL_USER=XXXXXXXXXXXX
+	[...]
+-
+-
+- Step by step:
+1) Read about (make sure you understand):
+    - What is Docker?
+    - What is Docker Compose?
+    - What are Multi-container Applications?
+    - What is a Docker Image?
+    - What Are Volumes?
+    - How Daemons Work?
+2) Set up your Virtual Machine
+    - Either with Alpine or Debian
+3) Connect your Virtual Machine and VS code
+    - Easier to use
+4) You then have to set up:
+    Your containers have to restart in case of a crash.
+    • A Docker container that contains NGINX with TLSv1.2 or TLSv1.3 only.
+    • A Docker container that contains WordPress + php-fpm (it must be installed and configured) only without nginx.
+    • A Docker container that contains MariaDB only without nginx.
+    • A volume that contains your WordPress database.
+    • A second volume that contains your WordPress website files.
+    • A docker-network that establishes the connection between your containers.
+-
+-
+-------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------------------------------
+
+Inception
+This project is designed to broaden your understanding of system administration by using Docker.
+You will virtualize several Docker images, creating them in your new personal virtual
+machine.
+
+
+1. What is Docker?
+Docker is a platform that helps developers easily create, deploy, and run applications in containers. Containers are lightweight, portable environments that package everything needed to run a piece of software—code, libraries, dependencies, and configuration—so it can run reliably on any system, regardless of the environment.
+
+Here’s a simple breakdown:
+Key Concepts in Docker:
+- 1) Containers:
+    - A container is like a small, lightweight virtual machine that runs an application and its dependencies.
+    - It ensures that the application works the same in different environments (e.g., on your laptop, in the cloud, or on a server).
+    - Unlike full virtual machines, containers share the host system’s OS kernel, making them faster and more efficient in terms of resource usage.
+- 2) Images:
+    - A Docker image is like a template or blueprint for creating containers. It contains everything needed to run an app, including the code, libraries, environment variables, and system tools.
+    - Images are read-only, and when a container starts from an image, it adds a writable layer on top of the image where it can make changes.
+- 3) Docker Daemon:
+    - The Docker daemon (dockerd) is the background service that runs on your host machine and is responsible for managing Docker containers, images, volumes, and networks.
+    - It listens for Docker commands and executes them (like pulling images, starting containers, or creating networks).
+- 4) Dockerfile:
+    - A Dockerfile is a text file that contains a set of instructions to create a Docker image.
+    - Think of it as a recipe: it specifies the base image (e.g., python:3.9), the app’s code, dependencies, and how to run the app.
+
+Example of a simple Dockerfile:
+```dockerfile
+# Use an official Python runtime as the base image
+FROM python:3.9
+
+# Set the working directory in the container
+WORKDIR /app
+
+# Copy the current directory contents into the container at /app
+COPY . /app
+
+# Install the dependencies
+RUN pip install -r requirements.txt
+
+# Command to run the app
+CMD ["python", "app.py"]
+```
+- 5) Docker Hub:
+    - Docker Hub is like GitHub for Docker images. It’s a public registry where you can find and share Docker images.
+    - You can pull official images (like nginx, mysql, or python) or push your own custom images to Docker Hub.
+
+Why Use Docker?
+- 1) Portability:
+    - Docker ensures that your app will run the same way on different machines or environments. Once it's packed in a container, you can move that container across systems (from your laptop to production servers) without worrying about compatibility issues.
+- 2) Consistency:
+    - Since all dependencies and environment configurations are included inside the container, there are no "it works on my machine" problems anymore. Containers behave the same no matter where they run.
+- 3) Lightweight:
+    - Containers use less overhead compared to virtual machines because they share the host system's kernel, making them faster to start and requiring fewer resources.
+- 4) Isolation:
+    - Containers are isolated from one another and the host system. This isolation helps to avoid conflicts (e.g., two applications needing different versions of the same dependency).
+- 5) Scalability:
+    - Docker makes it easy to scale applications by running multiple instances of containers. This is especially useful in cloud environments where you can spin up containers as needed.
+
+---
+
+2. What is Docker Compose?
+Docker Compose is a tool used to easily manage and run multi-container Docker applications.
+- Imagine you have a project with multiple parts, like a web app, a database, and maybe a message broker. Instead of running each part manually, Docker Compose lets you define all of them in a single file (called docker-compose.yml) and start everything with one command.
+So, Docker Compose simplifies running complex applications with multiple containers.
+
+---
+
+3. What are Multi-container Applications?
+A multi-container application is an app that needs more than one Docker container to work.
+- For example, let's say you have an e-commerce website. It might need:
+    - A web server (like Nginx or Apache) to serve the website.
+    - A database (like MySQL or MongoDB) to store user data.
+    - A caching service (like Redis) to make things faster.
+Each of these components runs in its own container, but they work together to make the entire app function. This setup is called a multi-container application.
+
+---
+
+4. What is a Docker Image?
+A Docker image is like a blueprint or template for creating a Docker container.
+- It contains everything needed to run an application, such as the code, libraries, and dependencies.
+- When you start a container, it's created from a Docker image. The image is read-only and acts as a recipe for how the container should be built.
+Think of a Docker image like a snapshot of your app environment that can be used to create multiple identical containers whenever you need.
+
+---
+
+5. What Are Volumes?
+Docker volumes are used to persist data generated or used by Docker containers. Normally, when a container is stopped or removed, all the data inside it is lost. Volumes allow you to keep that data even after the container is deleted.
+
+Here’s how volumes work:
+- Volumes are stored on the host machine outside the container’s filesystem, usually in /var/lib/docker/volumes/.
+- They allow data sharing between the host system and one or more containers.
+- Volumes are independent of the container lifecycle, so data is safe even when the container is deleted or stopped.
+
+Example Use Case:
+Let’s say you’re running a database container like PostgreSQL. You don’t want to lose your data every time the container stops. By using a volume, you can store the database data on your host machine, so that if you recreate the container, your data will still be there.
+
+How Volumes Are Defined in `docker-compose.yml`:
+In the `docker-compose.yml` example I gave earlier, this section:
+```yaml
+volumes:
+  db_data:
+```
+Defines a named volume called db_data. It is used by the PostgreSQL service to store its data:
+```yaml
+volumes:
+  - db_data:/var/lib/postgresql/data
+```
+This means the database data is stored outside the container, and will be preserved even if the container is destroyed.
+
+---
+
+6. How Daemons Work?
+A daemon is a background process that runs without user interaction. In Docker, the Docker daemon is the main program that manages containers, images, networks, and volumes. It listens for commands (like docker run or docker-compose up) and handles tasks like building, running, or stopping containers.
+
+Here’s how Docker daemons work:
+- `Docker Daemon (dockerd)` : The Docker daemon runs as a background process on the host machine. It listens to Docker API requests (commands you give Docker) and manages containers and resources (e.g., networks, volumes).
+- `Client interaction` : The Docker client (CLI) is what you interact with when you run Docker commands. It communicates with the Docker daemon, which actually performs the tasks.
+- `Container management` : The daemon handles everything related to containers, including creating, running, stopping, or destroying them.
+
+Example:
+When you run docker run to start a container, the Docker daemon:
+- Pulls the required image if it’s not available locally.
+- Creates a container from the image.
+- Allocates resources (CPU, memory, storage) to the container.
+- Runs the container in the background or attached to your terminal.
+
+Should You Use Daemons?
+The term daemon in Docker specifically refers to the background Docker process (the dockerd process), but in general computing, daemons refer to any background service or process. Let's look at when using daemons (background processes) is a good idea and when it might not be:
+
+Advantages of Using Daemons (Background Processes):
+- Automatic Management: Daemons can run automatically without user intervention. This is useful for services that need to be running at all times, like web servers, database servers, or background workers.
+- Resource Management: Since they run in the background, you can better manage resources (CPU, memory) and keep your terminal free for other tasks.
+- Continuous Service Availability: Daemons are perfect for tasks that need to be always on (like Docker itself, which runs the Docker daemon in the background to manage containers).
+
+Disadvantages (or Why Not to Use Daemons):
+- Difficult to Debug: If a daemonized process crashes or stops working correctly, it might be harder to troubleshoot since it runs in the background.
+- Harder to Monitor: You may not realize if a daemon is misbehaving or consuming too many resources since it's not visible in the foreground.
+- Overhead for Simple Tasks: For lightweight tasks that don't need to always be running (like one-time scripts or short-term jobs), using a daemon might add unnecessary complexity.
+
+When to Use Them:
+- Good Idea: Use daemons when you need to keep a service running continuously (e.g., a web server, a message broker, or a database service).
+- Not a Good Idea: Avoid daemons for quick, one-off jobs or scripts that don't need to stay alive after they finish running.
+In Docker's case, the daemon is essential for the system to function. Without it, you wouldn't be able to run containers, manage images, or interact with any of Docker’s features. For other software, whether or not you should use a daemon depends on the use case.
+
+---
+
+7. Extra: (Virtual Machine vs Docker)
+
+Summary of Differences:
+
+| Feature          | Virtual Machine (VM)                           | Docker (Container)                               |
+| ---------------- | ---------------------------------------------- | ------------------------------------------------ |
+| **Architecture**  | Full guest OS on top of host OS                | Shares host OS kernel, isolated by processes      |
+| **Startup Speed** | Slow (minutes)                                 | Fast (seconds)                                   |
+| **Resource Usage**| Heavy, each VM needs its own OS                | Lightweight, shares host OS                      |
+| **Isolation**     | Full OS isolation (secure, but heavier)        | Process-level isolation, lighter but less isolated|
+| **Portability**   | Less portable, larger images (full OS)         | Highly portable, smaller images                  |
+| **Performance**   | Slower (due to full OS overhead)               | Faster (less overhead)                           |
+| **Use Cases**     | Running multiple OSes, legacy apps, full OS isolation | Microservices, cloud apps, lightweight tasks  |
+| **Size of Images**| Large (GBs)                                    | Small (MBs to GBs)                               |
+
+In Summary:
+- `Docker (containers)` is more lightweight, faster, and more efficient when running multiple applications on the same machine. It's great for modern app development, where speed, portability, and scalability are key.
+- `Virtual machines (VM)` offer more complete isolation and are better suited when you need to run different operating systems or when full OS separation is required.
+
+---
+
+
+
