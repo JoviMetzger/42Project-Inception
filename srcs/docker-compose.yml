@@ -1,0 +1,70 @@
+version: "3.8"
+
+services:
+        mariadb:
+              build: 
+                    context: requirements/mariadb
+              args:
+                    MYSQL_DATABASE : ${MYSQL_DATABASE}
+                    MYSQL_USER : $MYSQL_USER
+                    MYSQL_PASSWORD : $MYSQL_PASSWORD
+                    MYSQL_ROOT_PASSWORD : $MYSQL_ROOT_PASSWORD
+              container_name: mariadb
+              image: mariadb
+              restart: unless-stopped
+              env_file:
+                    - .env
+              volumes:
+              networks:
+
+        nginx:
+              build: requirements/nginx
+              container_name: nginx
+              image: nginx
+              env_file:
+                    - .env
+              ports:
+                    - "443:443"
+              depends_on:
+                    - wordpress
+              restart: unless-stopped
+              volumes:
+              networks:
+
+        wordpress:
+              build:
+                    context: requirements/wordpress
+              args:
+                    MYSQL_DATABASE : "${MYSQL_DATABASE}"
+                    MYSQL_USER : "${MYSQL_USER}"
+                    MYSQL_PASSWORD : "${MYSQL_PASSWORD}"
+                    MYSQL_HOST : "${MYSQL_HOST}"
+              container_name: wordpress
+              image: wordpress
+              env_file:
+                    - .env
+              volumes:
+              networks:
+
+
+networks:
+        inception:
+              driver: bridge
+
+
+volumes:
+        mariadb:
+              name: mariadb
+              driver: local
+              driver_opts:
+                    type: none                            #setting the type of volume
+                    o: bind                               #binding the volume
+                    device: /home/jmetzger/data/mysql
+
+        wordpress:
+              name: worspress
+              driver: local
+              driver_opts:
+                    type: none                            #setting the type of volume
+                    o: bind                               #binding the volume
+                    device: /home/jmetzger/data/html

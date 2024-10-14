@@ -18,15 +18,4 @@ clean: down
 	docker system prune -af
 	docker volume prune -f
 
-# ---- Not important ----
-# Streams the logs from all the services in the docker-compose.yml
-logs:
-	$(DOCKER_COMPOSE) -f $(COMPOSE_FILE) logs -f
-
-# Lists the status of all the containers managed by the docker-compose.yml
-ps:
-	$(DOCKER_COMPOSE) -f $(COMPOSE_FILE) ps
-
-# -----------------------
-
 .PHONY: all down re clean

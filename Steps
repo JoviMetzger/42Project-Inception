@@ -227,5 +227,138 @@ In Summary:
 
 ---
 
+# .env
+General
+DOMAIN_NAME=jmetzger.42.fr:
+This specifies the domain name for the WordPress site. In this case, it seems to be a subdomain (jmetzger) of 42.fr, possibly referring to a user or server identifier.
 
+MYSQL_HOST=mariadb:
+This is the hostname or IP address of the database server (MariaDB in this case). The value mariadb indicates that it expects the database service to be running on the same server or a server accessible by that name (e.g., within a Docker container network).
 
+MYSQL_DATABASE=wordpress:
+This sets the name of the MySQL database that will be used for WordPress. The database is named wordpress.
+
+MYSQL_ROOT_PASSWORD=root:
+The password for the MySQL root user (the administrative user). Here, it’s set to root (which is a poor security practice, but it might be placeholder text for setup purposes).
+
+Database Administrator
+MYSQL_USER=bob:
+This creates a MySQL user named bob, which will be the non-root user for interacting with the WordPress database.
+
+MYSQL_PASSWORD=bob:
+The password for the bob MySQL user is set to bob.
+
+WordPress Admin (WordPress Backend)
+WP_ADMIN=wordpress:
+This sets the WordPress admin username to wordpress, which is used to log in to the WordPress dashboard.
+
+WP_ADMIN_PWD=wordpress:
+This sets the WordPress admin password to wordpress.
+
+WP_ADMIN_EMAIL=wordpress@gmail.com:
+This specifies the email address associated with the WordPress admin account. Here, it's set to wordpress@gmail.com, but this would typically be changed to a real email address during setup.
+
+WordPress User (Frontend User Account)
+WP_USR=wp_user:
+This is the name of a regular user for the WordPress site, named wp_user. This could be a default user account created during setup.
+
+WP_USER_PWD=wp_user:
+The password for the wp_user is set to wp_user.
+
+WP_USRR_EMAIL=user_wordpress@gmail.com:
+The email address associated with the regular wp_user account is user_wordpress@gmail.com.
+
+Summary
+This configuration defines several key settings for deploying a WordPress instance:
+
+Database connection details (hostname, database name, credentials)
+WordPress admin credentials (for managing the site)
+A regular user account (presumably for testing the site as a normal user)
+Keep in mind, the actual passwords (root, bob, wordpress, etc.) should be changed to something more secure in a real deployment. The file likely serves as part of an environment setup for a WordPress installation, where these variables are injected into scripts or Docker containers to automate the deployment.
+
+---
+
+# makefile
+```
+all:
+	@docker-compose -f $(COMPOSE_FILE) up -d --build
+```
+Purpose: The all target builds and starts the Docker containers.
+- `up:` This command starts (or creates, if not already created) the Docker services defined in the docker-compose.yml file.
+- `-d:` Runs the containers in detached mode, which means the containers will run in the background, and the terminal won't be blocked.
+- `--build:` This flag forces the rebuilding of images before starting the services. If there are changes in your Dockerfile or project, they will be included.
+
+```
+down:
+	@docker-compose -f $(COMPOSE_FILE) down
+```
+Purpose: The down target stops and removes the running Docker containers, along with any associated networks and temporary resources.
+- `down:` This stops the containers and removes all related resources, including networks, volumes (unless explicitly persisted), and containers defined by the docker-compose.yml file.
+
+```
+clean: down
+	docker system prune -af
+	docker volume prune -f
+```
+Purpose: The clean target stops and removes all Docker containers and associated resources, and then aggressively cleans up unused Docker resources (like unused images, stopped containers, and volumes).
+- `docker system prune -af:` This command removes all unused Docker objects (such as dangling images, stopped containers, and unused networks). The -a flag ensures that all unused images (not just dangling ones) are removed, and the -f flag forces it without asking for confirmation.
+- `docker volume prune -f:` This removes all unused Docker volumes. The -f flag forces it without a prompt.
+
+Both makefiles work:
+option1
+```Makefile
+# Paths
+COMPOSE_FILE	=	./scrs/docker-compose.yml
+
+# --- Targets ---
+# Builds and starts the Docker services
+all:
+	@docker-compose -f $(COMPOSE_FILE) up -d --build
+
+# Stops and removes the containers, networks, and any temporary resources created
+down:
+	@docker-compose -f $(COMPOSE_FILE) down
+
+# Rebuild and restart of the services
+re: down all
+
+# Cleans up Docker resources
+clean: down
+	docker system prune -af
+	docker volume prune -f
+
+.PHONY: all down re clean
+```
+
+option2
+```
+# Executable
+NAME 			= inception
+
+# Paths
+COMPOSE_FILE	=	./scrs/docker-compose.yml
+
+# --- Targets ---
+# Builds and starts the Docker services
+all: $(NAME)
+
+# Starts Docker services
+$(NAME):
+	@docker-compose -f $(COMPOSE_FILE) up -d --build
+
+# Stops and removes the containers, networks, and any temporary resources created
+down:
+	@docker-compose -f $(COMPOSE_FILE) down
+
+# Rebuild and restart of the services
+re: down all
+
+# Cleans up Docker resources
+clean: down
+	@docker system prune -af
+	@docker volume prune -f
+
+.PHONY: all down re clean
+```
+
+---
