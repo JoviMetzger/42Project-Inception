@@ -1,37 +1,41 @@
-version: "3.8"
+version: "3.8"													# The version of the Compose file format
 
-services:
-        mariadb:
+services:														# Individual services (containers) that make up your application
+        mariadb:												# The database service.
               build: 
-                    context: requirements/mariadb
-              args:
+                    context: requirements/mariadb    			# Builds the image from a Dockerfile located in "requirements/mariadb"
+              args:												# Passes environment variables to the build process
                     MYSQL_DATABASE : ${MYSQL_DATABASE}
                     MYSQL_USER : $MYSQL_USER
                     MYSQL_PASSWORD : $MYSQL_PASSWORD
                     MYSQL_ROOT_PASSWORD : $MYSQL_ROOT_PASSWORD
-              container_name: mariadb
-              image: mariadb
-              restart: unless-stopped
+              container_name: mariadb                     		# Names the container "mariadb" for easier reference
+              image: mariadb                              		# Pulls the official MariaDB image
+              restart: unless-stopped                     		# Restarts the container automatically unless explicitly stopped
               env_file:
-                    - .env
+                    - .env                                		# Loads environment variables from the ".env" file
               volumes:
+                    - mariadb:/var/www/html						# Bind the mariadb volume to the MySQL data directory in the container (Ensures the MySQL database persists across container restarts)
               networks:
-
-        nginx:
+                    - inception                           		# Connects to the "inception" network, allowing it to communicate with other services
+        
+        nginx:       											# The web server that will serve the website.
               build: requirements/nginx
               container_name: nginx
               image: nginx
-              env_file:
-                    - .env
-              ports:
-                    - "443:443"
               depends_on:
                     - wordpress
               restart: unless-stopped
+              env_file:
+                    - .env
+              ports:
+                    - "443:443"                       			# Exposes port 443 for HTTPS traffic
               volumes:
+                    - nginx:/var/www/html						# You can leave ngnix volumes section empty
               networks:
+                    - inception
 
-        wordpress:
+        wordpress:   											# The WordPress application itself.
               build:
                     context: requirements/wordpress
               args:
@@ -41,30 +45,35 @@ services:
                     MYSQL_HOST : "${MYSQL_HOST}"
               container_name: wordpress
               image: wordpress
+              depends_on:
+                   - mariadb
+              restart: unless-stopped
               env_file:
                     - .env
               volumes:
+                    - wordpress:/var/www/html					# Bind the wordpress volume to the WordPress root directory in the container
               networks:
+                    - inception
 
 
-networks:
-        inception:
-              driver: bridge
+networks:														# Network configuration
+        inception:												# The name of the network within the Compose file. It's just an identifier.
+              name: inception									# The actual name of the network that Docker will create
 
 
-volumes:
+volumes:                                             			# Volumes configuration to persist data
         mariadb:
               name: mariadb
-              driver: local
+              driver: local								  		# Volume is located locally
               driver_opts:
-                    type: none                            #setting the type of volume
-                    o: bind                               #binding the volume
+                    type: none                           		# Setting the type of volume
+                    o: bind                               		# Binding the volume
                     device: /home/jmetzger/data/mysql
 
         wordpress:
               name: worspress
-              driver: local
+              driver: local 							  		# Volume is located locally
               driver_opts:
-                    type: none                            #setting the type of volume
-                    o: bind                               #binding the volume
-                    device: /home/jmetzger/data/html
+                    type: none                            		# No special filesystem type is enforced
+                    o: bind                              		# Bind mounts the host directory to the container
+                    device: /home/jmetzger/data/html			# This is the host directory where WordPress files (themes, plugins, uploads) will be stored
