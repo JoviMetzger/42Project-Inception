@@ -1218,22 +1218,3 @@ require_once ABSPATH . 'wp-settings.php';
 # mariadb
 ### dockerfile
 
-https://codam.notion.site/g-o-c-o-d-a-m-n-l-ae4ad699a1654ae892f294e52527428e
-https://profile.intra.42.fr/
-https://github.com/JoviMetzger
-https://github.com/ikatyang/emoji-cheat-sheet/blob/master/README.md
-https://docs.docker.com/compose/
-https://docs.docker.com/get-started/docker-concepts/running-containers/multi-container-applications/
-https://docs.docker.com/engine/storage/volumes/
-https://www.geeksforgeeks.org/what-is-docker-daemon/
-https://docs.docker.com/get-started/docker-overview/
-https://github.com/Forstman1/inception-42/blob/main/README.md
-https://mariadb.com/kb/en/creating-a-custom-container-image/
-https://www.datanovia.com/en/lessons/wordpress-docker-setup-files-example-for-local-development/
-https://www.massolit-media.com/tech-writing/wordpress-and-docker-dockerfiles/
-https://www.docker.com/blog/how-to-use-the-official-nginx-docker-image/
-https://medium.com/@imyzf/inception-3979046d90a0
-https://developer.wordpress.org/advanced-administration/wordpress/wp-config/
-https://github.com/Forstman1/inception-42/tree/main/srcs
-
-
