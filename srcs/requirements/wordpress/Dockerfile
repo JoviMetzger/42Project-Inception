@@ -1,17 +1,20 @@
-# Use an official Python runtime as a base image
-FROM python:3.9
+# Use Debian as a base image (Debian 12)
+FROM debian:bookworm
 
-# Set the working directory in the container
-WORKDIR /app
+# Update & intstall your package manager
+RUN apt-get -y update && \
+	apt-get install php-fpm php-mysql -y && \
+	apt-get install curl -y
 
-# Copy the current directory contents into the container at /app
-COPY . /app
+# Copy script from 'tools' directory into the container’s root directory (/).
+COPY ./tools/wp-script.sh /
+COPY ./tools/wp-config.php /
 
-# Install any needed packages specified in requirements.txt
-RUN pip install --no-cache-dir -r requirements.txt
+# Make sure the script is executable (NOT necessary for 'wp-config.php', since PHP just reads it)
+RUN chmod +x /wp-script.sh
 
-# Make port 80 available to the world outside this container
-EXPOSE 80
+# This is the port that NGINX will use to communicate with WordPress (via PHP-FPM).
+EXPOSE 9000
 
-# Define the command to run the app
-CMD ["python", "app.py"]
+# Start PHP-FPM and run the custom WordPress script
+CMD ["/wp-script.sh"]
