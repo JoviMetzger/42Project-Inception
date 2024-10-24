@@ -1218,3 +1218,113 @@ require_once ABSPATH . 'wp-settings.php';
 # mariadb
 ### dockerfile
 
+
+
+---
+
+
+Connect your terminal to the VM:
+FIRST:
+VM Settings -> Network -> Advanced -> Port Forwarding -> Click on the 'plus' right side
+Host IP: 127.0.0.1
+Host Port: 2222 -> could be any port number
+Guest Port: 22 -> default SSH port on the guest
+
+SECOND:
+In VM terminal:
+```
+$> sudo apt install openssh-server
+```
+Password:
+```
+$> sudo systemctl start ssh
+```
+
+THIRD:
+```ssh -p 2222 jmetzger@127.0.0.1``` 
+-> ssh -p <port> <username>@127.0.0.1
+password:
+Test:
+```
+$> ls
+$> cd desktop
+$> touch IamHERE
+```
+-> file should appear on your VM desktop
+
+```
+$> exit
+```
+-> if you want to exit the syncrontaion
+
+FOUR:
+Syncronize VS and VM:
+Steps to Connect VS Code to Your VM via SSH:
+Ensure SSH Access to Your VM: Make sure you've set up SSH access to your VM by following the steps mentioned earlier (setting up port forwarding in VirtualBox and ensuring SSH is running on your VM). You should be able to SSH into the VM from your terminal.
+
+Test the SSH connection using your terminal:
+
+bash
+Copy code
+ssh -p 2222 <username>@127.0.0.1
+Install VS Code (if not already installed): Download and install Visual Studio Code on your main system.
+
+Install the Remote - SSH Extension:
+
+Open VS Code.
+Go to the Extensions view by clicking the Extensions icon on the sidebar or pressing Ctrl+Shift+X.
+In the search bar, type "Remote - SSH".
+Click Install on the "Remote - SSH" extension by Microsoft.
+Open the Command Palette:
+
+Open the Command Palette in VS Code by pressing Ctrl+Shift+P (or Cmd+Shift+P on macOS).
+In the Command Palette, type Remote-SSH: Connect to Host and select it.
+Configure Your SSH Host:
+
+If this is your first time using SSH in VS Code, it will prompt you to configure an SSH host.
+
+Enter the SSH connection string for your VM, similar to this:
+
+bash
+Copy code
+ssh -p 2222 <username>@127.0.0.1
+Example:
+
+bash
+Copy code
+ssh -p 2222 ubuntu@127.0.0.1
+Edit SSH Configuration (optional):
+
+If you want to add the SSH host to your config file for easier access, VS Code will ask if you want to do that. Choose "Add to SSH config" if prompted.
+
+Alternatively, you can manually add an entry in your ~/.ssh/config file (if it doesn't exist, you can create it):
+
+bash
+Copy code
+Host my-vm
+    HostName 127.0.0.1
+    Port 2222
+    User ubuntu
+Now you can connect to your VM by just typing my-vm as the host name in VS Code.
+
+Connect to the SSH Host:
+
+Once you've entered the SSH details, VS Code will attempt to connect to the remote machine.
+It will open a new window, and you may be asked to install the VS Code Server on the remote machine (the VM). Accept the installation if prompted.
+Work on Your Remote Files: Once connected, you can open folders and files on the remote VM directly from VS Code. You can also install extensions on the remote VM and use VS Code as if you were working locally, but everything will happen on the VM.
+
+---
+
+- Go to VM Settings -> Shared Folders
+- Click the + icon to add a new shared folder
+- Folder Path: The path to the shared folder on you host (Create before this step a folder on your host)
+- Folder Name: Name of the folder you created on the host (Fill in should happen automatically)
+- Mount Point: /mnt/shared
+- Set Auto-mount option
+- OK
+- Start your VM
+- sudo ./VBoxLinuxAdditions.run
+- 'cd..' till you find the mnt folder
+sudo mount -t vboxsf <foldername> /mnt/shared
+Replace <foldername> with the name you set for the shared folder.
+- 'cd' into /mnt/shared (You will find all yo
