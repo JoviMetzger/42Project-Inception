@@ -1,5 +1,5 @@
 <?php
-// MySQL settings - This info is saved inside your .env
+// *** MySQL settings - This info is saved inside your .env ***
 // The name of the database for WordPress
 define( 'DB_NAME', getenv('MYSQL_DATABASE' ));
 
