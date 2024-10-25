@@ -1260,6 +1260,26 @@ In your browser, navigate to http://localhost:8000. You should see the WordPress
 Next Steps
 Once this is working, you can set up Nginx and MariaDB, reconfigure the WordPress container to connect to them, and test the complete setup.
 
+Start PHP Built-in Server: If your Docker container is already set to start PHP-FPM, you might need to ensure that you also expose a port for the built-in server. Since you're using a Dockerfile with PHP-FPM, you might want to run PHP's built-in server as follows:
+
+Option A: Modify Your Dockerfile to Run PHP Built-in Server
+You can change your CMD in the Dockerfile or run the built-in server directly in the terminal after accessing your container. Here’s an example of how you might modify the last line in your Dockerfile to run the PHP server:
+
+dockerfile
+Copy code
+CMD ["php", "-S", "0.0.0.0:8000", "-t", "/var/www/html/wordpress"]
+This will start the PHP built-in server and serve files from the specified directory.
+
+Option B: Running it in the Terminal
+If you want to start the PHP built-in server manually, you can do the following:
+
+bash
+Copy code
+docker exec -it your_wordpress_container_name bash
+cd /var/www/html/wordpress
+php -S 0.0.0.0:8000
+
+
 
 ---
 
