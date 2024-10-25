@@ -1,31 +1,22 @@
 <?php
-// MySQL settings - You can get this info from your web host
+// MySQL settings - This info is saved inside your .env
 // The name of the database for WordPress
-// define( 'DB_NAME', 'db1' );
-define();
+define( 'DB_NAME', getenv('MYSQL_DATABASE' ));
 
 // MySQL database username
-// define( 'DB_USER', 'user' );
-define();
+define( 'DB_USER', getenv('MYSQL_USER' ));
 
 // MySQL database password
-// define( 'DB_PASSWORD', 'pwd' );
-define();
+define( 'DB_PASSWORD', getenv('MYSQL_PASSWORD' ));
 
 // MySQL hostname
-// define( 'DB_HOST', 'mariadb' );
-define();
+define( 'DB_HOST', 'mariadb' );
 
 // Database Charset to use in creating database tables.
-// define( 'DB_CHARSET', 'utf8' );
-define();
+define( 'DB_CHARSET', 'utf8 ');
 
-// The Database Collate type. Don't change this if in doubt.
-// define( 'DB_COLLATE', '' );
-define();
-
-// define( 'WP_ALLOW_REPAIR', true );
-define();
+// The Database Collate type.
+define( 'DB_COLLATE', '' );
 
 // Authentication Unique Keys and Salts.
 // ** generate key here: https://api.wordpress.org/secret-key/1.1/salt/ **
@@ -38,13 +29,11 @@ define('SECURE_AUTH_SALT', '&X>]HbfAq.^JtJ=20N+Q}od-[Z:szi<(4;fs/A$sFCR(}^WLNPH=
 define('LOGGED_IN_SALT',   'zC{Fhx#4L5GxU5)Tu4$4>iiV.V}.|}  %lVL&V*?DB}!pIm(6(QFe^|sS#>$U<{8');
 define('NONCE_SALT',       'ao;c@w@)!D@ujk+]D7O2 ?@T8b)il~LRzM|:ac`ykb;K;+.8/Yo4tf]X|R~+t+*5');
 
-// ????????????????????
-
 // Absolute path to the WordPress directory.
-if ( ! defined( 'ABSPATH' ) ) {
-	define( 'ABSPATH', '/var/www/html/wordpress' );
+if ( ! defined( 'ABSOLUTE_PATH' ) ) {
+	define( 'ABSOLUTE_PATH', '/var/www/html/wordpress' );
 }
 
 // Sets up WordPress vars and included files.
-require_once ABSPATH . 'wp-settings.php';
+require_once ABSOLUTE_PATH . 'wp-settings.php';
 ?>
