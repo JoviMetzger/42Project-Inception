@@ -1212,6 +1212,55 @@ require_once ABSPATH . 'wp-settings.php';
 ?>
 ```
 
+1. Generating the Authentication Keys and Salts for wp-config.php
+The values for AUTH_KEY, SECURE_AUTH_KEY, etc., are security keys and salts that WordPress uses for encrypting information stored in user cookies. You can generate new ones using the [WordPress Secret Key Generator](https://api.wordpress.org/secret-key/1.1/salt/). Simply visit that URL, and it will provide a unique set of values. Copy and paste these into your wp-config.php file where you see the keys and salts defined.
+
+
+# Test wordpress
+To test if your WordPress setup is working in Docker, you need to ensure that the WordPress container is up and accessible. Since Nginx and MariaDB are not yet configured, you can follow these steps to test WordPress in isolation:
+
+Verify the Container is Running
+Run the command below to check if the container is running as expected:
+
+bash
+Copy code
+docker ps
+Look for a container with the name or image name matching wordpress. If it's not running, you may need to troubleshoot the Dockerfile.
+
+Check Container Logs
+Inspect the WordPress container logs to see if there are any errors. Run:
+
+bash
+Copy code
+docker logs wordpress
+This can help you identify issues if the container starts but fails internally.
+
+Set up Temporary PHP Server for WordPress Testing
+Since you don't yet have Nginx configured, use PHP’s built-in server in the WordPress container to check if WordPress loads. First, connect to the container:
+
+bash
+Copy code
+docker exec -it wordpress bash
+Then navigate to the directory where WordPress is located (usually /var/www/html for Dockerized WordPress), and run the built-in PHP server:
+
+bash
+Copy code
+php -S 0.0.0.0:8000
+might to install:
+Command 'php' not found, but can be installed with:
+sudo apt install php8.3-cli  # version 8.3.6-0ubuntu0.24.04.2, or
+sudo apt install php-cli     # version 2:8.2+93ubuntu1
+sudo apt install php8.2-cli  # version 8.2.12-1ubuntu2
+
+This will start a web server on port 8000 inside the container.
+
+Access WordPress Locally
+In your browser, navigate to http://localhost:8000. You should see the WordPress setup page if everything is working correctly within the container.
+
+Next Steps
+Once this is working, you can set up Nginx and MariaDB, reconfigure the WordPress container to connect to them, and test the complete setup.
+
+
 ---
 
 
@@ -1328,3 +1377,4 @@ Work on Your Remote Files: Once connected, you can open folders and files on the
 sudo mount -t vboxsf <foldername> /mnt/shared
 Replace <foldername> with the name you set for the shared folder.
 - 'cd' into /mnt/shared (You will find all yo
+
