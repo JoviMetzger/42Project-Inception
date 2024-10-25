@@ -9,6 +9,7 @@ RUN apt-get -y update && \
 # Copy script from 'tools' directory into the container’s root directory (/).
 COPY ./tools/wp-script.sh /
 COPY ./tools/wp-config.php /
+# COPY ./tools/wp-config.php /etc/wp-config.php
 
 # Make sure the script is executable (NOT necessary for 'wp-config.php', since PHP just reads it)
 RUN chmod +x /wp-script.sh
