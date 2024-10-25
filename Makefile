@@ -13,9 +13,13 @@ down:
 # Rebuild and restart of the services
 re: down all
 
-# Cleans up Docker resources
+# Quick cleanup without disrupting your current Docker environment
 clean: down
 	docker system prune -af
 	docker volume prune -f
 
-.PHONY: all down re clean
+# All Docker resources are removed, stopped and deleted
+fclean:
+	docker stop $(docker ps -qa); docker rm $(docker ps -qa); docker rmi -f $(docker images -qa); docker volume rm $(docker volume ls -q); docker network rm $(docker network ls -q) 2>/dev/null
+
+.PHONY: all down re clean fclean
