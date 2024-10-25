@@ -19,7 +19,7 @@ define( 'DB_CHARSET', 'utf8 ');
 define( 'DB_COLLATE', '' );
 
 // Authentication Unique Keys and Salts.
-// ** generate key here: https://api.wordpress.org/secret-key/1.1/salt/ **
+// ** Find generated key here: https://api.wordpress.org/secret-key/1.1/salt/ **
 define('AUTH_KEY',         '8EsCDOM}7G%]D<90c]-+TzD%w=_M0CoY1~$5id>.JPO({DW~i}0x!}Z5X2>H|dly');
 define('SECURE_AUTH_KEY',  '|Ety5|C 8qA^t3>>kYI}6Zm)c%&HjVK[|qd(C;GGp?9kb;)2#-J[KUH-_g4aAl;=');
 define('LOGGED_IN_KEY',    '7wEU[#J(-u27qaPl+a.)OdLv(.3U_m<SKMVvn90Ia)Mwd)|1j3P5{dVWk-6%:E6<');
