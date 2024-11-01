@@ -1,13 +1,13 @@
 <?php
 // *** MySQL settings - This info is saved inside your .env ***
 // The name of the database for WordPress
-define( 'DB_NAME', getenv('DB_DATABASE' ));
+define( 'DB_NAME', getenv('MYSQL_DATABASE_NAME' ));
 
 // MySQL database username
-define( 'DB_USER', getenv('DB_USER' ));
+define( 'DB_USER', getenv('MYSQL_USER' ));
 
 // MySQL database password
-define( 'DB_PASSWORD', getenv('DB_PASSWORD' ));
+define( 'DB_PASSWORD', getenv('MYSQL_PASSWORD' ));
 
 // MySQL hostname
 define( 'DB_HOST', 'mariadb' );

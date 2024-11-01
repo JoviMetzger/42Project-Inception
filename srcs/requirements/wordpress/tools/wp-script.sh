@@ -17,7 +17,7 @@ if [ ! -f /var/www/html/wordpress/wp-config.php ]; then
 
     # Wait for the database to be ready
     echo "Waiting for the database to be ready..."
-    until mysqladmin -h${DB_HOSTNAME} -u${DB_USER} -p${DB_PASSWORD} ping; do
+    until mysqladmin -h${MYSQL_DATABASE_NAME} -u${MYSQL_USER} -p${MYSQL_PASSWORD} ping; do
         sleep 2
     done
 
@@ -26,17 +26,17 @@ if [ ! -f /var/www/html/wordpress/wp-config.php ]; then
     wp core install \
         --url="${DOMAIN_NAME}" \
         --title="inception" \
-        --admin_user="${WP_DB_ADMIN}" \
-        --admin_password="${WP_DB_ADMIN_PASSWORD}" \
-        --admin_email="${WP_DB_EMAIL}" \
+        --admin_user="${WP_ADMIN}" \
+        --admin_password="${WP_ADMIN_PASSWORD}" \
+        --admin_email="${WP_ADMIN_EMAIL}" \
         --allow-root
 
     # Create additional WordPress user
     echo "Creating WordPress user..."
 	wp user create \
-        ${WP_DB_USER} \
-        ${WP_DB_USER_EMAIL} \
-        --user_pass=${WP_DB_PASSWORD} \
+        ${WP_USER} \
+        ${WP_USER_EMAIL} \
+        --user_pass=${WP_USER_PASSWORD} \
         --allow-root
 fi
 

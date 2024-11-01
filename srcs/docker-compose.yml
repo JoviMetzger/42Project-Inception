@@ -6,9 +6,9 @@ services:                                                         # Individual s
                     context: requirements/mariadb                 # Builds the image from a Dockerfile located in "requirements/mariadb"
               environment:                                        # Passes environment variables to the build process
                     DB_DATABASE : ${DB_DATABASE}
-                    DB_USER : $DB_USER
-                    DB_PASSWORD : $DB_PASSWORD
-                    DB_ROOT_PASSWORD : $DB_ROOT_PASSWORD
+                    MYSQL_USER : $MYSQL_USER
+                    MYSQL_PASSWORD : $MYSQL_PASSWORD
+                    MYSQL_ROOT_PASSWORD : $MYSQL_ROOT_PASSWORD
                     MYSQL_EXTRA_FLAGS : --bind-address=0.0.0.0    # Make MariaDB listen on all interfaces
               container_name: mariadb                             # Names the container "mariadb" for easier reference
               image: mariadb                                      # Pulls the official MariaDB image
@@ -26,8 +26,8 @@ services:                                                         # Individual s
       #               context: requirements/wordpress
       #         environment:
       #               DB_DATABASE : "${DB_DATABASE}"
-      #               DB_USER : "${DB_USER}"
-      #               DB_PASSWORD : "${DB_PASSWORD}"
+      #               MYSQL_USER : "${MYSQL_USER}"
+      #               MYSQL_PASSWORD : "${MYSQL_PASSWORD}"
       #               DB_HOSTNAME : "${DB_HOSTNAME}"
       #         container_name: wordpress
       #         image: wordpress
@@ -69,7 +69,7 @@ volumes:                                                          # Volumes conf
               driver_opts:
                     type: none                                    # Setting the type of volume
                     o: bind                                       # Binding the volume
-                    device: /home/jmetzger/data/mysql
+                    device: /home/jmetzger/data/mysql             # This is the host directory where MariaDB files will be stored
       #   wordpress:
       #         name: wordpress
       #         driver: local                                       # Volume is located locally

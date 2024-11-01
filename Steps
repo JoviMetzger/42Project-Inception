@@ -22,7 +22,7 @@ Your containers have to restart in case of a crash.
 - This domain name must be login.42.fr. Example:  wil.42.fr will redirect to the IP address pointing to wil’s website.
 - expected directory structure:
 - ROOT: Makefile, srcs, secrets
-- ./secrets: credentials.txt, db_password.txt, db_root_password.txt
+- ./secrets: credentials.txt, MYSQL_PASSWORD.txt, MYSQL_ROOT_PASSWORD.txt
 - ./srcs: docker-compose.yml, .env, requirements
 - ./srcs/requirements: bonus, mariadb, nginx, tools, wordpress
 - . /srcs/requirements/mariadb: conf, Dockerfile, .dockerignore, tools
@@ -30,7 +30,7 @@ Your containers have to restart in case of a crash.
 - $> cat srcs/.env
 	DOMAIN_NAME=wil.42.fr
 	# MYSQL SETUP
-	DB_USER=XXXXXXXXXXXX
+	MYSQL_USER=XXXXXXXXXXXX
 	[...]
 -
 -
@@ -264,14 +264,14 @@ This is the hostname or IP address of the database server (MariaDB in this case)
 DB_DATABASE=wordpress:
 This sets the name of the MySQL database that will be used for WordPress. The database is named wordpress.
 
-DB_ROOT_PASSWORD=root:
+MYSQL_ROOT_PASSWORD=root:
 The password for the MySQL root user (the administrative user). Here, it’s set to root (which is a poor security practice, but it might be placeholder text for setup purposes).
 
 Database Administrator
-DB_USER=bob:
+MYSQL_USER=bob:
 This creates a MySQL user named bob, which will be the non-root user for interacting with the WordPress database.
 
-DB_PASSWORD=bob:
+MYSQL_PASSWORD=bob:
 The password for the bob MySQL user is set to bob.
 
 WordPress Admin (WordPress Backend)
@@ -301,7 +301,7 @@ Database connection details (hostname, database name, credentials)
 WordPress admin credentials (for managing the site)
 A regular user account (presumably for testing the site as a normal user)
 Keep in mind, the actual passwords (root, bob, wordpress, etc.) should be changed to something more secure in a real deployment. The file likely serves as part of an environment setup for a WordPress installation, where these variables are injected into scripts or Docker containers to automate the deployment.
-Since your DB_USER environment variable is empty when you check it with echo $DB_USER, it indicates that your .env file is not being loaded properly or the variables are not being passed to the Docker container correctly. Here’s how to troubleshoot and fix the issue.
+Since your MYSQL_USER environment variable is empty when you check it with echo $MYSQL_USER, it indicates that your .env file is not being loaded properly or the variables are not being passed to the Docker container correctly. Here’s how to troubleshoot and fix the issue.
 
 Steps to Resolve the Issue
 Check .env File Location:
@@ -321,9 +321,9 @@ DOMAIN_NAME=jmetzger.42.fr              # Intra user name
 
 # MARIADB DATABASE
 DB_DATABASE=maria_database              # Name of the MySQL database that will be used for WordPress
-DB_ROOT_PASSWORD=root                   # Password your choice 
-DB_USER=bob                             # User your choice
-DB_PASSWORD=bob                         # Password your choice  
+MYSQL_ROOT_PASSWORD=root                   # Password your choice 
+MYSQL_USER=bob                             # User your choice
+MYSQL_PASSWORD=bob                         # Password your choice  
 
 # WORDPRESS ADMIN
 WP_ADMIN=wordpress                      # User your choice
@@ -453,9 +453,9 @@ services:
       context: requirements/mariadb  # Builds the image from a Dockerfile located in "requirements/mariadb"
     args:
       DB_DATABASE: ${DB_DATABASE}      # Passes environment variables to the build process
-      DB_USER: $DB_USER
-      DB_PASSWORD: $DB_PASSWORD
-      DB_ROOT_PASSWORD: $DB_ROOT_PASSWORD
+      MYSQL_USER: $MYSQL_USER
+      MYSQL_PASSWORD: $MYSQL_PASSWORD
+      MYSQL_ROOT_PASSWORD: $MYSQL_ROOT_PASSWORD
     container_name: mariadb                  # Names the container "mariadb" for easier reference
     image: mariadb                           # Pulls the official MariaDB image
     restart: unless-stopped                  # Restarts the container automatically unless explicitly stopped
@@ -489,8 +489,8 @@ services:
       context: requirements/wordpress        # Builds the image from a Dockerfile located in "requirements/wordpress"
     args:
       DB_DATABASE: "${DB_DATABASE}"    # Passes environment variables to the build process
-      DB_USER: "${DB_USER}"
-      DB_PASSWORD: "${DB_PASSWORD}"
+      MYSQL_USER: "${MYSQL_USER}"
+      MYSQL_PASSWORD: "${MYSQL_PASSWORD}"
       DB_HOSTNAME: "${DB_HOSTNAME}"
     container_name: wordpress                # Names the container "wordpress"
     image: wordpress                         # Uses the official WordPress image
@@ -683,9 +683,9 @@ yaml
 Copy code
 args:
   DB_DATABASE : ${DB_DATABASE}
-  DB_USER : $DB_USER
-  DB_PASSWORD : $DB_PASSWORD
-  DB_ROOT_PASSWORD : $DB_ROOT_PASSWORD
+  MYSQL_USER : $MYSQL_USER
+  MYSQL_PASSWORD : $MYSQL_PASSWORD
+  MYSQL_ROOT_PASSWORD : $MYSQL_ROOT_PASSWORD
 In this section, the args are passing the database details (like the database name, user, and password) to the build process when Docker creates the MariaDB image.
 These values come from environment variables (typically defined in the .env file), and Docker substitutes them during the build phase.
 Are args important?
@@ -700,9 +700,9 @@ In a typical Dockerfile, you might see something like this:
 Dockerfile
 Copy code
 ARG DB_DATABASE
-ARG DB_USER
-ARG DB_PASSWORD
-ARG DB_ROOT_PASSWORD
+ARG MYSQL_USER
+ARG MYSQL_PASSWORD
+ARG MYSQL_ROOT_PASSWORD
 
 # Use these ARG values to set up the MariaDB configuration at build-time.
 If you're using a pre-built image (like the official mariadb image) and don't need to customize it at build time, the args section may not be necessary. Instead, you would only need to use environment variables (env_file or environment) to configure MariaDB at runtime.
@@ -756,7 +756,7 @@ Ports: What ports need to be exposed to access the services externally?
 Example: Nginx may expose port 443 to serve your web application over HTTPS.
 Environment Variables: Does the service need environment variables to be configured, like database credentials?
 
-Example: MariaDB needs variables like DB_USER, DB_PASSWORD, and DB_DATABASE to set up the database.
+Example: MariaDB needs variables like MYSQL_USER, MYSQL_PASSWORD, and DB_DATABASE to set up the database.
 3. Services Section
 For each component, you define a service. A service represents a container and its associated configuration.
 
@@ -787,7 +787,7 @@ depends_on:
 To avoid hardcoding sensitive configuration values (like database passwords) directly in your docker-compose.yml, use an .env file.
 
 Why? This keeps your Compose file clean and allows you to easily change configuration settings without editing the file itself.
-Example: You can use .env to set variables like DB_USER, DB_PASSWORD, and DB_DATABASE.
+Example: You can use .env to set variables like MYSQL_USER, MYSQL_PASSWORD, and DB_DATABASE.
 yaml
 Copy code
 env_file:
@@ -1194,13 +1194,13 @@ You don’t need the script to be executable (though it's still a good practice 
 
 // ** MySQL settings - You can get this info from your web host ** //
 /** The name of the database for WordPress */
-define( 'DB_NAME', 'db1' );
+define( 'MYSQL_DATABASE_NAME', 'db1' );
 
 /** MySQL database username */
-define( 'DB_USER', 'user' );
+define( 'MYSQL_USER', 'user' );
 
 /** MySQL database password */
-define( 'DB_PASSWORD', 'pwd' );
+define( 'MYSQL_PASSWORD', 'pwd' );
 
 /** MySQL hostname */
 define( 'DB_HOST', 'mariadb' );
@@ -1377,19 +1377,19 @@ Copy code
     # Secure MariaDB installation (run only the first time)
     mysql -u root <<EOF
     -- Set the root password
-    ALTER USER 'root'@'localhost' IDENTIFIED BY '${DB_ROOT_PASSWORD}';
+    ALTER USER 'root'@'localhost' IDENTIFIED BY '${MYSQL_ROOT_PASSWORD}';
     FLUSH PRIVILEGES;
 EOF
 This part uses a "here document" (<<EOF) to send multiple commands to the MariaDB command-line interface.
 mysql -u root starts the MySQL/MariaDB command line as the root user.
-The first command, ALTER USER 'root'@'localhost' IDENTIFIED BY '${DB_ROOT_PASSWORD}';, sets a password for the root user, using the environment variable ${DB_ROOT_PASSWORD}.
+The first command, ALTER USER 'root'@'localhost' IDENTIFIED BY '${MYSQL_ROOT_PASSWORD}';, sets a password for the root user, using the environment variable ${MYSQL_ROOT_PASSWORD}.
 FLUSH PRIVILEGES; reloads the privilege tables to apply any changes immediately.
 bash
 Copy code
     # Create a new database if specified
     if [ -n "$DB_DATABASE" ]; then
         echo "Creating database: $DB_DATABASE"
-        mysql -u root -p"${DB_ROOT_PASSWORD}" -e "CREATE DATABASE IF NOT EXISTS \`${DB_DATABASE}\` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+        mysql -u root -p"${MYSQL_ROOT_PASSWORD}" -e "CREATE DATABASE IF NOT EXISTS \`${DB_DATABASE}\` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
     fi
 This block checks if the variable $DB_DATABASE is set (non-empty).
 If it is, it prints a message about creating the specified database.
@@ -1398,18 +1398,18 @@ CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci; ensures the database uses UTF-
 bash
 Copy code
     # Create a new user and grant privileges
-    if [ -n "$DB_USER" ] && [ -n "$DB_PASSWORD" ]; then
-        echo "Creating user: $DB_USER with access to $DB_DATABASE"
-        mysql -u root -p"${DB_ROOT_PASSWORD}" <<EOF
-        CREATE USER IF NOT EXISTS '${DB_USER}'@'%' IDENTIFIED BY '${DB_PASSWORD}';
-        GRANT ALL PRIVILEGES ON \`${DB_DATABASE}\`.* TO '${DB_USER}'@'%';
+    if [ -n "$MYSQL_USER" ] && [ -n "$MYSQL_PASSWORD" ]; then
+        echo "Creating user: $MYSQL_USER with access to $DB_DATABASE"
+        mysql -u root -p"${MYSQL_ROOT_PASSWORD}" <<EOF
+        CREATE USER IF NOT EXISTS '${MYSQL_USER}'@'%' IDENTIFIED BY '${MYSQL_PASSWORD}';
+        GRANT ALL PRIVILEGES ON \`${DB_DATABASE}\`.* TO '${MYSQL_USER}'@'%';
         FLUSH PRIVILEGES;
 EOF
     fi
-This block checks if both $DB_USER and $DB_PASSWORD are set.
+This block checks if both $MYSQL_USER and $MYSQL_PASSWORD are set.
 If they are, it creates a new user with those credentials and grants them access to the specified database (${DB_DATABASE}).
-CREATE USER IF NOT EXISTS '${DB_USER}'@'%' IDENTIFIED BY '${DB_PASSWORD}'; creates the user if they don't already exist, with % allowing connections from any host.
-GRANT ALL PRIVILEGES ON \${DB_DATABASE}`.* TO '${DB_USER}'@'%';` grants full access to this user on all tables within the specified database.
+CREATE USER IF NOT EXISTS '${MYSQL_USER}'@'%' IDENTIFIED BY '${MYSQL_PASSWORD}'; creates the user if they don't already exist, with % allowing connections from any host.
+GRANT ALL PRIVILEGES ON \${DB_DATABASE}`.* TO '${MYSQL_USER}'@'%';` grants full access to this user on all tables within the specified database.
 FLUSH PRIVILEGES; reloads the privileges to ensure they take effect immediately.
 bash
 Copy code
@@ -1512,7 +1512,7 @@ Accessing the MariaDB Instance: To connect to your MariaDB instance, you can use
 bash
 Copy code
 mysql -h 127.0.0.1 -P 3306 -u my_user -p
-mysql -h 127.0.0.1 -P 3306 -u "$DB_USER" -p"$DB_PASSWORD"
+mysql -h 127.0.0.1 -P 3306 -u "$MYSQL_USER" -p"$MYSQL_PASSWORD"
 Stopping and Removing Containers: To stop the services, run:
 
 bash
@@ -1614,17 +1614,17 @@ sudo apt install mysql-client-core-8.0  # version 8.0.39-0ubuntu0.24.04.2, or
 
 mysql -h 127.0.0.1 -P 3306 -u my_user -p
 Enter password: 
-DB_PASSWORD
+MYSQL_PASSWORD
 >
-DB_USER=my_user
-DB_PASSWORD=my_user_password
+MYSQL_USER=my_user
+MYSQL_PASSWORD=my_user_password
 <
 If you need to connect as the root user instead, you would use:
 
 bash
 Copy code
 mysql -h 127.0.0.1 -P 3306 -u root -p
-And enter the password set for DB_ROOT_PASSWORD.
+And enter the password set for MYSQL_ROOT_PASSWORD.
 
 Notes on the Updates
 Ports: Exposes MariaDB on the host’s 3306 port, allowing access through 127.0.0.1.
@@ -1639,11 +1639,11 @@ Now, try connecting again with:
 
 bash
 Copy code
-mysql -h 127.0.0.1 -P 3306 -u "$DB_USER" -p"$DB_PASSWORD"
+mysql -h 127.0.0.1 -P 3306 -u "$MYSQL_USER" -p"$MYSQL_PASSWORD"
 ERROR 1045 (28000): Access denied for user 'jmetzger'@'172.18.0.1' (using password: YES) -> ????????????????
 
 >
-docker exec -it mariadb mysql -u root -p"${DB_ROOT_PASSWORD}"
+docker exec -it mariadb mysql -u root -p"${MYSQL_ROOT_PASSWORD}"
 Enter password: 
 Welcome to the MariaDB monitor.  Commands end with ; or \g.
 Your MariaDB connection id is 10
@@ -1671,7 +1671,7 @@ Next, check if the user you created exists and their access privileges:
 sql
 Copy code
 SELECT user, host FROM mysql.user;
-Look for your specified DB_USER. It should show up with a % host entry, allowing access from any host.
+Look for your specified MYSQL_USER. It should show up with a % host entry, allowing access from any host.
 
 
 -> MariaDB [(none)]> SHOW DATABASE;
@@ -1704,7 +1704,7 @@ MariaDB [(none)]> SELECT user, host FROM mysql.user;
 +-------------+-----------+
 | User        | Host      |
 +-------------+-----------+
-| ${DB_USER}  | %         |
+| ${MYSQL_USER}  | %         |
 | bob         | %         |
 | mariadb.sys | localhost |
 | mysql       | localhost |

@@ -1,5 +1,5 @@
 # Paths
-COMPOSE_FILE	=	./srcs/docker-compose.yml
+COMPOSE_FILE = ./srcs/docker-compose.yml
 
 # --- Targets ---
 # Builds and starts the Docker services
