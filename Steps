@@ -1346,220 +1346,399 @@ php -S 0.0.0.0:8000
 
 
 # mariadb
-### dockerfile
+To set up a MariaDB container with custom configuration, you would typically need:
+- `Dockerfile` : This defines the MariaDB image build, installing any necessary tools and copying configuration files into the container.
+- `Initialization Script (db-script.sh)` : This script initializes the database, sets up users, databases, and permissions, and ensures that MariaDB keeps running in the foreground.
+- `Custom Configuration File (custom_config.cnf) `: This file customizes MariaDB’s server settings, like port, bind address, caching, logging, and character sets.
+
+### dockerfile ---------------------------------
+- Use Debian as a base image (FROM)
+- Update & intstall your package manager (RUN)
+- Copy custom MariaDB configuration script AND custom_config.cnf (COPY) 
+- Expose port 3306 (EXPOSE)
+- Run the MariaDB setup script and start the server in the foreground (CMD)
+### --------------------------------------------
+## script --------------------------------------
 Let's go through this MariaDB initialization script step by step:
 
-bash
-Copy code
+`#!/bin/bash` (Allways have this)
+- Create necessary directories and set permissions as root
+- Check if the database directory exists
+      - Secure MariaDB installation
+      - Create a new database if specified
+      - Create a new user and grant privileges if specified
+- Keep MariaDB running in the foreground
+
+```sh
 #!/bin/bash
-This is called the shebang line. It specifies that this script should be run using the Bash shell (/bin/bash).
-bash
-Copy code
-# Exit immediately if a command exits with a non-zero status
-set -e
-set -e is a safety feature that tells the script to exit immediately if any command fails (returns a non-zero exit status). This helps to prevent the script from continuing when an error occurs.
-bash
-Copy code
-# Start the MariaDB service
-service mysql start
-This command starts the MariaDB (MySQL) service on the system.
-bash
-Copy code
-# Check if MariaDB is already initialized by looking for the database directory
-if [ ! -d "/var/lib/mysql/${DB_DATABASE}" ]; then
-This if statement checks if the directory /var/lib/mysql/${DB_DATABASE} exists. ${DB_DATABASE} is a variable expected to contain the name of the database. If this directory doesn't exist, it indicates that MariaDB hasn't been initialized yet, and the script proceeds with the initialization process.
-bash
-Copy code
+
+# Create necessary directories and set permissions as root
+mkdir -p /run/mysqld /var/log/mysql
+chown -R mysql:mysql /run/mysqld /var/log/mysql
+
+# Check if the database directory exists
+if [ ! -d "/var/lib/mysql/${MYSQL_DATABASE_NAME}" ]; then
     echo "Initializing MariaDB database..."
-Prints a message indicating that the MariaDB initialization process is starting.
-bash
-Copy code
-    # Secure MariaDB installation (run only the first time)
+
+    # Secure MariaDB installation
     mysql -u root <<EOF
     -- Set the root password
     ALTER USER 'root'@'localhost' IDENTIFIED BY '${MYSQL_ROOT_PASSWORD}';
     FLUSH PRIVILEGES;
 EOF
-This part uses a "here document" (<<EOF) to send multiple commands to the MariaDB command-line interface.
-mysql -u root starts the MySQL/MariaDB command line as the root user.
-The first command, ALTER USER 'root'@'localhost' IDENTIFIED BY '${MYSQL_ROOT_PASSWORD}';, sets a password for the root user, using the environment variable ${MYSQL_ROOT_PASSWORD}.
-FLUSH PRIVILEGES; reloads the privilege tables to apply any changes immediately.
-bash
-Copy code
+
     # Create a new database if specified
-    if [ -n "$DB_DATABASE" ]; then
-        echo "Creating database: $DB_DATABASE"
-        mysql -u root -p"${MYSQL_ROOT_PASSWORD}" -e "CREATE DATABASE IF NOT EXISTS \`${DB_DATABASE}\` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+    if [ -n "$MYSQL_DATABASE_NAME" ]; then
+        echo "Creating database: $MYSQL_DATABASE_NAME"
+        mysql -u root -p"${MYSQL_ROOT_PASSWORD}" -e "CREATE DATABASE IF NOT EXISTS \`${MYSQL_DATABASE_NAME}\` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
     fi
-This block checks if the variable $DB_DATABASE is set (non-empty).
-If it is, it prints a message about creating the specified database.
-The mysql command then creates the database using CREATE DATABASE IF NOT EXISTS \${DB_DATABASE}``.
-CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci; ensures the database uses UTF-8 encoding with Unicode collation for wide character support.
-bash
-Copy code
-    # Create a new user and grant privileges
+
+    # Create a new user and grant privileges if specified
     if [ -n "$MYSQL_USER" ] && [ -n "$MYSQL_PASSWORD" ]; then
-        echo "Creating user: $MYSQL_USER with access to $DB_DATABASE"
+        echo "Creating user: $MYSQL_USER with access to $MYSQL_DATABASE_NAME"
         mysql -u root -p"${MYSQL_ROOT_PASSWORD}" <<EOF
         CREATE USER IF NOT EXISTS '${MYSQL_USER}'@'%' IDENTIFIED BY '${MYSQL_PASSWORD}';
-        GRANT ALL PRIVILEGES ON \`${DB_DATABASE}\`.* TO '${MYSQL_USER}'@'%';
+        GRANT ALL PRIVILEGES ON \`${MYSQL_DATABASE_NAME}\`.* TO '${MYSQL_USER}'@'%';
         FLUSH PRIVILEGES;
 EOF
     fi
-This block checks if both $MYSQL_USER and $MYSQL_PASSWORD are set.
-If they are, it creates a new user with those credentials and grants them access to the specified database (${DB_DATABASE}).
-CREATE USER IF NOT EXISTS '${MYSQL_USER}'@'%' IDENTIFIED BY '${MYSQL_PASSWORD}'; creates the user if they don't already exist, with % allowing connections from any host.
-GRANT ALL PRIVILEGES ON \${DB_DATABASE}`.* TO '${MYSQL_USER}'@'%';` grants full access to this user on all tables within the specified database.
-FLUSH PRIVILEGES; reloads the privileges to ensure they take effect immediately.
-bash
-Copy code
+
     echo "Database initialization complete."
 else
-    echo "MariaDB database already initialized."
+    echo "Database already exists. Skipping initialization."
 fi
-If MariaDB has already been initialized (if the database directory exists), the script will skip the initialization steps and simply print a message saying that the database is already initialized.
-bash
-Copy code
-# Keep MariaDB running in the foreground (necessary for the container to stay alive)
+
+# Keep MariaDB running in the foreground
 echo "Starting MariaDB in the foreground..."
 exec mysqld
-This last part is crucial for container environments.
-exec mysqld replaces the current shell process with the MariaDB server process (mysqld), which keeps it running in the foreground. If the script were to terminate here, the container would stop. Keeping mysqld in the foreground ensures that the container stays alive and MariaDB remains accessible.
+```
+### --------------------------------------------
+### custom_config.cnf --------------------------
+
+The custom_config.cnf file is a configuration file for the MariaDB server, specifically for setting server-side options that control database behavior, storage, networking, and performance. Let’s break down the main sections and settings:
+
+# General Server Configuration Sections
+The configuration file is divided into sections (like [mysqld], [mariadb], etc.) that specify settings for different components of the MariaDB server. Each section can contain specific settings related to that component.
+- `[server]` : This section applies to the entire MariaDB server, both for standalone and embedded servers.
+- `[mysqld]` : Settings in this section apply only to the mysqld standalone MariaDB server daemon.
+- `[embedded]`, `[mariadb]`, `[mariadb-10.3]` : These sections define options specific to embedded servers, MariaDB-specific options, and MariaDB version-specific settings, respectively.
+
+# Basic Settings
+# User and PID file settings
+- `user` : Sets the user under which the MariaDB server runs.
+- `pid-file` : Path for the PID file, which helps manage the MariaDB process.
+
+# Socket and Port settings
+- `socket` : Location of the MariaDB Unix socket file for local connections.
+- `port` : Sets the port for TCP/IP connections (default MySQL/MariaDB port).
+
+# Directories settings
+- `basedir` : Base directory where MariaDB is installed.
+- `datadir` : Directory for storing database files.
+- `tmpdir` : Temporary files directory used by the server.
+- `lc-messages-dir` : Directory for error messages and translations.
+
+# Network settings
+- `bind-address` : Specifies the network interface on which MariaDB listens for incoming connections. Setting this to 0.0.0.0 means it accepts connections from all interfaces.
+
+# Fine Tuning
+This section contains various parameters that can fine-tune the performance of the server.
+Example parameters:
+- `key_buffer_size        = 16M`
+- `max_allowed_packet     = 16M`
+- `thread_stack           = 192K`
+- `thread_cache_size      = 8`
+- `myisam_recover_options = BACKUP`
+- `max_connections        = 100`
+- `table_cache            = 64`
+- `thread_concurrency     = 10`
+
+# Query Cache Configuration
+- `query_cache_size` : Size of the query cache, which stores results of queries to improve performance.
+
+# Logging and Replication
+- `log_error` : Path to the error log file, which is crucial for troubleshooting.
+- `expire_logs_days` : Number of days to keep binary logs before they are automatically removed.
+
+# Settings for general logging and slow query logging if desired:
+- `general_log_file       = /var/log/mysql/mysql.log`
+- `general_log            = 1`
+- `slow_query_log_file    = /var/log/mysql/mariadb-slow.log`
+- `long_query_time        = 10`
+- `log_slow_rate_limit    = 1000`
+- `log_slow_verbosity     = query_plan`
+- `log-queries-not-using-indexes`
+
+# Replication setup
+- `server-id              = 1`
+- `log_bin                = /var/log/mysql/mysql-bin.log`
+- `max_binlog_size        = 100M`
+- `binlog_do_db           = include_database_name`
+- `binlog_ignore_db       = exclude_database_name`
+
+# Security Features
+Security configurations related to connections and SSL.
+Uncomment and configure if required.
+- `chroot = /var/lib/mysql/`
+- `ssl-ca = /etc/mysql/cacert.pem`
+- `ssl-cert = /etc/mysql/server-cert.pem`
+- `ssl-key = /etc/mysql/server-key.pem`
+- `ssl-cipher = TLSv1.2  # Ensure the latest TLS protocol is used for secure connections.`
+
+# Character Sets
+Character set settings to support various languages and symbols.
+- `character-set-server` : Defines the default character set for the server.
+- `collation-server` : Defines the default collation for string comparison.
+
+# Unix Socket Authentication Plugin
+This is for Unix socket authentication, allowing the root user to authenticate without a password when running as the Unix root user.
+See https://mariadb.com/kb/en/unix_socket-authentication-plugin/ for details.
+
+# this is only for embedded server
+[embedded]
+
+# This group is only read by MariaDB servers, not by MySQL.
+# If you use the same .cnf file for MySQL and MariaDB,
+# you can put MariaDB-only options here.
+[mariadb]
+
+# This group is only read by MariaDB-10.3 servers.
+# If you use the same .cnf file for MariaDB of different versions,
+# use this group for options that older servers don't understand.
+[mariadb-10.3]
 
 
-The 50-server.cnf file is a configuration file for the MariaDB server, specifically for setting server-side options that control database behavior, storage, networking, and performance. Let’s break down the main sections and settings:
 
-General Server Configuration Sections
-[server]: This section applies to the entire MariaDB server, both for standalone and embedded servers.
-[mysqld]: Settings in this section apply only to the mysqld standalone MariaDB server daemon.
-[embedded], [mariadb], [mariadb-10.1]: These sections define options specific to embedded servers, MariaDB-specific options, and MariaDB version-specific settings, respectively.
-Key Configuration Areas
-Basic Settings
-User and PID file:
 
-user = root: Sets the user under which the MariaDB server runs.
-pid-file: Path for the PID file, which helps manage the MariaDB process.
-Socket and Port:
+```ini
+# MySQL Server Configuration File
 
-socket: Location of the MariaDB Unix socket file.
-port = 3306: Sets the port for TCP/IP connections (default MySQL/MariaDB port).
-Directories:
+# General server settings. (Not needed, so can remove it)
+[server]
 
-basedir: Base directory where MariaDB is installed.
-datadir: Directory for storing database files.
-tmpdir: Temporary files directory.
-Bind Address:
+# MySQL Server settings
+[mysqld]
 
-bind-address = mariadb: Specifies the network interface on which MariaDB listens for incoming connections. Setting this to a hostname like mariadb could mean it’s set up to accept connections on a specific interface (e.g., from a Docker network).
-Performance and Cache Tuning
-Fine Tuning:
-key_buffer_size = 16M: Memory allocated to the key cache for indexing; affects the speed of MyISAM indexes.
-max_allowed_packet = 16M: Maximum size of a packet the server can handle.
-thread_cache_size = 8: Number of threads to cache for reuse, which reduces the overhead of creating new threads.
-Query Cache:
-query_cache_limit = 1M: Maximum size of individual query results that can be cached.
-query_cache_size = 16M: Total amount of memory allocated for caching query results.
-Logging and Replication
-Error Log:
-log_error: Specifies the file path for error logs, helping troubleshoot issues.
-Replication Settings (commented out):
-server-id, log_bin, expire_logs_days, and max_binlog_size: Settings for replication, such as enabling binary logging, controlling the server ID, and managing log size and expiration.
-InnoDB Settings
-The InnoDB section is reserved for advanced configurations for the InnoDB storage engine. InnoDB is often the default engine in MariaDB for reliable ACID-compliant transactions. This section is empty, implying default InnoDB settings are in use.
-Security Features
-SSL/TLS Settings (commented out):
-SSL options specify paths to certificate files for encrypted connections, enhancing security.
-ssl-cipher (commented out) could restrict connections to secure TLS versions if uncommented.
-Character Sets
-UTF-8 Encoding:
-character-set-server = utf8mb4: Sets the default character encoding to UTF-8 (with support for 4-byte Unicode characters).
-collation-server = utf8mb4_general_ci: Sets the collation (sorting order) for the UTF-8 character set.
-Authentication Plugin
-Unix Socket Authentication (commented out): Allows root user access via Unix socket without a password, useful for local-only access but also potentially less secure if misconfigured.
-MariaDB-Specific Sections
-[mariadb]: This section is for MariaDB-specific options not read by MySQL.
-[mariadb-10.1]: This section specifies options that only apply to MariaDB version 10.1, providing version-specific customizations.
-In summary, 50-server.cnf provides essential MariaDB configuration settings organized by functional areas, allowing fine-tuning of memory, performance, security, logging, and replication. Most options are left at default values, but the file serves as a guide for more advanced configurations when needed.
+# User that the MySQL server runs as
+user                    = mysql
 
-Yes, to set up a MariaDB container with custom configuration, you would typically need:
+# Path to the PID file, which stores the process ID of the running MySQL server
+pid-file                = /run/mysqld/mysqld.pid
 
-Dockerfile: This defines the MariaDB image build, installing any necessary tools and copying configuration files into the container.
-Initialization Script (script.sh): This script initializes the database, sets up users, databases, and permissions, and ensures that MariaDB keeps running in the foreground.
-Custom Configuration File (50-server.cnf): This file customizes MariaDB’s server settings, like port, bind address, caching, logging, and character sets.
-Let’s go through an example of how these might look and work together.
+# Socket file for local connections
+socket                  = /var/run/mysqld/mysqld.sock
 
-Build and Run the Services: Navigate to the directory containing your docker-compose.yml and run the following command:
+# Port number the MySQL server listens on (default is 3306)
+port                    = 3306
 
-go to docker-compose
+# Base directory for MySQL installation
+basedir                 = /usr
+
+# Directory where MySQL databases are stored
+datadir                 = /var/lib/mysql
+
+# Temporary directory for MySQL operations
+tmpdir                  = /tmp
+
+# Directory for error messages and translations
+lc-messages-dir         = /usr/share/mysql
+
+# IP address to bind to. 0.0.0.0 means listen on all interfaces
+bind-address            = 0.0.0.0
+
+# Size of the query cache (memory allocated for caching query results)
+query_cache_size        = 16M
+
+# Path to the MySQL error log file
+log_error               = /var/log/mysql/error.log
+
+# Number of days to keep binary logs before they are automatically removed
+expire_logs_days        = 10
+
+# Default character set for the server
+character-set-server    = utf8mb4
+
+# Default collation for the server, which determines how string comparison is done
+collation-server        = utf8mb4_general_ci
+
+# [embedded] Section for embedded server configuration (Not needed, so can remove it)
+[embedded]
+
+# [mariadb] Section for MariaDB specific settings (Not needed, so can remove it)
+[mariadb]
+
+# [mariadb-10.3] Section for MariaDB version-specific settings (Not needed, so can remove it)
+[mariadb-10.3]
+```
+
+### --------------------------------------------
+### Test MariaDB -------------------------------
+Navigate to the directory containing your `docker-compose.yml` and run the following command:
+
 RUN:
-
-bash
-Copy code
+(Build your container):
+```bash
 docker-compose up -d
-The -d flag runs the containers in detached mode (in the background).
-Check the Running Services: After starting the containers, you can check their status using:
+```
+-> The -d flag runs the containers in detached mode (in the background).
 
-bash
-Copy code
+(Check the Running Services): 
+```bash
 docker-compose ps
-View Logs: To view the logs of your MariaDB service, you can run:
+```
 
-bash
-Copy code
+(View Logs):
+```bash
 docker-compose logs mariadb
-Accessing the MariaDB Instance: To connect to your MariaDB instance, you can use a MySQL client from your host or another container. For example:
+```
 
-bash
-Copy code
-mysql -h 127.0.0.1 -P 3306 -u my_user -p
+(Accessing the MariaDB Instance):
+Might need to install `sudo apt install mysql-client-core-8.0`
+```bash
 mysql -h 127.0.0.1 -P 3306 -u "$MYSQL_USER" -p"$MYSQL_PASSWORD"
-Stopping and Removing Containers: To stop the services, run:
+```
+-> If everything works till here your database ia running 
+- 1. Verify Database and User Creation:
+```sql
+# SHOW DATABASES;
+```
+-> Make sure your database (your_database_name) is listed. 
+-> Should look like:
+```sql
+mysql> SHOW DATABASES;
++--------------------+
+| Database           |
++--------------------+
+| information_schema |
+| mysql              |
+| performance_schema |
+| sys                |
++--------------------+
+4 rows in set (0.00 sec)
+```
 
-bash
-Copy code
+- 2. Check if your user is created with the right permissions:
+```sql
+# SELECT host, user FROM mysql.user;
+```
+-> This should list your USER.
+-> Should look like:
+```sql
+mysql> SELECT host, user FROM mysql.user;
++-----------+-------------+
+| Host      | User        |
++-----------+-------------+
+| %         | bob         |
+| %         | root        |
+| 127.0.0.1 | healthcheck |
+| ::1       | healthcheck |
+| localhost | healthcheck |
+| localhost | mariadb.sys |
+| localhost | root        |
++-----------+-------------+
+7 rows in set (0.00 sec)
+```
+
+- 3. To confirm the user's permissions:
+```sql
+# SHOW GRANTS FOR '<USER>'@'%';
+```
+If the USER does not have the correct permissions:
+-> Should look like:
+```sql
+mysql> SHOW GRANTS FOR 'bob'@'%';
++----------------------------------------------------------------------------------------------------+
+| Grants for bob@%                                                                                   |
++----------------------------------------------------------------------------------------------------+
+| GRANT USAGE ON *.* TO `bob`@`%` IDENTIFIED BY PASSWORD '*61584B76F6ECE8FB9A328E7CF198094B2FAC55C7' |
++----------------------------------------------------------------------------------------------------+
+1 row in set (0.00 sec)
+```
+- 4. Correct Any Issues with User Permissions
+```sql
+# GRANT ALL PRIVILEGES ON `<your_database_name>`.* TO '<USER>'@'%' IDENTIFIED BY '<your_password>';
+# FLUSH PRIVILEGES;
+```
+-> Should look like:
+```sql
+mysql> GRANT ALL PRIVILEGES ON `mariadb`.* TO 'bob'@'%' IDENTIFIED BY 'bob';
+Query OK, 0 rows affected (0.01 sec)
+
+mysql> FLUSH PRIVILEGES;
+Query OK, 0 rows affected (0.00 sec)
+```
+
+- 5. Retry Connecting from the Host
+Exit from the container and try connecting again from your host:
+```bash
+$ mysql -h 127.0.0.1 -P 3306 -u "$MYSQL_USER" -p"$MYSQL_PASSWORD"
+```
+-> Should look like:
+```sql
+$ mysql -h 127.0.0.1 -P 3306 -u "$MYSQL_USER" -p"$MYSQL_PASSWORD"
+
+Enter password: 
+Welcome to the MySQL monitor.  Commands end with ; or \g.
+Your MySQL connection id is 12
+Server version: 11.5.2-MariaDB-ubu2404 mariadb.org binary distribution
+
+Copyright (c) 2000, 2024, Oracle and/or its affiliates.
+
+Oracle is a registered trademark of Oracle Corporation and/or its
+affiliates. Other names may be trademarks of their respective
+owners.
+
+Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
+```
+Yay! you logged in successfully, the MariaDB server is running fine
+
+
+(Stopping and Removing Containers): 
+```bash
 docker-compose down
+```
 
-IF::
-$ docker-compose up -d
-WARN[0000] /mnt/shared/srcs/docker-compose.yml: the attribute version is obsolete, it will be ignored, please remove it to avoid potential confusion 
+### --------------------------------------------
+### PROBLEMS? ----------------------------------
+
+IF ANY OF THE PRIVOUS COMMAND AREN'T WORKING
+LOOK HERE:
+
+1) PROBLEM AT `docker-compose up -d`
+Similar output:
+```bash
+$ docker-compose up -d`
+
 [+] Running 0/0
- ⠋ Container mariadb  Starting                                                                                                             0.1s 
-Error response from daemon: error while mounting volume '/var/lib/docker/volumes/mariadb/_data': failed to mount local volume: mount /home/jmetzger/data/mysql:/var/lib/docker/volumes/mariadb/_data, flags: 0x1000: no such file or directory
+ ⠋ Container mariadb  Starting        0.1s 
+Error response from daemon: error while mounting volume '/var/lib/docker/volumes/mariadb/_data': failed to mount local volume: mount /home/<username>/data/mysql:/var/lib/docker/volumes/mariadb/_data, flags: 0x1000: no such file or directory
+```
 
-
-Check the Directory Path: Make sure that the directory /home/jmetzger/data/mysql exists on your host machine. You can check this using the terminal:
-
-bash
-Copy code
-ls /home/jmetzger/data/mysql
+- `Check the Directory Path` : Make sure that the directory /home/<username>/data/mysql exists on your host machine. You can check this using the terminal:
+```bash
+ls /home/<username>/data/mysql
+```
 If it doesn’t exist, you'll need to create it.
-
-Create the Required Directory: If the directory does not exist, create it using the following command:
-
-bash
-Copy code
-mkdir -p /home/jmetzger/data/mysql
+```bash
+mkdir -p /home/<username>/data/mysql
+```
 This command will create the directory along with any necessary parent directories.
 
-Check Permissions: After creating the directory, ensure that the user running the Docker daemon has the necessary permissions to access this directory. You can set the permissions as follows:
-
-bash
-Copy code
-sudo chown -R $(whoami):$(whoami) /home/jmetzger/data/mysql
-
+- `Re-run Docker Compose` : After ensuring the directory exists and has the correct permissions, try running your Docker Compose command again:
+```bash
 docker volume rm mariadb
-Be careful with this command as it will delete the volume and all data stored in it.
+```
+-> Be careful with this command as it will delete the volume and all data stored in it.
 
-Re-run Docker Compose: After ensuring the directory exists and has the correct permissions, try running your Docker Compose command again:
-
-bash
-Copy code
+```bash
 docker-compose up -d
+```
 
-docker-compose logs mariadb
-.......
+2) PROBLEM AT `docker-compose logs mariadb`
+Similar output:
+```bash
 $ docker-compose logs mariadb
-WARN[0000] /mnt/shared/srcs/docker-compose.yml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion 
+
 mariadb  | mysql: unrecognized service
 mariadb  | Initializing MariaDB database...
 mariadb  | ERROR 2002 (HY000): Can't connect to local server through socket '/run/mysqld/mysqld.sock' (2)
@@ -1570,80 +1749,23 @@ mariadb  | ERROR 2002 (HY000): Can't connect to local server through socket '/ru
 mariadb  | Database initialization complete.
 mariadb  | Starting MariaDB in the foreground...
 mariadb  | mysqld: Can't create file '/var/log/mysql/error.log' (errno: 2 "No such file or directory")
-mariadb  | 2024-10-31 15:25:29 0 [Note] Starting MariaDB 10.11.6-MariaDB-0+deb12u1 source revision  as process 1
-mariadb  | 2024-10-31 15:25:29 0 [Note] InnoDB: Compressed tables use zlib 1.2.13
-mariadb  | 2024-10-31 15:25:29 0 [Note] InnoDB: Number of transaction pools: 1
-mariadb  | 2024-10-31 15:25:29 0 [Note] InnoDB: Using crc32 + pclmulqdq instructions
-mariadb  | 2024-10-31 15:25:29 0 [Note] mysqld: O_TMPFILE is not supported on /tmp (disabling future attempts)
-mariadb  | 2024-10-31 15:25:29 0 [Warning] mysqld: io_uring_queue_init() failed with errno 95
-mariadb  | 2024-10-31 15:25:29 0 [Warning] InnoDB: liburing disabled: falling back to innodb_use_native_aio=OFF
-mariadb  | 2024-10-31 15:25:29 0 [Note] InnoDB: Initializing buffer pool, total size = 128.000MiB, chunk size = 2.000MiB
-mariadb  | 2024-10-31 15:25:29 0 [Note] InnoDB: Completed initialization of buffer pool
-mariadb  | 2024-10-31 15:25:30 0 [Note] InnoDB: Buffered log writes (block size=512 bytes)
-mariadb  | 2024-10-31 15:25:30 0 [Note] InnoDB: End of log at LSN=46996
-mariadb  | 2024-10-31 15:25:30 0 [Note] InnoDB: 128 rollback segments are active.
-mariadb  | 2024-10-31 15:25:30 0 [Note] InnoDB: Setting file './ibtmp1' size to 12.000MiB. Physically writing the file full; Please wait ...
-mariadb  | 2024-10-31 15:25:30 0 [Note] InnoDB: File './ibtmp1' size is now 12.000MiB.
-mariadb  | 2024-10-31 15:25:30 0 [Note] InnoDB: log sequence number 46996; transaction id 14
-mariadb  | 2024-10-31 15:25:30 0 [Note] Plugin 'FEEDBACK' is disabled.
-mariadb  | 2024-10-31 15:25:30 0 [Note] InnoDB: Loading buffer pool(s) from /var/lib/mysql/ib_buffer_pool
-mariadb  | 2024-10-31 15:25:30 0 [Warning] You need to use --log-bin to make --expire-logs-days or --binlog-expire-logs-seconds work.
-mariadb  | 2024-10-31 15:25:30 0 [Note] Server socket created on IP: '0.0.0.0'.
-mariadb  | 2024-10-31 15:25:30 0 [ERROR] Can't start server : Bind on unix socket: No such file or directory
-mariadb  | 2024-10-31 15:25:30 0 [ERROR] Do you already have another server running on socket: /run/mysqld/mysqld.sock ?
-mariadb  | 2024-10-31 15:25:30 0 [ERROR] Aborting
-mariadb  | mysql: unrecognized service
-mariadb  | Initializing MariaDB database...
+.........
+```
+Check your script.sh
 
-.......
+3) PROBLEM AT `mysql -h 127.0.0.1 -P 3306 -u "$MYSQL_USER" -p"$MYSQL_PASSWORD"`
+Similar output:
+```bash
+$ mysql -h 127.0.0.1 -P 3306 -u "$MYSQL_USER" -p"$MYSQL_PASSWORD"
 
-docker-compose logs mariadb
-WARN[0000] /mnt/shared/srcs/docker-compose.yml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion 
-mariadb  | Initializing MariaDB database...
-mariadb  | ERROR 2002 (HY000): Can't connect to local server through socket '/run/mysqld/mysqld.sock' (2)
-mariadb  | Creating database: wordpress
-mariadb  | ERROR 2002 (HY000): Can't connect to local server through socket '/run/mysqld/mysqld.sock' (2)
-mariadb  | Creating user: bob with access to wordpress
-mariadb  | ERROR 2002 (HY000): Can't connect to local server through socket '/run/mysqld/mysqld.sock' (2)
-mariadb  | Database initialization complete.
-mariadb  | Starting MariaDB in the foreground...
+ERROR 1045 (28000): Access denied for user '<username>'@'172.18.0.1' (using password: YES)
+```
 
-mysql -h 127.0.0.1 -P 3306 -u my_user -p
-Command 'mysql' not found, but can be installed with:
-sudo apt install mysql-client-core-8.0  # version 8.0.39-0ubuntu0.24.04.2, or
+```bash
+$ docker exec -it mariadb mysql -u root -p"${MYSQL_ROOT_PASSWORD}"
+OR
+$ mysql -u root -p"${MYSQL_ROOT_PASSWORD}"
 
-mysql -h 127.0.0.1 -P 3306 -u my_user -p
-Enter password: 
-MYSQL_PASSWORD
->
-MYSQL_USER=my_user
-MYSQL_PASSWORD=my_user_password
-<
-If you need to connect as the root user instead, you would use:
-
-bash
-Copy code
-mysql -h 127.0.0.1 -P 3306 -u root -p
-And enter the password set for MYSQL_ROOT_PASSWORD.
-
-Notes on the Updates
-Ports: Exposes MariaDB on the host’s 3306 port, allowing access through 127.0.0.1.
-Environment Variable: MYSQL_EXTRA_FLAGS lets you set MariaDB to listen on all IP addresses (0.0.0.0), making the container accessible from outside the Docker network.
-Volumes: Ensure you’re using the correct path in the device section to map the MariaDB data directory to persist data.
-With these changes, restart the service with:
-
-bash
-Copy code
-docker-compose down && docker-compose up -d
-Now, try connecting again with:
-
-bash
-Copy code
-mysql -h 127.0.0.1 -P 3306 -u "$MYSQL_USER" -p"$MYSQL_PASSWORD"
-ERROR 1045 (28000): Access denied for user 'jmetzger'@'172.18.0.1' (using password: YES) -> ????????????????
-
->
-docker exec -it mariadb mysql -u root -p"${MYSQL_ROOT_PASSWORD}"
 Enter password: 
 Welcome to the MariaDB monitor.  Commands end with ; or \g.
 Your MariaDB connection id is 10
@@ -1653,213 +1775,51 @@ Copyright (c) 2000, 2018, Oracle, MariaDB Corporation Ab and others.
 
 Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
 
-MariaDB [(none)]> 
---
-Great! It looks like you were able to successfully connect to the MariaDB server as the root user. Now, let’s verify that the user and database were created as expected and troubleshoot the access issue with your application user.
+MariaDB [(none)]>
+```
+
+Great! It looks like you were able to successfully connect to the MariaDB server as the root user. 
+Now, let’s verify that the user and database were created as expected and troubleshoot the access issue with your application user.
+
 Now that you’re inside the MariaDB shell, run the following commands to check if your intended database and user exist.
-Check Databases
-To see if the database you intended to create exists, run:
+- Check Databases:
+```sql
+# SHOW DATABASES;
+```
+-> Look for the database name you specified in your MYSQL_DATABASE_NAME variable.
 
-sql
-Copy code
-SHOW DATABASES;
-Look for the database name you specified in your DB_DATABASE variable.
+- Check Users:
+Check if the user you created exists and their access privileges
+```sql
+# SELECT user, host FROM mysql.user;
+```
+-> Look for your specified MYSQL_USER. It should show up with a % host entry, allowing access from any host.
 
-Check Users
-Next, check if the user you created exists and their access privileges:
-
-sql
-Copy code
-SELECT user, host FROM mysql.user;
-Look for your specified MYSQL_USER. It should show up with a % host entry, allowing access from any host.
-
-
--> MariaDB [(none)]> SHOW DATABASE;
-ERROR 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'DATABASE' at line 1
-
--> MariaDB [(none)]> SELECT user, host FROM mysql.user;
-+-------------+-----------+
-| User        | Host      |
-+-------------+-----------+
-| bob         | %         |
-| mariadb.sys | localhost |
-| mysql       | localhost |
-| root        | localhost |
-+-------------+-----------+
-4 rows in set (0.034 sec)
-
-From your previous output, we see that the user bob was created with access from any host (%), which is good. However, the root user is only allowed to connect from localhost.
-
-Step 3: Grant Privileges to bob (if needed)
-If bob should have access to the database but isn't seeing it, make sure to grant the necessary privileges:
-
-If the database exists, run:
-
-sql
-Copy code
-GRANT ALL PRIVILEGES ON `your_database_name`.* TO 'bob'@'%';
-FLUSH PRIVILEGES;
-
-MariaDB [(none)]> SELECT user, host FROM mysql.user;
-+-------------+-----------+
-| User        | Host      |
-+-------------+-----------+
-| ${MYSQL_USER}  | %         |
-| bob         | %         |
-| mariadb.sys | localhost |
-| mysql       | localhost |
-| root        | localhost |
-+-------------+-----------+
-5 rows in set (0.001 sec)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+- Grant Privileges to USER:
+If USER should have access to the database but isn't seeing it, make sure to grant the necessary privileges:
+```sql
+# GRANT ALL PRIVILEGES ON `<your_database_name>`.* TO '<USER_NAME>'@'%';
+# FLUSH PRIVILEGES;
+```
+### --------------------------------------------
 
 
 ---
 
 
-Connect your terminal to the VM:
-FIRST:
-VM Settings -> Network -> Advanced -> Port Forwarding -> Click on the 'plus' right side
-Host IP: 127.0.0.1
-Host Port: 2222 -> could be any port number
-Guest Port: 22 -> default SSH port on the guest
+# Extra INFO
 
-SECOND:
-In VM terminal:
-```
-$> sudo apt install openssh-server
-```
-Password:
-```
-$> sudo systemctl start ssh
-```
+###  .conf and .cnf ----------------------------
+difference between `.conf` and `.cnf`
 
-THIRD:
-```ssh -p 2222 jmetzger@127.0.0.1``` 
--> ssh -p <port> <username>@127.0.0.1
-password:
-Test:
-```
-$> ls
-$> cd desktop
-$> touch IamHERE
-```
--> file should appear on your VM desktop
+Both `.conf` and `.cnf` are commonly used for configuration files, but they are often associated with different types of applications or services.
+Key Differences: 
+`.conf` is more general and used by many different types of software, associated with operating system services and various servers.
+`.cnf` is more specialized, often used for MySQL and database-related configurations, associated with database configurations.
 
-```
-$> exit
-```
--> if you want to exit the syncrontaion
-
-FOUR:
-Syncronize VS and VM:
-Steps to Connect VS Code to Your VM via SSH:
-Ensure SSH Access to Your VM: Make sure you've set up SSH access to your VM by following the steps mentioned earlier (setting up port forwarding in VirtualBox and ensuring SSH is running on your VM). You should be able to SSH into the VM from your terminal.
-
-Test the SSH connection using your terminal:
-
-bash
-Copy code
-ssh -p 2222 <username>@127.0.0.1
-Install VS Code (if not already installed): Download and install Visual Studio Code on your main system.
-
-Install the Remote - SSH Extension:
-
-Open VS Code.
-Go to the Extensions view by clicking the Extensions icon on the sidebar or pressing Ctrl+Shift+X.
-In the search bar, type "Remote - SSH".
-Click Install on the "Remote - SSH" extension by Microsoft.
-Open the Command Palette:
-
-Open the Command Palette in VS Code by pressing Ctrl+Shift+P (or Cmd+Shift+P on macOS).
-In the Command Palette, type Remote-SSH: Connect to Host and select it.
-Configure Your SSH Host:
-
-If this is your first time using SSH in VS Code, it will prompt you to configure an SSH host.
-
-Enter the SSH connection string for your VM, similar to this:
-
-bash
-Copy code
-ssh -p 2222 <username>@127.0.0.1
-Example:
-
-bash
-Copy code
-ssh -p 2222 ubuntu@127.0.0.1
-Edit SSH Configuration (optional):
-
-If you want to add the SSH host to your config file for easier access, VS Code will ask if you want to do that. Choose "Add to SSH config" if prompted.
-
-Alternatively, you can manually add an entry in your ~/.ssh/config file (if it doesn't exist, you can create it):
-
-bash
-Copy code
-Host my-vm
-    HostName 127.0.0.1
-    Port 2222
-    User ubuntu
-Now you can connect to your VM by just typing my-vm as the host name in VS Code.
-
-Connect to the SSH Host:
-
-Once you've entered the SSH details, VS Code will attempt to connect to the remote machine.
-It will open a new window, and you may be asked to install the VS Code Server on the remote machine (the VM). Accept the installation if prompted.
-Work on Your Remote Files: Once connected, you can open folders and files on the remote VM directly from VS Code. You can also install extensions on the remote VM and use VS Code as if you were working locally, but everything will happen on the VM.
-
----
-
-- Go to VM Settings -> Shared Folders
-- Click the + icon to add a new shared folder
-- Folder Path: The path to the shared folder on you host (Create before this step a folder on your host)
-- Folder Name: Name of the folder you created on the host (Fill in should happen automatically)
-- Mount Point: /mnt/shared
-- Set Auto-mount option
-- OK
-- Start your VM
-- sudo ./VBoxLinuxAdditions.run
-- 'cd..' till you find the mnt folder
-sudo mount -t vboxsf <foldername> /mnt/shared
-Replace <foldername> with the name you set for the shared folder.
-- 'cd' into /mnt/shared (You will find all your files here)
-
-
-
-
+### --------------------------------------------
 
 
 ---
 
-#difference between .conf and .cnf
 
-The difference between .conf and .cnf file extensions typically comes down to convention and the specific software that uses them. Both .conf and .cnf are commonly used for configuration files, but they are often associated with different types of applications or services. Here's a breakdown:
-
-1. .conf Files
-General Use: The .conf extension is widely used for configuration files across a range of Unix-based and Linux systems. It's more of a general-purpose file format used by various software packages, daemons, and services.
-Examples: Apache's httpd.conf, sshd_config for OpenSSH, and many configuration files in /etc on Unix systems use the .conf extension.
-Syntax: The syntax of .conf files varies depending on the software, but they are often in plain text and may include key-value pairs, directives, or blocks of settings.
-2. .cnf Files
-Specific Use: The .cnf extension is usually associated with MySQL and MariaDB configuration files. It is less commonly used across a wide variety of software compared to .conf.
-Examples: The primary configuration file for MySQL is often my.cnf, which contains parameters that control how the database server operates.
-Syntax: Like .conf files, .cnf files are typically plain text and include sections that are marked by square brackets (e.g., [mysqld]), with configuration options listed underneath.
-3. Key Differences
-Use Cases: .conf is more general and used by many different types of software, whereas .cnf is more specialized, often used for MySQL and database-related configurations.
-Association: .conf files are associated with operating system services and various servers, while .cnf files are associated with database configurations.
-Conclusion
-The differences are not inherent to the file format or content but rather how they are conventionally used. The syntax and structure of the files are determined by the software they are meant to configure, not by the file extension itself.
