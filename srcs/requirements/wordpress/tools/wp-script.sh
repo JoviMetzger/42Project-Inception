@@ -17,7 +17,7 @@ if [ ! -f /var/www/html/wordpress/wp-config.php ]; then
 
     # Wait for the database to be ready
     echo "Waiting for the database to be ready..."
-    until mysqladmin -h${MYSQL_HOST} -u${MYSQL_USER} -p${MYSQL_PASSWORD} ping; do
+    until mysqladmin -h${DB_HOSTNAME} -u${DB_USER} -p${DB_PASSWORD} ping; do
         sleep 2
     done
 

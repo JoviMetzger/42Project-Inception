@@ -5,38 +5,41 @@ services:                                                         # Individual s
               build: 
                     context: requirements/mariadb                 # Builds the image from a Dockerfile located in "requirements/mariadb"
               environment:                                        # Passes environment variables to the build process
-                    MYSQL_DATABASE : ${MYSQL_DATABASE}
-                    MYSQL_USER : $MYSQL_USER
-                    MYSQL_PASSWORD : $MYSQL_PASSWORD
-                    MYSQL_ROOT_PASSWORD : $MYSQL_ROOT_PASSWORD
+                    DB_DATABASE : ${DB_DATABASE}
+                    DB_USER : $DB_USER
+                    DB_PASSWORD : $DB_PASSWORD
+                    DB_ROOT_PASSWORD : $DB_ROOT_PASSWORD
+                    MYSQL_EXTRA_FLAGS : --bind-address=0.0.0.0    # Make MariaDB listen on all interfaces
               container_name: mariadb                             # Names the container "mariadb" for easier reference
               image: mariadb                                      # Pulls the official MariaDB image
               restart: unless-stopped                             # Restarts the container automatically unless explicitly stopped
               env_file:
                     - .env                                        # Loads environment variables from the ".env" file
+              ports:
+                    - "3306:3306"                                 # Expose MariaDB on port 3306
               volumes:
                     - mariadb:/var/www/html                       # Bind the mariadb volume to the MySQL data directory in the container (Ensures the MySQL database persists across container restarts)
               networks:
                     - inception                                   # Connects to the "inception" network, allowing it to communicate with other services
-        wordpress:                                                # The WordPress application itself.
-              build:
-                    context: requirements/wordpress
-              environment:
-                    MYSQL_DATABASE : "${MYSQL_DATABASE}"
-                    MYSQL_USER : "${MYSQL_USER}"
-                    MYSQL_PASSWORD : "${MYSQL_PASSWORD}"
-                    MYSQL_HOST : "${MYSQL_HOST}"
-              container_name: wordpress
-              image: wordpress
-              depends_on:
-                   - mariadb
-              restart: unless-stopped
-              env_file:
-                    - .env
-              volumes:
-                    - wordpress:/var/www/html                     # Bind the wordpress volume to the WordPress root directory in the container
-              networks:
-                    - inception
+      #   wordpress:                                                # The WordPress application itself.
+      #         build:
+      #               context: requirements/wordpress
+      #         environment:
+      #               DB_DATABASE : "${DB_DATABASE}"
+      #               DB_USER : "${DB_USER}"
+      #               DB_PASSWORD : "${DB_PASSWORD}"
+      #               DB_HOSTNAME : "${DB_HOSTNAME}"
+      #         container_name: wordpress
+      #         image: wordpress
+      #         depends_on:
+      #              - mariadb
+      #         restart: unless-stopped
+      #         env_file:
+      #               - .env
+      #         volumes:
+      #               - wordpress:/var/www/html                     # Bind the wordpress volume to the WordPress root directory in the container
+      #         networks:
+      #               - inception
       #   nginx:                                                    # The web server that will serve the website.
       #         build: requirements/nginx
       #         container_name: nginx
@@ -60,13 +63,6 @@ networks:                                                         # Network conf
 
 
 volumes:                                                          # Volumes configuration to persist data
-        wordpress:
-              name: wordpress
-              driver: local                                       # Volume is located locally
-              driver_opts:
-                    type: none                                    # No special filesystem type is enforced
-                    o: bind                                       # Bind mounts the host directory to the container
-                    device: /home/jmetzger/data/html              # This is the host directory where WordPress files (themes, plugins, uploads) will be stored
         mariadb:
               name: mariadb
               driver: local                                       # Volume is located locally
@@ -74,5 +70,12 @@ volumes:                                                          # Volumes conf
                     type: none                                    # Setting the type of volume
                     o: bind                                       # Binding the volume
                     device: /home/jmetzger/data/mysql
+      #   wordpress:
+      #         name: wordpress
+      #         driver: local                                       # Volume is located locally
+      #         driver_opts:
+      #               type: none                                    # No special filesystem type is enforced
+      #               o: bind                                       # Bind mounts the host directory to the container
+      #               device: /home/jmetzger/data/html              # This is the host directory where WordPress files (themes, plugins, uploads) will be stored
 
 
