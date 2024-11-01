@@ -974,10 +974,13 @@ Use Dockerfile when you need to create a custom Docker image for your applicatio
 Use docker-compose.yml when you need to manage multiple services, connect containers, define networks, and orchestrate how containers work together.
 In essence, Dockerfile is for building images, and docker-compose.yml is for running and managing containers in a multi-service environment.
 
+
 ---
 
+
 # wordpress
-### dockerfile
+
+### dockerfile ----------------------------------
 
 Let’s break down your Dockerfile for WordPress and address its correctness and functionality. Here's a more detailed explanation of each part:
 
@@ -1170,7 +1173,9 @@ Use CMD ["/bin/bash", "/wp-script.sh"] if:
 You want to ensure the script runs with bash no matter what.
 You don’t need the script to be executable (though it's still a good practice to make it executable).
 
-### wp-config.php
+### --------------------------------------------
+### wp-config.php ------------------------------
+
 ```php
 <?php
 /**
@@ -1277,7 +1282,9 @@ require_once ABSPATH . 'wp-settings.php';
 The values for AUTH_KEY, SECURE_AUTH_KEY, etc., are security keys and salts that WordPress uses for encrypting information stored in user cookies. You can generate new ones using the [WordPress Secret Key Generator](https://api.wordpress.org/secret-key/1.1/salt/). Simply visit that URL, and it will provide a unique set of values. Copy and paste these into your wp-config.php file where you see the keys and salts defined.
 
 
-# Test wordpress
+### --------------------------------------------
+### Test wordpress -----------------------------
+
 To test if your WordPress setup is working in Docker, you need to ensure that the WordPress container is up and accessible. Since Nginx and MariaDB are not yet configured, you can follow these steps to test WordPress in isolation:
 
 Verify the Container is Running
@@ -1358,16 +1365,38 @@ To set up a MariaDB container with custom configuration, you would typically nee
 - Expose port 3306 (EXPOSE)
 - Run the MariaDB setup script and start the server in the foreground (CMD)
 ### --------------------------------------------
-## script --------------------------------------
+### script -------------------------------------
+Such a script usually takes care of preparing the environment, initializing the database if necessary, setting up security configurations, creating a database, and ensuring MariaDB runs in the foreground.
 Let's go through this MariaDB initialization script step by step:
 
-`#!/bin/bash` (Allways have this)
-- Create necessary directories and set permissions as root
-- Check if the database directory exists
-      - Secure MariaDB installation
-      - Create a new database if specified
-      - Create a new user and grant privileges if specified
-- Keep MariaDB running in the foreground
+This is the "shebang" line. It tells the system that the script should be executed using /bin/bash, a common Unix shell.
+You alway need this line at the top of your script.sh
+```bash
+#!/bin/bash
+```
+- Create Necessary Directories and Set Permissions:
+MariaDB requires specific directories for data and logs. The script should create these directories and adjust permissions to ensure that the MariaDB process has access to them.
+- Check if the Database Directory Exists:
+The script checks if the MariaDB data directory is already initialized. If not, it initializes the database.
+      - Secure MariaDB Installation:
+        This step usually involves securing the MariaDB installation, similar to the interactive mysql_secure_installation command.
+        This script segment automates the security questions asked during the mysql_secure_installation. Options include:
+            - Setting a root password
+            - Removing anonymous users
+            - Disallowing root login remotely
+            - Removing the test database
+            - Reloading privilege tables
+        Note: Replace "password" with a secure password of your choice.
+      - Create a New Database (if specified):
+        If you want to create a new database, you can add a check and run the necessary SQL command.
+      - Create a New User and Grant Privileges (if specified):
+        If a user and password are provided, the script creates the user and grants the necessary privileges.
+            - CREATE USER: Adds a new user with a specified password.
+            - GRANT ALL PRIVILEGES: Gives the new user full access to the specified database.
+            - FLUSH PRIVILEGES: Refreshes the privilege tables to apply changes.
+- Keep MariaDB Running in the Foreground:
+To ensure the database service stays active in the foreground (important for containerized environments like Docker).
+            - `exec mysqld` replaces the current shell process with the MariaDB server, keeping it running in the foreground.
 
 ```sh
 #!/bin/bash
@@ -1412,18 +1441,29 @@ fi
 echo "Starting MariaDB in the foreground..."
 exec mysqld
 ```
+
+Environment Variables: 
+$DB_NAME, $DB_USER, and $DB_PASSWORD should be set in the environment before running the script, or you can hard-code them (not recommended for security reasons).
+
+
 ### --------------------------------------------
 ### custom_config.cnf --------------------------
 
 The custom_config.cnf file is a configuration file for the MariaDB server, specifically for setting server-side options that control database behavior, storage, networking, and performance. Let’s break down the main sections and settings:
 
-# General Server Configuration Sections
+# Structure of the Configuration File
+1) Sections:
+Configuration files are organized into sections. Each section starts with a name in square brackets, such as [server], [mysqld], [embedded], etc. The parameters defined under each section apply to that specific component of MariaDB.
+2) Key-Value Pairs:
+Each setting is defined as a key-value pair, where the key is the configuration option, and the value specifies its setting.
+
+# 1) Sections: General Server Configuration Sections
 The configuration file is divided into sections (like [mysqld], [mariadb], etc.) that specify settings for different components of the MariaDB server. Each section can contain specific settings related to that component.
 - `[server]` : This section applies to the entire MariaDB server, both for standalone and embedded servers.
 - `[mysqld]` : Settings in this section apply only to the mysqld standalone MariaDB server daemon.
 - `[embedded]`, `[mariadb]`, `[mariadb-10.3]` : These sections define options specific to embedded servers, MariaDB-specific options, and MariaDB version-specific settings, respectively.
 
-# Basic Settings
+# 2) Key-Value Pairs: Basic Settings
 # User and PID file settings
 - `user` : Sets the user under which the MariaDB server runs.
 - `pid-file` : Path for the PID file, which helps manage the MariaDB process.
@@ -1818,6 +1858,30 @@ Key Differences:
 `.cnf` is more specialized, often used for MySQL and database-related configurations, associated with database configurations.
 
 ### --------------------------------------------
+###  Docker version ----------------------------
+
+The version field was used in older versions of Docker Compose (pre-1.27.0) to specify the format of the configuration file and indicate which features were available in the Docker Compose specification. 
+However, from Docker Compose v1.27.0 onwards, the requirement for a version field has been deprecated.
+
+Older Docker Compose files (versioned):
+Here, '3.9' specifies the schema version of the Docker Compose file.
+```yaml
+version: "3.9"
+
+services: 
+  mariadb:
+    image: mariadb
+```
+
+Newer Docker Compose (no version field): With newer versions of Docker Compose (v1.27.0 and beyond), the version field is no longer required. You can simply define the services without specifying a version:
+```yaml
+services: 
+  mariadb:
+    image: mariadb
+```
+
+### --------------------------------------------
+
 
 
 ---

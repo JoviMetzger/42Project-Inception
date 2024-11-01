@@ -1,5 +1,3 @@
-# version: "3.7"                                                         # The version of the Compose file format
-
 services:                                                              # Individual services (containers) that make up your application
         mariadb:                                                       # The database service.
               build: 
@@ -21,24 +19,24 @@ services:                                                              # Individ
                     - mariadb:/var/www/html                            # Bind the mariadb volume to the MySQL data directory in the container (Ensures the MySQL database persists across container restarts)
               networks:
                     - inception                                        # Connects to the "inception" network, allowing it to communicate with other services
-      #   wordpress:                                                     # The WordPress application itself.
-      #         build:
-      #               context: requirements/wordpress
-      #         environment:
-      #               MYSQL_DATABASE_NAME : "${MYSQL_DATABASE_NAME}"
-      #               MYSQL_USER : "${MYSQL_USER}"
-      #               MYSQL_PASSWORD : "${MYSQL_PASSWORD}"
-      #         container_name: wordpress
-      #         image: wordpress
-      #         depends_on:
-      #              - mariadb
-      #         restart: unless-stopped
-      #         env_file:
-      #               - .env
-      #         volumes:
-      #               - wordpress:/var/www/html                          # Bind the wordpress volume to the WordPress root directory in the container
-      #         networks:
-      #               - inception
+        wordpress:                                                     # The WordPress application itself.
+              build:
+                    context: requirements/wordpress
+              environment:
+                    MYSQL_DATABASE_NAME : "${MYSQL_DATABASE_NAME}"
+                    MYSQL_USER : "${MYSQL_USER}"
+                    MYSQL_PASSWORD : "${MYSQL_PASSWORD}"
+              container_name: wordpress
+              image: wordpress
+              depends_on:
+                   - mariadb
+              restart: unless-stopped
+              env_file:
+                    - .env
+              volumes:
+                    - wordpress:/var/www/html                          # Bind the wordpress volume to the WordPress root directory in the container
+              networks:
+                    - inception
       #   nginx:                                                         # The web server that will serve the website.
       #         build: requirements/nginx
       #         container_name: nginx
@@ -69,12 +67,12 @@ volumes:                                                               # Volumes
                     type: none                                         # Setting the type of volume
                     o: bind                                            # Binding the volume
                     device: /home/jmetzger/data/mysql                  # This is the host directory where MariaDB files will be stored
-      #   wordpress:
-      #         name: wordpress
-      #         driver: local                                            # Volume is located locally
-      #         driver_opts:
-      #               type: none                                         # No special filesystem type is enforced
-      #               o: bind                                            # Bind mounts the host directory to the container
-      #               device: /home/jmetzger/data/html                   # This is the host directory where WordPress files (themes, plugins, uploads) will be stored
+        wordpress:
+              name: wordpress
+              driver: local                                            # Volume is located locally
+              driver_opts:
+                    type: none                                         # No special filesystem type is enforced
+                    o: bind                                            # Bind mounts the host directory to the container
+                    device: /home/jmetzger/data/html                   # This is the host directory where WordPress files (themes, plugins, uploads) will be stored
 
 
