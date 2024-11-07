@@ -1,40 +1,10 @@
-- Virtual Machine -> Debian
-- Connect Virtual Machine and VS code
-- root: makefile srcs obj
-- Makefile:  build the Docker images using `docker-compose.yml`
-- docker compose
-- Docker image
-- write your own Dockerfiles, one per service
-- build yourself the Docker images of your project
-- You then have to set up:
-• A Docker container that contains NGINX with TLSv1.2 or TLSv1.3 only.
-• A Docker container that contains WordPress + php-fpm (it must be installed and configured) only without nginx.
-• A Docker container that contains MariaDB only without nginx.
-• A volume that contains your WordPress database.
-• A second volume that contains your WordPress website files.
-• A docker-network that establishes the connection between your containers.
-Your containers have to restart in case of a crash.
-- Read about how daemons work and whether it’s a good idea to use them or not.
-- PID 1 and the best practices for writing Dockerfiles.
-- In your WordPress database, there must be two users, one of them being the administrator (Ying Yang)
-- Your volumes will be available in the /home/login/data folder of the host machine using Docker. Of course, you have to replace the login with yours.
-- configure your domain name so it points to your local IP address.
-- This domain name must be login.42.fr. Example:  wil.42.fr will redirect to the IP address pointing to wil’s website.
-- expected directory structure:
-- ROOT: Makefile, srcs, secrets
-- ./secrets: credentials.txt, MYSQL_PASSWORD.txt, MYSQL_ROOT_PASSWORD.txt
-- ./srcs: docker-compose.yml, .env, requirements
-- ./srcs/requirements: bonus, mariadb, nginx, tools, wordpress
-- . /srcs/requirements/mariadb: conf, Dockerfile, .dockerignore, tools
-- ./srcs/requirements/nginx: conf, Dockerfile, .dockerignore, tools
-- $> cat srcs/.env
-	DOMAIN_NAME=wil.42.fr
-	# MYSQL SETUP
-	MYSQL_USER=XXXXXXXXXXXX
-	[...]
--
--
-- Step by step:
+# Inception
+Inception
+This project is designed to broaden your understanding of system administration by using Docker.
+You will virtualize several Docker images, creating them in your new personal virtual
+machine.
+
+### Step by step -------------------------------
 1) Read about (make sure you understand):
     - What is Docker?
     - What is Docker Compose?
@@ -44,15 +14,11 @@ Your containers have to restart in case of a crash.
     - How Daemons Work?
 2) Set up your Virtual Machine
     - Either with [Ubuntu]() or [POP!_OS]()
-    - Install [Pop!_OS Video]()
-    - Install [Ubuntu video]()
 3) Connect your Virtual Machine and VS code
-    - Easier to use
     - Create a shared folder, between your VM and host.
     - Work over your host terminal, because VM terminal sucks.
-    - [Step-by-step]() set up for both, sharde folder and terminal
 4) You then have to set up:
-    Your containers have to restart in case of a crash.
+    - Start with `Docker-compose`, then MariaDB, wordpress and then NGINX.
     • A Docker container that contains MariaDB only without nginx.
     • A Docker container that contains WordPress + php-fpm (it must be installed and configured) only without nginx.
     • A Docker container that contains NGINX with TLSv1.2 or TLSv1.3 only.
@@ -60,37 +26,28 @@ Your containers have to restart in case of a crash.
     • A second volume that contains your WordPress website files.
     • A docker-network that establishes the connection between your containers.
 
-    Start with `Docker-compose`, then MariaDB, wordpress and then NGINX.
+---
 
-    
--
--
+### --------------------------------------------
+### Step 4 Explain -----------------------------
 
-
-
-or a WordPress setup using Docker with three containers (WordPress, MariaDB, and Nginx), you’ll need to start with MariaDB, as it is the database backend for WordPress. Here’s the ideal sequence and why:
+You need to start with MariaDB, as it is the database backend for WordPress. 
+Here’s the ideal sequence and why:
 
 MariaDB:
-
 WordPress relies on a database to store its data. The MariaDB container provides this, so it needs to be up and running first.
 This ensures WordPress can connect to the database as soon as it starts.
-WordPress:
 
+WordPress:
 Once MariaDB is up, start the WordPress container. During startup, WordPress will try to connect to the database, so having MariaDB ready beforehand is essential.
 WordPress will connect to MariaDB using environment variables (like database host, username, and password) in your docker-compose.yml file or Docker run command.
-Nginx:
 
+Nginx:
 Nginx acts as a reverse proxy and web server for WordPress.
 It can only serve WordPress properly if the WordPress container is already up and running, so start Nginx last.
--------------------------------------------------------------------------------------------------------
--------------------------------------------------------------------------------------------------------
--------------------------------------------------------------------------------------------------------
 
-Inception
-This project is designed to broaden your understanding of system administration by using Docker.
-You will virtualize several Docker images, creating them in your new personal virtual
-machine.
-
+### --------------------------------------------
+### Docker -------------------------------------
 
 1. What is Docker?
 Docker is a platform that helps developers easily create, deploy, and run applications in containers. Containers are lightweight, portable environments that package everything needed to run a piece of software—code, libraries, dependencies, and configuration—so it can run reliably on any system, regardless of the environment.
@@ -144,14 +101,33 @@ Why Use Docker?
 - 5) Scalability:
     - Docker makes it easy to scale applications by running multiple instances of containers. This is especially useful in cloud environments where you can spin up containers as needed.
 
+
+In Docker: The RUN apt-get install command inside the Dockerfile runs as the root user by default, which is why it works without any additional permissions.
+In a Running Container: When you're trying to manually install something by running apt-get in an already running container, you must ensure you're using the root user. If you're inside a running container and need to run a command with apt-get, you can switch to the root user.
+
+
+### --------------------------------------------
+
+
+
 ---
+
+
+
+### Docker-Compose -----------------------------
 
 2. What is Docker Compose?
 Docker Compose is a tool used to easily manage and run multi-container Docker applications.
 - Imagine you have a project with multiple parts, like a web app, a database, and maybe a message broker. Instead of running each part manually, Docker Compose lets you define all of them in a single file (called docker-compose.yml) and start everything with one command.
 So, Docker Compose simplifies running complex applications with multiple containers.
 
+### --------------------------------------------
+
+
 ---
+
+
+### Multi-container------------------------------
 
 3. What are Multi-container Applications?
 A multi-container application is an app that needs more than one Docker container to work.
@@ -161,15 +137,26 @@ A multi-container application is an app that needs more than one Docker containe
     - A caching service (like Redis) to make things faster.
 Each of these components runs in its own container, but they work together to make the entire app function. This setup is called a multi-container application.
 
+### --------------------------------------------
+
+
 ---
 
+
+### Docker Image--------------------------------
 4. What is a Docker Image?
 A Docker image is like a blueprint or template for creating a Docker container.
 - It contains everything needed to run an application, such as the code, libraries, and dependencies.
 - When you start a container, it's created from a Docker image. The image is read-only and acts as a recipe for how the container should be built.
 Think of a Docker image like a snapshot of your app environment that can be used to create multiple identical containers whenever you need.
 
+### --------------------------------------------
+
+
 ---
+
+
+### Volumes-------------------------------------
 
 5. What Are Volumes?
 Docker volumes are used to persist data generated or used by Docker containers. Normally, when a container is stopped or removed, all the data inside it is lost. Volumes allow you to keep that data even after the container is deleted.
@@ -195,7 +182,13 @@ volumes:
 ```
 This means the database data is stored outside the container, and will be preserved even if the container is destroyed.
 
+### --------------------------------------------
+
+
 ---
+
+
+### Daemons ------------------------------------
 
 6. How Daemons Work?
 A daemon is a background process that runs without user interaction. In Docker, the Docker daemon is the main program that manages containers, images, networks, and volumes. It listens for commands (like docker run or docker-compose up) and handles tasks like building, running, or stopping containers.
@@ -230,8 +223,13 @@ When to Use Them:
 - Not a Good Idea: Avoid daemons for quick, one-off jobs or scripts that don't need to stay alive after they finish running.
 In Docker's case, the daemon is essential for the system to function. Without it, you wouldn't be able to run containers, manage images, or interact with any of Docker’s features. For other software, whether or not you should use a daemon depends on the use case.
 
+### --------------------------------------------
+
+
 ---
 
+
+### VM vs Docker -------------------------------
 7. Extra: (Virtual Machine vs Docker)
 
 Summary of Differences:
@@ -251,7 +249,13 @@ In Summary:
 - `Docker (containers)` is more lightweight, faster, and more efficient when running multiple applications on the same machine. It's great for modern app development, where speed, portability, and scalability are key.
 - `Virtual machines (VM)` offer more complete isolation and are better suited when you need to run different operating systems or when full OS separation is required.
 
+### --------------------------------------------
+
+
 ---
+
+
+### .ENV ---------------------------------------
 
 # .env
 General
@@ -336,8 +340,13 @@ WP_USER_PWD=wp_user                     # Password your choice
 WP_USRR_EMAIL=user_wordpress@gmail.com  # Email your choice
 
 
+### --------------------------------------------
+
 
 ---
+
+
+### Makefile -----------------------------------
 
 # makefile
 ```
@@ -422,7 +431,13 @@ clean: down
 .PHONY: all down re clean
 ```
 
+### --------------------------------------------
+
+
 ---
+
+### Docker-compose.yml -------------------------
+
 # docker-compse.yml
 
 1. General Overview
@@ -879,14 +894,13 @@ Restart Policies:
 Use appropriate restart policies for container health management.
 By focusing on your application’s needs, you can tailor your docker-compose.yml file to ensure each service is properly configured, communicates securely, and can be easily managed.
 
-
-
-
-
-
+### --------------------------------------------
 
 
 ---
+
+
+### Dockerfile  --------------------------------
 
 # Dockerfile
 
@@ -975,13 +989,6 @@ Use docker-compose.yml when you need to manage multiple services, connect contai
 In essence, Dockerfile is for building images, and docker-compose.yml is for running and managing containers in a multi-service environment.
 
 
----
-
-
-# wordpress
-
-### dockerfile ----------------------------------
-
 Let’s break down your Dockerfile for WordPress and address its correctness and functionality. Here's a more detailed explanation of each part:
 
 1. Base Image Selection:
@@ -1023,7 +1030,7 @@ Ensure that this script is executable by setting the right permissions with chmo
 4. Exposing Port 9000:
 dockerfile
 Copy code
-# Make port 9000 available to the world outside this container
+# Make port 9000 available to the wor### --------------------------------------------ld outside this container
 EXPOSE 9000
 What it does:
 
@@ -1081,26 +1088,45 @@ Fixed the CMD path: Changed CMD to /wp-script.sh and used bash to execute it pro
 Included php-fpm handling: Ensure that php-fpm is running in your wp-script.sh file or separately configure php-fpm to run in the CMD section.
 Make sure your wp-script.sh does everything necessary to prepare WordPress, including downloading the WordPress files if they are not in the image already, configuring wp-config.php, and starting php-fpm. Here's an example of what it might include:
 
+### --------------------------------------------
+
+
+---
+
+
+
+# wordpress
+
+### dockerfile ----------------------------------
+- Use Debian as a base image (Debian 12)
+- Update & intstall your package manager (RUN)
+- Copy `wp-config.php` & `wp-script.sh` script from 'tools' directory into the container’s root directory (/). (COPY)
+- Make sure the script is executable (NOT necessary for 'wp-config.php', since PHP just reads it) (RUN)
+- Expose port 9000 (EXPOSE)
+- Start PHP-FPM and run the custom WordPress script (CMD)
+
+
+
+
+The issue where the mysqladmin command cannot be found suggests that mysql-client is still not installed or correctly configured in your WordPress Docker container.
+The error you're encountering indicates that the mysql-client package is unavailable in the Debian 12 (Bookworm) repositories, which is causing the apt-get command to fail during the build process. Specifically, the package mysql-client is no longer available under that name in newer versions of Debian, including Bookworm.
+
+Solution: Use the Correct MySQL Client Package
+In recent versions of Debian, the MySQL client package has been replaced with mariadb-client. Since you are using MariaDB in your stack, the correct package to install would be mariadb-client instead of mysql-client.
+### --------------------------------------------
+
+
+3. Fix the PHP-FPM executable issue
+The error /wp-script.sh: line 45: /usr/sbin/php-fpm7.4: No such file or directory indicates that the php-fpm7.4 executable doesn't exist. This may happen because the version specified (php-fpm7.4) is not installed in your container.
+
+Instead of using php-fpm7.4, simply use php-fpm (which will default to the latest installed version of PHP-FPM). Update your wp-script.sh to use this:
+
 bash
 Copy code
-#!/bin/bash
+exec /usr/sbin/php-fpm -F
+This will start PHP-FPM without specifying a version number, ensuring it uses the installed PHP-FPM version.
 
-# Download and unpack WordPress if not already installed
-if [ ! -f /var/www/html/wp-config.php ]; then
-  curl -O https://wordpress.org/latest.tar.gz
-  tar -xzf latest.tar.gz -C /var/www/html --strip-components=1
-  rm latest.tar.gz
-fi
 
-# Start PHP-FPM service
-php-fpm7.4 -F
-This script checks if WordPress is already installed (based on the presence of wp-config.php), downloads it if necessary, and then starts PHP-FPM to handle incoming requests.
-
-6. Defining the Default Command:
-dockerfile
-Copy code
-CMD ["/bin/bash", "/wp-script.sh"]
-This sets the default command to be executed when the container starts. You are running the wp-script.sh script using /bin/bash.
 
 Important Considerations:
 
@@ -1637,7 +1663,7 @@ Might need to install `sudo apt install mysql-client-core-8.0`
 ```bash
 mysql -h 127.0.0.1 -P 3306 -u "$MYSQL_USER" -p"$MYSQL_PASSWORD"
 ```
--> If everything works till here your database ia running 
+-> If everything works till here your database is running 
 - 1. Verify Database and User Creation:
 ```sql
 # SHOW DATABASES;
@@ -1736,6 +1762,10 @@ Yay! you logged in successfully, the MariaDB server is running fine
 (Stopping and Removing Containers): 
 ```bash
 docker-compose down
+```
+(Remove mariadb volume):
+```bash
+docker volume rm mariadb
 ```
 
 ### --------------------------------------------
@@ -1841,11 +1871,299 @@ If USER should have access to the database but isn't seeing it, make sure to gra
 # GRANT ALL PRIVILEGES ON `<your_database_name>`.* TO '<USER_NAME>'@'%';
 # FLUSH PRIVILEGES;
 ```
+
+
+
+
+Question about the script.sh. 
+why did you remove:
+#     # Create a new database if specified
+#     if [ -n "$MYSQL_DATABASE_NAME" ]; then
+#         echo "Creating database: $MYSQL_DATABASE_NAME"
+#         mysql -u root -p"${MYSQL_ROOT_PASSWORD}" -e "CREATE DATABASE IF NOT EXISTS \${MYSQL_DATABASE_NAME}\ CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+#     fi
+
+#     # Create a new user and grant privileges if specified
+#     if [ -n "$MYSQL_USER" ] && [ -n "$MYSQL_PASSWORD" ]; then
+#         echo "Creating user: $MYSQL_USER with access to $MYSQL_DATABASE_NAME"
+#         mysql -u root -p"${MYSQL_ROOT_PASSWORD}" <<EOF
+#         CREATE USER IF NOT EXISTS '${MYSQL_USER}'@'%' IDENTIFIED BY '${MYSQL_PASSWORD}';
+#         GRANT ALL PRIVILEGES ON \${MYSQL_DATABASE_NAME}\.* TO '${MYSQL_USER}'@'%';
+#         FLUSH PRIVILEGES;
+# EOF
+#     fi
+
+from my script.sh?
+#!/bin/bash
+
+# Create necessary directories and set permissions as root
+mkdir -p /run/mysqld /var/log/mysql
+chown -R mysql:mysql /run/mysqld /var/log/mysql
+
+# Start mysqld with networking enabled
+echo "Starting mysqld..."
+mysqld --skip-grant-tables --skip-networking &
+pid="$!"
+
+# Wait for mysqld to be ready
+echo "Waiting for mysqld to be ready..."
+while ! mysqladmin ping --silent; do
+    sleep 1
+done
+echo "MariaDB is ready."
+
+# Check if the database directory exists
+if [ ! -d "/var/lib/mysql/${MYSQL_DATABASE_NAME}" ]; then
+    echo "Initializing MariaDB database..."
+
+    # Secure MariaDB installation
+    mysql -u root <<EOF
+    -- Set the root password
+    ALTER USER 'root'@'localhost' IDENTIFIED BY '${MYSQL_ROOT_PASSWORD}';
+    FLUSH PRIVILEGES;
+EOF
+
+#     # Create a new database if specified
+#     if [ -n "$MYSQL_DATABASE_NAME" ]; then
+#         echo "Creating database: $MYSQL_DATABASE_NAME"
+#         mysql -u root -p"${MYSQL_ROOT_PASSWORD}" -e "CREATE DATABASE IF NOT EXISTS \${MYSQL_DATABASE_NAME}\ CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+#     fi
+
+#     # Create a new user and grant privileges if specified
+#     if [ -n "$MYSQL_USER" ] && [ -n "$MYSQL_PASSWORD" ]; then
+#         echo "Creating user: $MYSQL_USER with access to $MYSQL_DATABASE_NAME"
+#         mysql -u root -p"${MYSQL_ROOT_PASSWORD}" <<EOF
+#         CREATE USER IF NOT EXISTS '${MYSQL_USER}'@'%' IDENTIFIED BY '${MYSQL_PASSWORD}';
+#         GRANT ALL PRIVILEGES ON \${MYSQL_DATABASE_NAME}\.* TO '${MYSQL_USER}'@'%';
+#         FLUSH PRIVILEGES;
+# EOF
+#     fi
+
+    echo "Database initialization complete."
+else
+    echo "Database already exists. Skipping initialization."
+fi
+
+# Stop the temporary mysqld instance
+echo "Stopping the temporary mysqld instance..."
+kill "$pid"
+wait "$pid"
+
+# Keep MariaDB running in the foreground
+echo "Starting MariaDB in the foreground..."
+exec mysqld
+ChatGPT said:
+ChatGPT
+I removed the sections in your script related to creating a new database and user because you mentioned that the main issue was with getting MariaDB up and running in the container. When MariaDB is started with --skip-grant-tables and --skip-networking, it allows you to bypass some common authentication mechanisms and makes it easier to manipulate database users, but that also means certain commands (like creating new users and granting privileges) might not be executed as expected when MariaDB is still in that state.
+
+Here’s why I removed those sections:
+
+Database and User Creation:
+
+The initial script was likely stopping before the part where the database and users were created because --skip-grant-tables disables grants and privileges management until MariaDB is fully started. This could cause issues with user creation or setting up the database if you run those commands while the server is in that state.
+If you're already creating the database and user inside Docker via environment variables or setup during the container build phase (or it's pre-configured), the script might not need to do that step again.
+Container Setup:
+
+The script was running MariaDB with --skip-grant-tables, meaning MariaDB was essentially in a "maintenance mode" where privileges were disabled. It's safe to set the root password, but trying to create a new database or user when you're still in this state might cause issues, especially if it’s already been set up in the Dockerfile or environment.
+Once MariaDB is fully initialized and ready, you don’t need to create new users or databases unless it’s part of your setup routine for specific applications that expect certain databases/users to exist.
+Stability:
+
+After MariaDB is started and you set the root password, you can later safely switch back to normal mode, but running these commands immediately after starting with --skip-grant-tables could lead to an incomplete or misconfigured setup if the instance isn't yet fully initialized.
+Suggested Fix:
+If you want to retain the creation of a database and user, the better place to do that would be after the MariaDB server has been fully initialized and running (i.e., after mysqld has started in the foreground without --skip-grant-tables), and not before. This ensures you're interacting with a fully operational database that can properly execute those commands.
+
+If your Docker setup or MariaDB initialization already takes care of database creation and user setup, you can skip those commands.
+
+Final Script (with database and user creation):
+bash
+Copy code
+#!/bin/bash
+
+# Create necessary directories and set permissions as root
+mkdir -p /run/mysqld /var/log/mysql
+chown -R mysql:mysql /run/mysqld /var/log/mysql
+
+# Start mysqld with networking enabled
+echo "Starting mysqld..."
+mysqld --skip-grant-tables --skip-networking &
+pid="$!"
+
+# Wait for mysqld to be ready
+echo "Waiting for mysqld to be ready..."
+while ! mysqladmin ping --silent; do
+    sleep 1
+done
+echo "MariaDB is ready."
+
+# Secure MariaDB installation
+mysql -u root <<EOF
+-- Set the root password
+ALTER USER 'root'@'localhost' IDENTIFIED BY '${MYSQL_ROOT_PASSWORD}';
+FLUSH PRIVILEGES;
+EOF
+
+# Create a new database if specified
+if [ -n "$MYSQL_DATABASE_NAME" ]; then
+    echo "Creating database: $MYSQL_DATABASE_NAME"
+    mysql -u root -p"${MYSQL_ROOT_PASSWORD}" -e "CREATE DATABASE IF NOT EXISTS \`${MYSQL_DATABASE_NAME}\` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+fi
+
+# Create a new user and grant privileges if specified
+if [ -n "$MYSQL_USER" ] && [ -n "$MYSQL_PASSWORD" ]; then
+    echo "Creating user: $MYSQL_USER with access to $MYSQL_DATABASE_NAME"
+    mysql -u root -p"${MYSQL_ROOT_PASSWORD}" <<EOF
+    CREATE USER IF NOT EXISTS '${MYSQL_USER}'@'%' IDENTIFIED BY '${MYSQL_PASSWORD}';
+    GRANT ALL PRIVILEGES ON \`${MYSQL_DATABASE_NAME}\`.* TO '${MYSQL_USER}'@'%';
+    FLUSH PRIVILEGES;
+EOF
+fi
+
+echo "Database initialization complete."
+
+# Stop the temporary mysqld instance
+echo "Stopping the temporary mysqld instance..."
+kill "$pid"
+wait "$pid"
+
+# Keep MariaDB running in the foreground
+echo "Starting MariaDB in the foreground..."
+exec mysqld
+Key Changes:
+Moved the database and user creation after MariaDB has been secured with the root password.
+You can create the database and user only after the MariaDB instance is fully initialized and running.
+Summary:
+Removing those parts temporarily helps ensure that MariaDB starts correctly.
+Once the database is fully initialized and operational, you can safely create databases and users.
+If your MariaDB container is pre-configured with the necessary databases and users, you can skip these parts entirely.
+
+
+
+#!/bin/bash
+
+# Create necessary directories and set permissions as root
+mkdir -p /run/mysqld /var/log/mysql
+chown -R mysql:mysql /run/mysqld /var/log/mysql
+
+# Start mysqld with networking enabled
+echo "Starting mysqld..."
+mysqld --skip-grant-tables --skip-networking &
+pid="$!"
+
+# Wait for mysqld to be ready
+echo "Waiting for mysqld to be ready..."
+while ! mysqladmin ping --silent; do
+    sleep 1
+done
+echo "MariaDB is ready."
+
+# Check if the database directory exists
+if [ ! -d "/var/lib/mysql/${MYSQL_DATABASE_NAME}" ]; then
+    echo "Initializing MariaDB database..."
+
+    # Secure MariaDB installation
+    mysql -u root <<EOF
+    -- Set the root password
+    ALTER USER 'root'@'localhost' IDENTIFIED BY '${MYSQL_ROOT_PASSWORD}';
+    FLUSH PRIVILEGES;
+EOF
+
+#     # Create a new database if specified
+#     if [ -n "$MYSQL_DATABASE_NAME" ]; then
+#         echo "Creating database: $MYSQL_DATABASE_NAME"
+#         mysql -u root -p"${MYSQL_ROOT_PASSWORD}" -e "CREATE DATABASE IF NOT EXISTS \`${MYSQL_DATABASE_NAME}\` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+#     fi
+
+#     # Create a new user and grant privileges if specified
+#     if [ -n "$MYSQL_USER" ] && [ -n "$MYSQL_PASSWORD" ]; then
+#         echo "Creating user: $MYSQL_USER with access to $MYSQL_DATABASE_NAME"
+#         mysql -u root -p"${MYSQL_ROOT_PASSWORD}" <<EOF
+#         CREATE USER IF NOT EXISTS '${MYSQL_USER}'@'%' IDENTIFIED BY '${MYSQL_PASSWORD}';
+#         GRANT ALL PRIVILEGES ON \`${MYSQL_DATABASE_NAME}\`.* TO '${MYSQL_USER}'@'%';
+#         FLUSH PRIVILEGES;
+# EOF
+#     fi
+
+    echo "Database initialization complete."
+else
+    echo "Database already exists. Skipping initialization."
+fi
+
+# Stop the temporary mysqld instance
+echo "Stopping the temporary mysqld instance..."
+kill "$pid"
+wait "$pid"
+
+# Keep MariaDB running in the foreground
+echo "Starting MariaDB in the foreground..."
+exec mysqld
+
+
+
+# ---
+#!/bin/bash
+
+# Create necessary directories and set permissions as root
+mkdir -p /run/mysqld /var/log/mysql
+chown -R mysql:mysql /run/mysqld /var/log/mysql
+
+# Start mysqld with networking enabled
+echo "Starting mysqld..."
+mysqld --skip-grant-tables --skip-networking &
+pid="$!"
+
+# Wait for mysqld to be ready
+echo "Waiting for mysqld to be ready..."
+while ! mysqladmin ping --silent; do
+    sleep 1
+done
+echo "MariaDB is ready."
+
+# Secure MariaDB installation
+mysql -u root <<EOF
+-- Set the root password
+ALTER USER 'root'@'localhost' IDENTIFIED BY '${MYSQL_ROOT_PASSWORD}';
+FLUSH PRIVILEGES;
+EOF
+
+# Create a new database if specified
+if [ -n "$MYSQL_DATABASE_NAME" ]; then
+    echo "Creating database: $MYSQL_DATABASE_NAME"
+    mysql -u root -p"${MYSQL_ROOT_PASSWORD}" -e "CREATE DATABASE IF NOT EXISTS \`${MYSQL_DATABASE_NAME}\` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+fi
+
+# Create a new user and grant privileges if specified
+if [ -n "$MYSQL_USER" ] && [ -n "$MYSQL_PASSWORD" ]; then
+    echo "Creating user: $MYSQL_USER with access to $MYSQL_DATABASE_NAME"
+    mysql -u root -p"${MYSQL_ROOT_PASSWORD}" <<EOF
+    CREATE USER IF NOT EXISTS '${MYSQL_USER}'@'%' IDENTIFIED BY '${MYSQL_PASSWORD}';
+    GRANT ALL PRIVILEGES ON \`${MYSQL_DATABASE_NAME}\`.* TO '${MYSQL_USER}'@'%';
+    FLUSH PRIVILEGES;
+EOF
+fi
+
+echo "Database initialization complete."
+
+# Stop the temporary mysqld instance
+echo "Stopping the temporary mysqld instance..."
+kill "$pid"
+wait "$pid"
+
+# Keep MariaDB running in the foreground
+echo "Starting MariaDB in the foreground..."
+exec mysqld
+
+
 ### --------------------------------------------
 
 
 ---
 
+# NGINX
+
+###  Docker ----------------------------
+### --------------------------------------------
+
+---
 
 # Extra INFO
 

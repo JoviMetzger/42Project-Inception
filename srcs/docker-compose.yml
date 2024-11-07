@@ -3,11 +3,11 @@ services:                                                              # Individ
               build: 
                     context: requirements/mariadb                      # Builds the image from a Dockerfile located in "requirements/mariadb"
               environment:                                             # Passes environment variables to the build process
-                    MYSQL_DATABASE_NAME : "${MYSQL_DATABASE_NAME}"
-                    MYSQL_USER : "${MYSQL_USER}"
-                    MYSQL_PASSWORD : "${MYSQL_PASSWORD}"
-                    MYSQL_ROOT_PASSWORD : "${MYSQL_ROOT_PASSWORD}"
-                    MYSQL_EXTRA_FLAGS : --bind-address=0.0.0.0         # Make MariaDB listen on all interfaces
+                    MYSQL_DATABASE_NAME: "${MYSQL_DATABASE_NAME}"
+                    MYSQL_USER: "${MYSQL_USER}"
+                    MYSQL_PASSWORD: "${MYSQL_PASSWORD}"
+                    MYSQL_ROOT_PASSWORD: "${MYSQL_ROOT_PASSWORD}"
+                    MYSQL_EXTRA_FLAGS: --bind-address=0.0.0.0          # Make MariaDB listen on all interfaces
               container_name: mariadb                                  # Names the container "mariadb" for easier reference
               image: mariadb                                           # Pulls the official MariaDB image
               restart: unless-stopped                                  # Restarts the container automatically unless explicitly stopped
@@ -16,16 +16,16 @@ services:                                                              # Individ
               ports:
                     - "3306:3306"                                      # Expose MariaDB on port 3306
               volumes:
-                    - mariadb:/var/www/html                            # Bind the mariadb volume to the MySQL data directory in the container (Ensures the MySQL database persists across container restarts)
+                    - mariadb:/var/lib/mysql                           # Bind the mariadb volume to the MySQL data directory in the container (Ensures the MySQL database persists across container restarts)
               networks:
                     - inception                                        # Connects to the "inception" network, allowing it to communicate with other services
         wordpress:                                                     # The WordPress application itself.
               build:
                     context: requirements/wordpress
               environment:
-                    MYSQL_DATABASE_NAME : "${MYSQL_DATABASE_NAME}"
-                    MYSQL_USER : "${MYSQL_USER}"
-                    MYSQL_PASSWORD : "${MYSQL_PASSWORD}"
+                    MYSQL_DATABASE_NAME: "${MYSQL_DATABASE_NAME}"
+                    MYSQL_USER: "${MYSQL_USER}"
+                    MYSQL_PASSWORD: "${MYSQL_PASSWORD}"
               container_name: wordpress
               image: wordpress
               depends_on:

@@ -3,13 +3,13 @@ FROM debian:bookworm
 
 # Update & intstall your package manager
 RUN apt-get -y update && \
-	apt-get install php-fpm php-mysql -y && \
-	apt-get install curl -y
+    apt-get install php-fpm php-mysql -y && \
+	apt-get install curl mariadb-client -y
 
 # Copy script from 'tools' directory into the container’s root directory (/).
+# `wp-config.php` needs to be copied to '/etc/wp-config.php'.
 COPY ./tools/wp-script.sh /
-COPY ./tools/wp-config.php /
-# COPY ./tools/wp-config.php /etc/wp-config.php
+COPY ./tools/wp-config.php /etc/wp-config.php
 
 # Make sure the script is executable (NOT necessary for 'wp-config.php', since PHP just reads it)
 RUN chmod +x /wp-script.sh

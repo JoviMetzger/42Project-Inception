@@ -1,98 +1,178 @@
 #!/bin/bash
 
+# # Create necessary directories and set permissions as root
+# mkdir -p /run/mysqld /var/log/mysql
+# chown -R mysql:mysql /run/mysqld /var/log/mysql
+
+# # Start mysqld with networking enabled
+# echo "Starting mysqld..."
+# mysqld --skip-grant-tables --skip-networking &
+# pid="$!"
+
+# # Wait for mysqld to be ready
+# echo "Waiting for mysqld to be ready..."
+# while ! mysqladmin ping --silent; do
+#     sleep 1
+# done
+# echo "MariaDB is ready."
+
+# # Check if the database directory exists
+# if [ ! -d "/var/lib/mysql/${MYSQL_DATABASE_NAME}" ]; then
+#     echo "Initializing MariaDB database..."
+
+#     # Secure MariaDB installation
+#     mysql -u root <<EOF
+#     -- Set the root password
+#     ALTER USER 'root'@'localhost' IDENTIFIED BY '${MYSQL_ROOT_PASSWORD}';
+#     FLUSH PRIVILEGES;
+# EOF
+
+# #     # Create a new database if specified
+# #     if [ -n "$MYSQL_DATABASE_NAME" ]; then
+# #         echo "Creating database: $MYSQL_DATABASE_NAME"
+# #         mysql -u root -p"${MYSQL_ROOT_PASSWORD}" -e "CREATE DATABASE IF NOT EXISTS \`${MYSQL_DATABASE_NAME}\` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+# #     fi
+
+# #     # Create a new user and grant privileges if specified
+# #     if [ -n "$MYSQL_USER" ] && [ -n "$MYSQL_PASSWORD" ]; then
+# #         echo "Creating user: $MYSQL_USER with access to $MYSQL_DATABASE_NAME"
+# #         mysql -u root -p"${MYSQL_ROOT_PASSWORD}" <<EOF
+# #         CREATE USER IF NOT EXISTS '${MYSQL_USER}'@'%' IDENTIFIED BY '${MYSQL_PASSWORD}';
+# #         GRANT ALL PRIVILEGES ON \`${MYSQL_DATABASE_NAME}\`.* TO '${MYSQL_USER}'@'%';
+# #         FLUSH PRIVILEGES;
+# # EOF
+# #     fi
+
+#     echo "Database initialization complete."
+# else
+#     echo "Database already exists. Skipping initialization."
+# fi
+
+# # Stop the temporary mysqld instance
+# echo "Stopping the temporary mysqld instance..."
+# kill "$pid"
+# wait "$pid"
+
+# # Keep MariaDB running in the foreground
+# echo "Starting MariaDB in the foreground..."
+# exec mysqld
+
+
+
+# # ---
+
 # Create necessary directories and set permissions as root
 mkdir -p /run/mysqld /var/log/mysql
 chown -R mysql:mysql /run/mysqld /var/log/mysql
 
-# Check if the database directory exists
-if [ ! -d "/var/lib/mysql/${MYSQL_DATABASE_NAME}" ]; then
-    echo "Initializing MariaDB database..."
+# Start mysqld with networking enabled
+echo "Starting mysqld..."
+mysqld --skip-networking &
+pid="$!"
 
-    # Secure MariaDB installation
-    mysql -u root <<EOF
-    -- Set the root password
-    ALTER USER 'root'@'localhost' IDENTIFIED BY '${MYSQL_ROOT_PASSWORD}';
+# Wait for mysqld to be ready
+echo "Waiting for mysqld to be ready..."
+while ! mysqladmin ping --silent; do
+    sleep 1
+done
+echo "MariaDB is ready."
+
+# Secure MariaDB installation
+mysql -u root <<EOF
+-- Set the root password
+ALTER USER 'root'@'localhost' IDENTIFIED BY '${MYSQL_ROOT_PASSWORD}';
+FLUSH PRIVILEGES;
+EOF
+
+# Create a new database if specified
+if [ -n "$MYSQL_DATABASE_NAME" ]; then
+    echo "Creating database: $MYSQL_DATABASE_NAME"
+    mysql -u root -p"${MYSQL_ROOT_PASSWORD}" -e "CREATE DATABASE IF NOT EXISTS \`${MYSQL_DATABASE_NAME}\` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+fi
+
+# Create a new user and grant privileges if specified
+if [ -n "$MYSQL_USER" ] && [ -n "$MYSQL_PASSWORD" ]; then
+    echo "Creating user: $MYSQL_USER with access to $MYSQL_DATABASE_NAME"
+    mysql -u root -p"${MYSQL_ROOT_PASSWORD}" <<EOF
+    CREATE USER IF NOT EXISTS '${MYSQL_USER}'@'%' IDENTIFIED BY '${MYSQL_PASSWORD}';
+    GRANT ALL PRIVILEGES ON \`${MYSQL_DATABASE_NAME}\`.* TO '${MYSQL_USER}'@'%';
     FLUSH PRIVILEGES;
 EOF
-
-    # Create a new database if specified
-    if [ -n "$MYSQL_DATABASE_NAME" ]; then
-        echo "Creating database: $MYSQL_DATABASE_NAME"
-        mysql -u root -p"${MYSQL_ROOT_PASSWORD}" -e "CREATE DATABASE IF NOT EXISTS \`${MYSQL_DATABASE_NAME}\` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
-    fi
-
-    # Create a new user and grant privileges if specified
-    if [ -n "$MYSQL_USER" ] && [ -n "$MYSQL_PASSWORD" ]; then
-        echo "Creating user: $MYSQL_USER with access to $MYSQL_DATABASE_NAME"
-        mysql -u root -p"${MYSQL_ROOT_PASSWORD}" <<EOF
-        CREATE USER IF NOT EXISTS '${MYSQL_USER}'@'%' IDENTIFIED BY '${MYSQL_PASSWORD}';
-        GRANT ALL PRIVILEGES ON \`${MYSQL_DATABASE_NAME}\`.* TO '${MYSQL_USER}'@'%';
-        FLUSH PRIVILEGES;
-EOF
-    fi
-
-    echo "Database initialization complete."
-else
-    echo "Database already exists. Skipping initialization."
 fi
+
+echo "Database initialization complete."
+
+# Stop the temporary mysqld instance
+echo "Stopping the temporary mysqld instance..."
+kill "$pid"
+wait "$pid"
 
 # Keep MariaDB running in the foreground
 echo "Starting MariaDB in the foreground..."
 exec mysqld
 
-# #---
+
+
+
+
 # #!/bin/bash
 
-# # Create necessary directories and set permissions
+# # Create necessary directories and set permissions as root
 # mkdir -p /run/mysqld /var/log/mysql
 # chown -R mysql:mysql /run/mysqld /var/log/mysql
 
-# # Check if the database directory exists
-# if [ ! -d "/var/lib/mysql/${MYSQL_DATABASE_NAME}" ]; then
-#     echo "Initializing MariaDB database..."
-    
-#     # Initialize the MariaDB data directory
-#     mysql_install_db --user=mysql --datadir=/var/lib/mysql
-#     echo "MariaDB data directory initialized."
+# # Start mysqld without grant tables to allow initial setup
+# echo "Starting mysqld with limited access for initial setup..."
+# mysqld --skip-networking &
+# pid="$!"
 
-#     # Start MariaDB temporarily to run initialization commands
-#     mysqld --skip-networking --socket=/run/mysqld/mysqld.sock &
-#     pid="$!"
+# # Wait for mysqld to be ready
+# echo "Waiting for mysqld to be ready..."
+# while ! mysqladmin ping --silent; do
+#     sleep 1
+# done
+# echo "MariaDB initial setup ready."
 
-#     # Wait a few seconds for MariaDB to start up
-#     sleep 5
-
-#     # Secure MariaDB installation and create database/user
-#     mysql -u root <<EOF
-#     ALTER USER 'root'@'localhost' IDENTIFIED BY '${MYSQL_ROOT_PASSWORD}';
-#     FLUSH PRIVILEGES;
+# # Set up initial root user password and flush privileges
+# mysql -u root <<EOF
+# ALTER USER 'root'@'localhost' IDENTIFIED BY '${MYSQL_ROOT_PASSWORD}';
+# FLUSH PRIVILEGES;
 # EOF
 
-#     # Create a new database if specified
-#     if [ -n "$MYSQL_DATABASE_NAME" ]; then
-#         echo "Creating database: $MYSQL_DATABASE_NAME"
-#         mysql -u root -p"${MYSQL_ROOT_PASSWORD}" -e "CREATE DATABASE IF NOT EXISTS \`${MYSQL_DATABASE_NAME}\` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
-#     fi
+# # Stop the temporary mysqld instance
+# echo "Stopping the temporary mysqld instance after initial setup..."
+# kill "$pid"
+# wait "$pid"
 
-#     # Create a new user and grant privileges if specified
-#     if [ -n "$MYSQL_USER" ] && [ -n "$MYSQL_PASSWORD" ]; then
-#         echo "Creating user: $MYSQL_USER with access to $MYSQL_DATABASE_NAME"
-#         mysql -u root -p"${MYSQL_ROOT_PASSWORD}" <<EOF
-#         CREATE USER IF NOT EXISTS '${MYSQL_USER}'@'%' IDENTIFIED BY '${MYSQL_PASSWORD}';
-#         GRANT ALL PRIVILEGES ON \`${MYSQL_DATABASE_NAME}\`.* TO '${MYSQL_USER}'@'%';
-#         FLUSH PRIVILEGES;
-# EOF
-#     fi
+# # Restart mysqld with full privileges
+# echo "Restarting mysqld with full privileges..."
+# mysqld &
+# pid="$!"
 
-#     echo "Database initialization complete."
+# # Wait for mysqld to be ready again
+# while ! mysqladmin ping --silent; do
+#     sleep 1
+# done
+# echo "MariaDB is ready with full privileges."
 
-#     # Stop the temporary MariaDB instance
-#     mysqladmin -u root -p"${MYSQL_ROOT_PASSWORD}" shutdown
-
-# else
-#     echo "Database already exists. Skipping initialization."
+# # Create a new database if specified
+# if [ -n "$MYSQL_DATABASE_NAME" ]; then
+#     echo "Creating database: $MYSQL_DATABASE_NAME"
+#     mysql -u root -p"${MYSQL_ROOT_PASSWORD}" -e "CREATE DATABASE IF NOT EXISTS \`${MYSQL_DATABASE_NAME}\` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
 # fi
 
-# # Start MariaDB in the foreground
+# # Create a new user and grant privileges if specified
+# if [ -n "$MYSQL_USER" ] && [ -n "$MYSQL_PASSWORD" ]; then
+#     echo "Creating user: $MYSQL_USER with access to $MYSQL_DATABASE_NAME"
+#     mysql -u root -p"${MYSQL_ROOT_PASSWORD}" <<EOF
+#     CREATE USER IF NOT EXISTS '${MYSQL_USER}'@'%' IDENTIFIED BY '${MYSQL_PASSWORD}';
+#     GRANT ALL PRIVILEGES ON \`${MYSQL_DATABASE_NAME}\`.* TO '${MYSQL_USER}'@'%';
+#     FLUSH PRIVILEGES;
+# EOF
+# fi
+
+# echo "Database initialization complete."
+
+# # Keep MariaDB running in the foreground
 # echo "Starting MariaDB in the foreground..."
 # exec mysqld
