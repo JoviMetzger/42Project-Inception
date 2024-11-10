@@ -3,8 +3,12 @@ FROM debian:bookworm
 
 # Update & intstall your package manager
 RUN apt-get -y update && \
-    apt-get install php-fpm php-mysql -y && \
-	apt-get install curl mariadb-client -y
+    apt-get install -y php-fpm php-mysql curl mariadb-client
+
+# Download WP-CLI directly into the /usr/local/bin directory
+RUN curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar && \
+    chmod +x wp-cli.phar && \
+    mv wp-cli.phar /usr/local/bin/wp
 
 # Copy script from 'tools' directory into the container’s root directory (/).
 # `wp-config.php` needs to be copied to '/etc/wp-config.php'.
@@ -19,3 +23,4 @@ EXPOSE 9000
 
 # Start PHP-FPM and run the custom WordPress script
 CMD ["/wp-script.sh"]
+

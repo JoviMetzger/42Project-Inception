@@ -7,7 +7,7 @@ all: up
 
 # Starts the Docker services
 up:
-	docker-compose -f $(COMPOSE_FILE) up -d --build
+	docker-compose -f $(COMPOSE_FILE) up --build -d
 
 # Stops and removes the containers, networks, and any temporary resources created
 down:

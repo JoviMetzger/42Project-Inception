@@ -1,22 +1,23 @@
 <?php
 // *** MySQL settings - This info is saved inside your .env ***
 // The name of the database for WordPress
-define( 'DB_NAME', getenv('MYSQL_DATABASE_NAME' ));
+define('DB_NAME', '${MYSQL_DATABASE_NAME}');
 
 // MySQL database username
-define( 'DB_USER', getenv('MYSQL_USER' ));
+define('DB_USER', '${MYSQL_USER}');
 
 // MySQL database password
-define( 'DB_PASSWORD', getenv('MYSQL_PASSWORD' ));
+define('DB_PASSWORD', '${MYSQL_PASSWORD}');
 
-// MySQL hostname
-define( 'DB_HOST', 'mariadb' );
+// MySQL hostname (Database for the server)
+define('DB_HOST', '${MYSQL_HOST_NAME}');
+// define('DB_HOST', getenv('MYSQL_HOST_NAME'));
 
 // Database Charset to use in creating database tables.
-define( 'DB_CHARSET', 'utf8 ');
+define('DB_CHARSET', 'utf8');
 
 // The Database Collate type.
-define( 'DB_COLLATE', '' );
+define('DB_COLLATE', '');
 
 // Authentication Unique Keys and Salts.
 // ** Find generated key here: https://api.wordpress.org/secret-key/1.1/salt/ **

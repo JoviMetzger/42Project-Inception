@@ -18,6 +18,9 @@ machine.
     - Create a shared folder, between your VM and host.
     - Work over your host terminal, because VM terminal sucks.
 4) You then have to set up:
+    - MariaDB
+    - Wordpress
+    - Nginx
     - Start with `Docker-compose`, then MariaDB, wordpress and then NGINX.
     • A Docker container that contains MariaDB only without nginx.
     • A Docker container that contains WordPress + php-fpm (it must be installed and configured) only without nginx.
@@ -1114,6 +1117,30 @@ The error you're encountering indicates that the mysql-client package is unavail
 Solution: Use the Correct MySQL Client Package
 In recent versions of Debian, the MySQL client package has been replaced with mariadb-client. Since you are using MariaDB in your stack, the correct package to install would be mariadb-client instead of mysql-client.
 ### --------------------------------------------
+
+
+is it okay that this is happening now in the dockerfile instead of the script.sh?
+# Download WP-CLI directly into the /usr/local/bin directory
+RUN curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar && \
+    chmod +x wp-cli.phar && \
+    mv wp-cli.phar /usr/local/bin/wp
+ChatGPT said:
+ChatGPT
+Yes, it's perfectly fine—and actually quite good practice—to move the WP-CLI installation steps to the Dockerfile instead of handling them in script.sh. Here’s why this adjustment is beneficial:
+
+Efficiency: By including WP-CLI installation in the Dockerfile, Docker caches this step in the image. This way, WP-CLI doesn't have to be downloaded each time you start a new container, which speeds up container startup.
+
+Cleaner Script: script.sh now focuses only on the WordPress setup and configuration tasks, making it simpler and easier to debug.
+
+Reduced Network Dependency: Since the WP-CLI download and installation occur during the build phase, this step only needs internet access once. Future builds and deployments of this container won't rely on the WP-CLI download server, which improves reliability.
+
+Revised Dockerfile and Script Overview
+With the WP-CLI installation in the Dockerfile, here’s a streamlined flow:
+
+Dockerfile: Installs the necessary dependencies and downloads WP-CLI. This creates a reliable base image with everything WordPress needs.
+script.sh: Uses WP-CLI to configure and start WordPress, now assuming WP-CLI is already installed and available.
+In summary, this approach is both robust and more efficient. Your current setup looks good—let it build and run, and watch for any further configuration logs to confirm everything's working end-to-end!
+
 
 
 3. Fix the PHP-FPM executable issue
