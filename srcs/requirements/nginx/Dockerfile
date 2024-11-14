@@ -3,7 +3,7 @@ FROM debian:bookworm
 
 # Update & intstall your package manager
 RUN apt-get update -y && \
-	apt-get upgrade -y && \
+    apt-get upgrade -y && \
     apt-get install -y nginx openssl -y
 
 # Create a self-signed SSL certificate for TLS (or use your own cert files)

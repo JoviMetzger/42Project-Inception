@@ -13,8 +13,8 @@ cd /var/www/wordpress
 if [ ! -f wp-login.php ]; then 
 	echo "Downloading WordPress..."
 	wp core download \
-			--path="/var/www/wordpress" \
-			--allow-root
+		--path="/var/www/wordpress" \
+		--allow-root
 fi
 
 # Check if wp-config.php exists, and create it if it doesn't
