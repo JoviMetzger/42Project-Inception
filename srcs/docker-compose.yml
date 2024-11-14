@@ -2,7 +2,6 @@ services:                                                                  # Ind
         mariadb:                                                           # The database service.
               build: requirements/mariadb                                  # Builds the image from a Dockerfile located in "requirements/mariadb"
               container_name: mariadb                                      # Names the container "mariadb" for easier reference
-              image: mariadb:latest                                        # Pulls the official MariaDB image
               restart: unless-stopped                                      # Restarts the container automatically unless explicitly stopped
               env_file:
                     - .env                                                 # Loads environment variables from the ".env" file
@@ -13,36 +12,36 @@ services:                                                                  # Ind
         wordpress:                                                         # The WordPress application itself.
               build: requirements/wordpress
               container_name: wordpress
-              image: wordpress:latest
               depends_on:
                    - mariadb
               restart: unless-stopped
               env_file:
                     - .env
               volumes:
-                    - wordpress:/var/www/wordpress                           # Bind the wordpress volume to the WordPress root directory in the container
+                    - wordpress:/var/www/wordpress                         # Bind the wordpress volume to the WordPress root directory in the container
               networks:
                     - inception
-      #   nginx:                                                             # The web server that will serve the website.
-      #         build: requirements/nginx
-      #         container_name: nginx
-      #         image: nginx
-      #         depends_on:
-      #               - wordpress
-      #         restart: unless-stopped
-      #         env_file:
-      #               - .env
-      #         ports:
-      #               - "443:443"                                            # Exposes port 443 for HTTPS traffic
-      #         volumes:
-      #               - wordpress:/var/www/html                               # You can leave ngnix volumes section empty
-      #         networks:
-      #               - inception
+        nginx:                                                             # The web server that will serve the website.
+              build: requirements/nginx
+              container_name: nginx
+              depends_on:
+                    - wordpress
+              restart: unless-stopped
+              env_file:
+                    - .env
+              ports:
+                    - "443:443"                                            # Exposes port 443 for HTTPS traffic
+              volumes:
+                    - wordpress:/var/www/wordpress                         # You can leave ngnix volumes section empty
+              networks:
+                    - inception
 
 
 networks:                                                                  # Network configuration
-        inception:                                                         # The name of the network within the Compose file. It's just an identifier.
+        inception:   
+            name: inception                                                # The name of the network within the Compose file. It's just an identifier.                                               
             driver: bridge
+
 
 volumes:                                                                   # Volumes configuration to persist data
         mariadb:

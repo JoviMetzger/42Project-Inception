@@ -12,15 +12,14 @@ RUN openssl req \
 	-nodes \
 	-days 365 \ 
 	-newkey rsa:2048 \
-	-keyout /etc/nginx/key.pem \
+	-keyout "/etc/ssl/private/nginx-selfsigned.key" \
 	-subj "/C=/ST=/L=/O=/CN=${DOMAIN_NAME}" \
-	-out /etc/ssl/certs/nginx-selfsigned.crt \
-	-subj "/CN=inception"
+	-out "/etc/ssl/certs/nginx-selfsigned.crt"
 
 # Copy custom Nginx configuration
-COPY conf/default-nginx.conf /etc/nginx/default-nginx.conf
+COPY ./tools/default-nginx.conf /etc/nginx/conf.d/
 
-Expose NGINX port for HTTPS
+# Expose NGINX port for HTTPS
 EXPOSE 443
 
 # Start NGINX in the foreground

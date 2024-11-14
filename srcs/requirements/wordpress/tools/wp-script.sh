@@ -52,4 +52,3 @@ wp user create ${WP_USER} ${WP_USER_EMAIL} \
 # Start PHP-FPM in the foreground
 echo "Starting PHP-FPM in the foreground..."
 exec /usr/bin/php-fpm -F
-
