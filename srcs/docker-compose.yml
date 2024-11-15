@@ -9,6 +9,11 @@ services:                                                                  # Ind
                     - mariadb:/var/lib/mysql                               # Bind the mariadb volume to the MySQL data directory in the container (Ensures the MySQL database persists across container restarts)
               networks:
                     - inception                                            # Connects to the "inception" network, allowing it to communicate with other services
+            #   healthcheck:
+            #         test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+            #         interval: 10s
+            #         timeout: 5s
+            #         retries: 5
         wordpress:                                                         # The WordPress application itself.
               build: requirements/wordpress
               container_name: wordpress
@@ -39,20 +44,20 @@ services:                                                                  # Ind
 
 networks:                                                                  # Network configuration
         inception:   
-            name: inception                                                # The name of the network within the Compose file. It's just an identifier.                                               
+            name: inception_net                                            # The name of the network within the Compose file. It's just an identifier.                                               
             driver: bridge
 
 
 volumes:                                                                   # Volumes configuration to persist data
         mariadb:
-              name: mariadb
+              name: mariadb_vol
               driver: local                                                # Volume is located locally
               driver_opts:
                     type: none                                             # Setting the type of volume
                     o: bind                                                # Binding the volume
                     device: ${HOME}/data/mariadb                           # This is the host directory where MariaDB files will be stored
         wordpress:
-              name: wordpress
+              name: wordpress_vol
               driver: local                                                # Volume is located locally
               driver_opts:
                     type: none                                             # No special filesystem type is enforced

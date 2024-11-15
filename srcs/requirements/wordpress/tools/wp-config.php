@@ -1,17 +1,16 @@
 <?php
-// *** MySQL settings - This info is saved inside your .env ***
+// ** MySQL settings - This info is saved inside your .env ** //
 // The name of the database for WordPress
-define('DB_NAME', '${MYSQL_DATABASE_NAME}');
+define('DB_NAME', '${WP_DATABASE_NAME}');
 
 // MySQL database username
-define('DB_USER', '${MYSQL_USER}');
+define('DB_USER', '${DB_USER}');
 
 // MySQL database password
-define('DB_PASSWORD', '${MYSQL_PASSWORD}');
+define('DB_PASSWORD', '${DB_PASSWORD}');
 
 // MySQL hostname (Database for the server)
-define('DB_HOST', '${MYSQL_HOST_NAME}');
-// define('DB_HOST', getenv('MYSQL_HOST_NAME'));
+define('DB_HOST', '${WP_DATABASE_HOST}');
 
 // Database Charset to use in creating database tables.
 define('DB_CHARSET', 'utf8');
@@ -19,8 +18,8 @@ define('DB_CHARSET', 'utf8');
 // The Database Collate type.
 define('DB_COLLATE', '');
 
-// Authentication Unique Keys and Salts.
-// ** Find generated key here: https://api.wordpress.org/secret-key/1.1/salt/ **
+// ** Authentication Unique Keys and Salts. ** //
+// Find generated key here: https://api.wordpress.org/secret-key/1.1/salt/ 
 define('AUTH_KEY',         '8EsCDOM}7G%]D<90c]-+TzD%w=_M0CoY1~$5id>.JPO({DW~i}0x!}Z5X2>H|dly');
 define('SECURE_AUTH_KEY',  '|Ety5|C 8qA^t3>>kYI}6Zm)c%&HjVK[|qd(C;GGp?9kb;)2#-J[KUH-_g4aAl;=');
 define('LOGGED_IN_KEY',    '7wEU[#J(-u27qaPl+a.)OdLv(.3U_m<SKMVvn90Ia)Mwd)|1j3P5{dVWk-6%:E6<');
@@ -30,11 +29,13 @@ define('SECURE_AUTH_SALT', '&X>]HbfAq.^JtJ=20N+Q}od-[Z:szi<(4;fs/A$sFCR(}^WLNPH=
 define('LOGGED_IN_SALT',   'zC{Fhx#4L5GxU5)Tu4$4>iiV.V}.|}  %lVL&V*?DB}!pIm(6(QFe^|sS#>$U<{8');
 define('NONCE_SALT',       'ao;c@w@)!D@ujk+]D7O2 ?@T8b)il~LRzM|:ac`ykb;K;+.8/Yo4tf]X|R~+t+*5');
 
+// Defines the prefix for WordPress database tables
+$table_prefix = 'wp_';
+
 // Absolute path to the WordPress directory.
 if ( ! defined( 'ABSOLUTE_PATH' ) ) {
-	define( 'ABSOLUTE_PATH', '/var/www/html/wordpress' );
+	define( 'ABSOLUTE_PATH', '/var/www/wordpress/wordpress' );
 }
 
 // Sets up WordPress vars and included files.
 require_once ABSOLUTE_PATH . 'wp-settings.php';
-?>

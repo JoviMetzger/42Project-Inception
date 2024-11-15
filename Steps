@@ -124,6 +124,8 @@ Docker Compose is a tool used to easily manage and run multi-container Docker ap
 - Imagine you have a project with multiple parts, like a web app, a database, and maybe a message broker. Instead of running each part manually, Docker Compose lets you define all of them in a single file (called docker-compose.yml) and start everything with one command.
 So, Docker Compose simplifies running complex applications with multiple containers.
 
+
+
 ### --------------------------------------------
 
 
@@ -271,14 +273,14 @@ This is the hostname or IP address of the database server (MariaDB in this case)
 DB_DATABASE=wordpress:
 This sets the name of the MySQL database that will be used for WordPress. The database is named wordpress.
 
-MYSQL_ROOT_PASSWORD=root:
+DB_ROOT_PASSWORD=root:
 The password for the MySQL root user (the administrative user). Here, it’s set to root (which is a poor security practice, but it might be placeholder text for setup purposes).
 
 Database Administrator
-MYSQL_USER=bob:
+DB_USER=bob:
 This creates a MySQL user named bob, which will be the non-root user for interacting with the WordPress database.
 
-MYSQL_PASSWORD=bob:
+DB_PASSWORD=bob:
 The password for the bob MySQL user is set to bob.
 
 WordPress Admin (WordPress Backend)
@@ -308,7 +310,7 @@ Database connection details (hostname, database name, credentials)
 WordPress admin credentials (for managing the site)
 A regular user account (presumably for testing the site as a normal user)
 Keep in mind, the actual passwords (root, bob, wordpress, etc.) should be changed to something more secure in a real deployment. The file likely serves as part of an environment setup for a WordPress installation, where these variables are injected into scripts or Docker containers to automate the deployment.
-Since your MYSQL_USER environment variable is empty when you check it with echo $MYSQL_USER, it indicates that your .env file is not being loaded properly or the variables are not being passed to the Docker container correctly. Here’s how to troubleshoot and fix the issue.
+Since your DB_USER environment variable is empty when you check it with echo $DB_USER, it indicates that your .env file is not being loaded properly or the variables are not being passed to the Docker container correctly. Here’s how to troubleshoot and fix the issue.
 
 Steps to Resolve the Issue
 Check .env File Location:
@@ -328,9 +330,9 @@ DOMAIN_NAME=jmetzger.42.fr              # Intra user name
 
 # MARIADB DATABASE
 DB_DATABASE=maria_database              # Name of the MySQL database that will be used for WordPress
-MYSQL_ROOT_PASSWORD=root                   # Password your choice 
-MYSQL_USER=bob                             # User your choice
-MYSQL_PASSWORD=bob                         # Password your choice  
+DB_ROOT_PASSWORD=root                   # Password your choice 
+DB_USER=bob                             # User your choice
+DB_PASSWORD=bob                         # Password your choice  
 
 # WORDPRESS ADMIN
 WP_ADMIN=wordpress                      # User your choice
@@ -342,6 +344,85 @@ WP_USR=wp_user                          # User your choice
 WP_USER_PWD=wp_user                     # Password your choice 
 WP_USRR_EMAIL=user_wordpress@gmail.com  # Email your choice
 
+
+
+
+Your .env file looks good overall, but there are a few points that could be causing issues, especially with MariaDB and WordPress connectivity. Here are some adjustments and clarifications to help ensure smooth operation:
+
+1. Database Host and Naming Conventions
+In the .env file, WP_DB_HOST is set to MariaDB, but this should match the service name exactly as it is case-sensitive. Since your docker-compose.yml file uses mariadb (all lowercase) as the service name, you should change:
+plaintext
+Copy code
+WP_DB_HOST=mariadb
+This will allow WordPress to locate the MariaDB service correctly.
+2. Consistent Variable Naming
+For database settings, Docker's WordPress image expects WORDPRESS_DB_HOST, WORDPRESS_DB_USER, and WORDPRESS_DB_PASSWORD environment variables. In your case, you need to rename WP_DB_HOST, DB_USER, and DB_PASSWORD as follows to ensure compatibility:
+plaintext
+Copy code
+WORDPRESS_DB_HOST=mariadb
+WORDPRESS_DB_USER=bob
+WORDPRESS_DB_PASSWORD=bob
+WORDPRESS_DB_NAME=WordPressDB  # This should match your `WP_DATABASE_NAME` setting.
+Also, remove WP_DATABASE_NAME and WP_DB_HOST from .env to avoid confusion, as they are not recognized by the WordPress Docker image.
+3. Updated .env File
+Here’s what your .env file should look like after these adjustments:
+
+plaintext
+Copy code
+# GENERAL
+DOMAIN_NAME=jmetzger.42.fr              # Intra user name
+
+# MARIADB DATABASE
+DB_ROOT_PASSWORD=root                # Root password for MariaDB
+DB_USER=bob                          # User for MariaDB
+DB_PASSWORD=bob                      # Password for MariaDB
+MYSQL_DATABASE=WordPressDB              # Name of the database for WordPress
+
+# WORDPRESS CONNECTION TO DATABASE
+WORDPRESS_DB_HOST=mariadb               # Hostname for MariaDB as set in docker-compose.yml
+WORDPRESS_DB_USER=bob                   # MariaDB user WordPress will connect with
+WORDPRESS_DB_PASSWORD=bob               # Password for the MariaDB user
+WORDPRESS_DB_NAME=WordPressDB           # Database name WordPress will use
+
+# WORDPRESS ADMIN
+WP_ADMIN=wordpress                      # Admin username
+WP_ADMIN_PASSWORD=wordpress             # Admin password
+WP_ADMIN_EMAIL=wordpress@gmail.com      # Admin email
+
+# WORDPRESS USER
+WP_USER=wp_user                         # Regular WordPress user
+WP_USER_PASSWORD=wp_user                # User password
+WP_USER_EMAIL=user_wordpress@gmail.com  # User email
+4. Important Note on MYSQL_DATABASE
+Adding MYSQL_DATABASE=WordPressDB ensures that MariaDB creates the database WordPress expects on its first run.
+
+5. Restart Docker Compose
+After updating the .env file, restart the containers to ensure that the new environment variables are loaded:
+
+bash
+Copy code
+docker-compose down
+docker-compose up -d
+With these adjustments, your containers should work more smoothly together. Use docker-compose logs -f to monitor the logs after making these changes and check if WordPress can successfully connect to MariaDB.
+
+
+
+In your docker-compose.yml file, the MariaDB service is defined under the mariadb key, all in lowercase:
+
+yaml
+Copy code
+services:
+  mariadb:  # This is the service name used by Docker
+    ...
+Docker uses this service name (mariadb) as the hostname for internal network communication between containers. So, to allow WordPress to connect to the MariaDB service, WP_DB_HOST (or ideally WORDPRESS_DB_HOST as per Docker's default WordPress image) in your .env file must be set to mariadb (all lowercase), matching this service name exactly.
+
+Summary of Required Changes:
+In your .env file:
+
+plaintext
+Copy code
+WORDPRESS_DB_HOST=mariadb  # Ensure this is lowercase to match the service name
+By doing this, you ensure that WordPress connects to the correct host on Docker's internal network.
 
 ### --------------------------------------------
 
@@ -471,9 +552,9 @@ services:
       context: requirements/mariadb  # Builds the image from a Dockerfile located in "requirements/mariadb"
     args:
       DB_DATABASE: ${DB_DATABASE}      # Passes environment variables to the build process
-      MYSQL_USER: $MYSQL_USER
-      MYSQL_PASSWORD: $MYSQL_PASSWORD
-      MYSQL_ROOT_PASSWORD: $MYSQL_ROOT_PASSWORD
+      DB_USER: $DB_USER
+      DB_PASSWORD: $DB_PASSWORD
+      DB_ROOT_PASSWORD: $DB_ROOT_PASSWORD
     container_name: mariadb                  # Names the container "mariadb" for easier reference
     image: mariadb                           # Pulls the official MariaDB image
     restart: unless-stopped                  # Restarts the container automatically unless explicitly stopped
@@ -507,8 +588,8 @@ services:
       context: requirements/wordpress        # Builds the image from a Dockerfile located in "requirements/wordpress"
     args:
       DB_DATABASE: "${DB_DATABASE}"    # Passes environment variables to the build process
-      MYSQL_USER: "${MYSQL_USER}"
-      MYSQL_PASSWORD: "${MYSQL_PASSWORD}"
+      DB_USER: "${DB_USER}"
+      DB_PASSWORD: "${DB_PASSWORD}"
       DB_HOSTNAME: "${DB_HOSTNAME}"
     container_name: wordpress                # Names the container "wordpress"
     image: wordpress                         # Uses the official WordPress image
@@ -701,9 +782,9 @@ yaml
 Copy code
 args:
   DB_DATABASE : ${DB_DATABASE}
-  MYSQL_USER : $MYSQL_USER
-  MYSQL_PASSWORD : $MYSQL_PASSWORD
-  MYSQL_ROOT_PASSWORD : $MYSQL_ROOT_PASSWORD
+  DB_USER : $DB_USER
+  DB_PASSWORD : $DB_PASSWORD
+  DB_ROOT_PASSWORD : $DB_ROOT_PASSWORD
 In this section, the args are passing the database details (like the database name, user, and password) to the build process when Docker creates the MariaDB image.
 These values come from environment variables (typically defined in the .env file), and Docker substitutes them during the build phase.
 Are args important?
@@ -718,9 +799,9 @@ In a typical Dockerfile, you might see something like this:
 Dockerfile
 Copy code
 ARG DB_DATABASE
-ARG MYSQL_USER
-ARG MYSQL_PASSWORD
-ARG MYSQL_ROOT_PASSWORD
+ARG DB_USER
+ARG DB_PASSWORD
+ARG DB_ROOT_PASSWORD
 
 # Use these ARG values to set up the MariaDB configuration at build-time.
 If you're using a pre-built image (like the official mariadb image) and don't need to customize it at build time, the args section may not be necessary. Instead, you would only need to use environment variables (env_file or environment) to configure MariaDB at runtime.
@@ -774,7 +855,7 @@ Ports: What ports need to be exposed to access the services externally?
 Example: Nginx may expose port 443 to serve your web application over HTTPS.
 Environment Variables: Does the service need environment variables to be configured, like database credentials?
 
-Example: MariaDB needs variables like MYSQL_USER, MYSQL_PASSWORD, and DB_DATABASE to set up the database.
+Example: MariaDB needs variables like DB_USER, DB_PASSWORD, and DB_DATABASE to set up the database.
 3. Services Section
 For each component, you define a service. A service represents a container and its associated configuration.
 
@@ -805,7 +886,7 @@ depends_on:
 To avoid hardcoding sensitive configuration values (like database passwords) directly in your docker-compose.yml, use an .env file.
 
 Why? This keeps your Compose file clean and allows you to easily change configuration settings without editing the file itself.
-Example: You can use .env to set variables like MYSQL_USER, MYSQL_PASSWORD, and DB_DATABASE.
+Example: You can use .env to set variables like DB_USER, DB_PASSWORD, and DB_DATABASE.
 yaml
 Copy code
 env_file:
@@ -896,6 +977,140 @@ Restart Policies:
 
 Use appropriate restart policies for container health management.
 By focusing on your application’s needs, you can tailor your docker-compose.yml file to ensure each service is properly configured, communicates securely, and can be easily managed.
+
+
+
+
+Your docker-compose file is close to correct, but a few issues could be causing errors in the logs. Here’s an analysis of potential problem areas and recommended fixes:
+
+1. Structure and Indentation
+Make sure the indentation is consistent. YAML is very sensitive to indentation. In your file, double-check for spaces versus tabs, as they can often cause issues.
+
+2. docker-compose Version Declaration
+Most docker-compose files start with a version declaration. While it’s not always required, adding one can ensure compatibility:
+
+yaml
+Copy code
+version: '3.8'  # or another version compatible with your Docker setup
+3. Environment Variables in .env
+Ensure your .env file includes all necessary environment variables, specifically for:
+
+DB_ROOT_PASSWORD
+MYSQL_DATABASE
+DB_USER
+DB_PASSWORD
+WORDPRESS_DB_HOST
+WORDPRESS_DB_USER
+WORDPRESS_DB_PASSWORD
+4. Database Connection (WORDPRESS_DB_HOST)
+For WORDPRESS_DB_HOST, specify mariadb as the hostname in the .env file. It should look something like:
+
+plaintext
+Copy code
+WORDPRESS_DB_HOST=mariadb:3306
+Docker’s internal DNS resolves service names within the same network.
+
+5. depends_on Directive
+depends_on manages startup order but doesn’t guarantee a service is ready. You might be seeing errors because WordPress starts before MariaDB is fully ready. For MariaDB, you could add a healthcheck like so:
+
+yaml
+Copy code
+    mariadb:
+      ...
+      healthcheck:
+        test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+        interval: 10s
+        timeout: 5s
+        retries: 5
+6. NGINX Volume Configuration
+Your NGINX service’s volume section includes wordpress:/var/www/wordpress, which might conflict since this is generally handled by the WordPress container alone. Unless NGINX needs access to specific WordPress files (like static assets), you may want to remove this volume reference from NGINX.
+
+7. Permissions and Ownership of Host Folders
+Ensure that the directories ${HOME}/data/mariadb and ${HOME}/data/wordpress have correct permissions and ownership to allow Docker to bind these directories without issues:
+
+bash
+Copy code
+sudo chown -R $USER:$USER ${HOME}/data/mariadb
+sudo chown -R $USER:$USER ${HOME}/data/wordpress
+8. Example Revised docker-compose File
+Here is an updated version with some of the recommended changes applied:
+
+yaml
+Copy code
+version: '3.8'
+
+services:
+  mariadb:
+    build: requirements/mariadb
+    container_name: mariadb
+    restart: unless-stopped
+    env_file:
+      - .env
+    volumes:
+      - mariadb:/var/lib/mysql
+    networks:
+      - inception
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  wordpress:
+    build: requirements/wordpress
+    container_name: wordpress
+    depends_on:
+      - mariadb
+    restart: unless-stopped
+    env_file:
+      - .env
+    volumes:
+      - wordpress:/var/www/wordpress
+    networks:
+      - inception
+
+  nginx:
+    build: requirements/nginx
+    container_name: nginx
+    depends_on:
+      - wordpress
+    restart: unless-stopped
+    env_file:
+      - .env
+    ports:
+      - "443:443"
+    networks:
+      - inception
+
+networks:
+  inception:
+    name: inception
+    driver: bridge
+
+volumes:
+  mariadb:
+    name: mariadb
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${HOME}/data/mariadb
+
+  wordpress:
+    name: wordpress
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${HOME}/data/wordpress
+After making these changes, restart your services by running:
+
+bash
+Copy code
+docker-compose down
+docker-compose up -d
+Then monitor logs with docker-compose logs -f to see if the errors are resolved.
+
 
 ### --------------------------------------------
 
@@ -1252,13 +1467,13 @@ You don’t need the script to be executable (though it's still a good practice 
 
 // ** MySQL settings - You can get this info from your web host ** //
 /** The name of the database for WordPress */
-define( 'MYSQL_DATABASE_NAME', 'db1' );
+define( 'WP_DATABASE_NAME', 'db1' );
 
 /** MySQL database username */
-define( 'MYSQL_USER', 'user' );
+define( 'DB_USER', 'user' );
 
 /** MySQL database password */
-define( 'MYSQL_PASSWORD', 'pwd' );
+define( 'DB_PASSWORD', 'pwd' );
 
 /** MySQL hostname */
 define( 'DB_HOST', 'mariadb' );
@@ -1400,6 +1615,143 @@ docker exec -it your_wordpress_container_name bash
 cd /var/www/html/wordpress
 php -S 0.0.0.0:8000
 
+Your setup is almost correct, but there are a few improvements and fixes needed. I’ll go over each file, pointing out issues and improvements.
+
+1. Dockerfile for WordPress Container
+Your Dockerfile is mostly correct but has a few points to check:
+
+Directory Structure: Make sure the directory /var/www/wordpress exists and has appropriate permissions. If it doesn’t, WordPress installation may fail.
+Environment Variables in wp-config.php: Your wp-config.php relies on environment variables like ${WP_DATABASE_NAME}. But PHP won’t directly replace those. You may need to use a tool like envsubst or add commands in the script to replace placeholders.
+Here’s an adjusted Dockerfile:
+
+dockerfile
+Copy code
+# Use Debian as a base image (Debian 12)
+FROM debian:bookworm
+
+# Update & install packages
+RUN apt-get -y update && \
+    apt-get install -y php-fpm php-mysql curl mariadb-client
+
+# Download WP-CLI
+RUN curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar && \
+    chmod +x wp-cli.phar && \
+    mv wp-cli.phar /usr/local/bin/wp
+
+# Create the directory where WordPress will be installed
+RUN mkdir -p /var/www/wordpress && chown -R www-data:www-data /var/www/wordpress
+
+# Copy the script and config
+COPY ./tools/wp-script.sh /
+COPY ./tools/wp-config.php /etc/wp-config.php
+
+# Make sure the script is executable
+RUN chmod +x /wp-script.sh
+
+# Expose port 9000 for PHP-FPM
+EXPOSE 9000
+
+# Run PHP-FPM and the custom script
+CMD ["/wp-script.sh"]
+2. wp-script.sh Script
+Your script seems to cover most requirements, but here are some improvements:
+
+WordPress Path: Ensure the /var/www/wordpress directory exists before running wp core download.
+Configuration File Location: In the current setup, you’re using a custom wp-config.php that might not be correctly applied to /var/www/wordpress/wp-config.php. Copy or symlink it to the correct location.
+Database Variables: Confirm WP_DATABASE_NAME, DB_USER, DB_PASSWORD, and WP_DATABASE_HOST are correctly sourced from .env.
+Here’s an improved version of wp-script.sh:
+
+bash
+Copy code
+#!/bin/bash
+
+# Wait for MariaDB
+echo "Waiting for the database to be ready..."
+until mysqladmin ping -h "${WP_DATABASE_HOST}" --silent; do
+    sleep 2
+done
+
+# Change to WordPress directory
+cd /var/www/wordpress
+
+# Download WordPress if not already downloaded
+if [ ! -f wp-login.php ]; then 
+    echo "Downloading WordPress..."
+    wp core download --allow-root
+fi
+
+# Copy the wp-config.php if it doesn't already exist
+if [ ! -f wp-config.php ]; then
+    echo "Copying wp-config.php..."
+    cp /etc/wp-config.php wp-config.php
+fi
+
+# Install WordPress core
+echo "Installing WordPress core..."
+wp core install \
+    --url="${DOMAIN_NAME}" \
+    --title="inception" \
+    --admin_user="${WP_ADMIN}" \
+    --admin_password="${WP_ADMIN_PASSWORD}" \
+    --admin_email="${WP_ADMIN_EMAIL}" \
+    --allow-root
+
+# Create additional WordPress user
+echo "Creating WordPress user..."
+wp user create "${WP_USER}" "${WP_USER_EMAIL}" --user_pass="${WP_USER_PASSWORD}" --allow-root
+
+# Start PHP-FPM in the foreground
+echo "Starting PHP-FPM in the foreground..."
+exec php-fpm -F
+3. wp-config.php (Configuration File)
+In your wp-config.php, environment variables aren’t automatically replaced, and the syntax has some issues. PHP doesn’t process ${VAR_NAME} directly in strings. Instead, use getenv() or set environment variables using envsubst during setup.
+
+Update wp-config.php as follows:
+
+php
+Copy code
+<?php
+// ** MySQL settings ** //
+define('DB_NAME', getenv('WP_DATABASE_NAME'));
+define('DB_USER', getenv('DB_USER'));
+define('DB_PASSWORD', getenv('DB_PASSWORD'));
+define('DB_HOST', getenv('WP_DATABASE_HOST'));
+define('DB_CHARSET', 'utf8');
+define('DB_COLLATE', '');
+
+// ** Authentication Unique Keys and Salts **
+define('AUTH_KEY',         '8EsCDOM}7G%]D<90c]-+TzD%w=_M0CoY1~$5id>.JPO({DW~i}0x!}Z5X2>H|dly');
+define('SECURE_AUTH_KEY',  '|Ety5|C 8qA^t3>>kYI}6Zm)c%&HjVK[|qd(C;GGp?9kb;)2#-J[KUH-_g4aAl;=');
+define('LOGGED_IN_KEY',    '7wEU[#J(-u27qaPl+a.)OdLv(.3U_m<SKMVvn90Ia)Mwd)|1j3P5{dVWk-6%:E6<');
+define('NONCE_KEY',        '?DCZ?J_lRJq0[j@xhO8bQ<|Is<0L&WOncGPL<8L$-hkI,`^?Xk=;~5t~wy%z2*}+');
+define('AUTH_SALT',        '/5iNnxCVI,Mwk-@@+i!aVmo~*])8l-Zeitu0+^ip lvp088s^3J[%|-#|R)-<wi$');
+define('SECURE_AUTH_SALT', '&X>]HbfAq.^JtJ=20N+Q}od-[Z:szi<(4;fs/A$sFCR(}^WLNPH=2,+k80-bLqyT');
+define('LOGGED_IN_SALT',   'zC{Fhx#4L5GxU5)Tu4$4>iiV.V}.|}  %lVL&V*?DB}!pIm(6(QFe^|sS#>$U<{8');
+define('NONCE_SALT',       'ao;c@w@)!D@ujk+]D7O2 ?@T8b)il~LRzM|:ac`ykb;K;+.8/Yo4tf]X|R~+t+*5');
+
+// Absolute path to the WordPress directory.
+if ( ! defined( 'ABSPATH' ) ) {
+    define( 'ABSPATH', '/var/www/wordpress' );
+}
+
+// Sets up WordPress vars and included files.
+require_once ABSPATH . 'wp-settings.php';
+4. Additional Tips
+Permissions: Ensure /var/www/wordpress is writable by www-data user.
+Database Connectivity: Ensure MariaDB is accessible using the host specified in WP_DATABASE_HOST. If the WordPress container can't reach the database, it might be due to networking issues or the wrong hostname.
+Logs: Use docker-compose logs wordpress to identify specific errors.
+After making these changes, restart your containers:
+
+bash
+Copy code
+docker-compose down
+docker-compose up -d
+Then, monitor the logs with:
+
+bash
+Copy code
+docker-compose logs -f wordpress
+This should help resolve most issues and get your WordPress container working correctly.
 
 
 ---
@@ -1459,28 +1811,28 @@ mkdir -p /run/mysqld /var/log/mysql
 chown -R mysql:mysql /run/mysqld /var/log/mysql
 
 # Check if the database directory exists
-if [ ! -d "/var/lib/mysql/${MYSQL_DATABASE_NAME}" ]; then
+if [ ! -d "/var/lib/mysql/${WP_DATABASE_NAME}" ]; then
     echo "Initializing MariaDB database..."
 
     # Secure MariaDB installation
     mysql -u root <<EOF
     -- Set the root password
-    ALTER USER 'root'@'localhost' IDENTIFIED BY '${MYSQL_ROOT_PASSWORD}';
+    ALTER USER 'root'@'localhost' IDENTIFIED BY '${DB_ROOT_PASSWORD}';
     FLUSH PRIVILEGES;
 EOF
 
     # Create a new database if specified
-    if [ -n "$MYSQL_DATABASE_NAME" ]; then
-        echo "Creating database: $MYSQL_DATABASE_NAME"
-        mysql -u root -p"${MYSQL_ROOT_PASSWORD}" -e "CREATE DATABASE IF NOT EXISTS \`${MYSQL_DATABASE_NAME}\` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+    if [ -n "$WP_DATABASE_NAME" ]; then
+        echo "Creating database: $WP_DATABASE_NAME"
+        mysql -u root -p"${DB_ROOT_PASSWORD}" -e "CREATE DATABASE IF NOT EXISTS \`${WP_DATABASE_NAME}\` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
     fi
 
     # Create a new user and grant privileges if specified
-    if [ -n "$MYSQL_USER" ] && [ -n "$MYSQL_PASSWORD" ]; then
-        echo "Creating user: $MYSQL_USER with access to $MYSQL_DATABASE_NAME"
-        mysql -u root -p"${MYSQL_ROOT_PASSWORD}" <<EOF
-        CREATE USER IF NOT EXISTS '${MYSQL_USER}'@'%' IDENTIFIED BY '${MYSQL_PASSWORD}';
-        GRANT ALL PRIVILEGES ON \`${MYSQL_DATABASE_NAME}\`.* TO '${MYSQL_USER}'@'%';
+    if [ -n "$DB_USER" ] && [ -n "$DB_PASSWORD" ]; then
+        echo "Creating user: $DB_USER with access to $WP_DATABASE_NAME"
+        mysql -u root -p"${DB_ROOT_PASSWORD}" <<EOF
+        CREATE USER IF NOT EXISTS '${DB_USER}'@'%' IDENTIFIED BY '${DB_PASSWORD}';
+        GRANT ALL PRIVILEGES ON \`${WP_DATABASE_NAME}\`.* TO '${DB_USER}'@'%';
         FLUSH PRIVILEGES;
 EOF
     fi
@@ -1688,7 +2040,7 @@ docker-compose logs mariadb
 (Accessing the MariaDB Instance):
 Might need to install `sudo apt install mysql-client-core-8.0`
 ```bash
-mysql -h 127.0.0.1 -P 3306 -u "$MYSQL_USER" -p"$MYSQL_PASSWORD"
+mysql -h 127.0.0.1 -P 3306 -u "$DB_USER" -p"$DB_PASSWORD"
 ```
 -> If everything works till here your database is running 
 - 1. Verify Database and User Creation:
@@ -1764,11 +2116,11 @@ Query OK, 0 rows affected (0.00 sec)
 - 5. Retry Connecting from the Host
 Exit from the container and try connecting again from your host:
 ```bash
-$ mysql -h 127.0.0.1 -P 3306 -u "$MYSQL_USER" -p"$MYSQL_PASSWORD"
+$ mysql -h 127.0.0.1 -P 3306 -u "$DB_USER" -p"$DB_PASSWORD"
 ```
 -> Should look like:
 ```sql
-$ mysql -h 127.0.0.1 -P 3306 -u "$MYSQL_USER" -p"$MYSQL_PASSWORD"
+$ mysql -h 127.0.0.1 -P 3306 -u "$DB_USER" -p"$DB_PASSWORD"
 
 Enter password: 
 Welcome to the MySQL monitor.  Commands end with ; or \g.
@@ -1850,18 +2202,18 @@ mariadb  | mysqld: Can't create file '/var/log/mysql/error.log' (errno: 2 "No su
 ```
 Check your script.sh
 
-3) PROBLEM AT `mysql -h 127.0.0.1 -P 3306 -u "$MYSQL_USER" -p"$MYSQL_PASSWORD"`
+3) PROBLEM AT `mysql -h 127.0.0.1 -P 3306 -u "$DB_USER" -p"$DB_PASSWORD"`
 Similar output:
 ```bash
-$ mysql -h 127.0.0.1 -P 3306 -u "$MYSQL_USER" -p"$MYSQL_PASSWORD"
+$ mysql -h 127.0.0.1 -P 3306 -u "$DB_USER" -p"$DB_PASSWORD"
 
 ERROR 1045 (28000): Access denied for user '<username>'@'172.18.0.1' (using password: YES)
 ```
 
 ```bash
-$ docker exec -it mariadb mysql -u root -p"${MYSQL_ROOT_PASSWORD}"
+$ docker exec -it mariadb mysql -u root -p"${DB_ROOT_PASSWORD}"
 OR
-$ mysql -u root -p"${MYSQL_ROOT_PASSWORD}"
+$ mysql -u root -p"${DB_ROOT_PASSWORD}"
 
 Enter password: 
 Welcome to the MariaDB monitor.  Commands end with ; or \g.
@@ -1883,14 +2235,14 @@ Now that you’re inside the MariaDB shell, run the following commands to check 
 ```sql
 # SHOW DATABASES;
 ```
--> Look for the database name you specified in your MYSQL_DATABASE_NAME variable.
+-> Look for the database name you specified in your WP_DATABASE_NAME variable.
 
 - Check Users:
 Check if the user you created exists and their access privileges
 ```sql
 # SELECT user, host FROM mysql.user;
 ```
--> Look for your specified MYSQL_USER. It should show up with a % host entry, allowing access from any host.
+-> Look for your specified DB_USER. It should show up with a % host entry, allowing access from any host.
 
 - Grant Privileges to USER:
 If USER should have access to the database but isn't seeing it, make sure to grant the necessary privileges:
@@ -1905,17 +2257,17 @@ If USER should have access to the database but isn't seeing it, make sure to gra
 Question about the script.sh. 
 why did you remove:
 #     # Create a new database if specified
-#     if [ -n "$MYSQL_DATABASE_NAME" ]; then
-#         echo "Creating database: $MYSQL_DATABASE_NAME"
-#         mysql -u root -p"${MYSQL_ROOT_PASSWORD}" -e "CREATE DATABASE IF NOT EXISTS \${MYSQL_DATABASE_NAME}\ CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+#     if [ -n "$WP_DATABASE_NAME" ]; then
+#         echo "Creating database: $WP_DATABASE_NAME"
+#         mysql -u root -p"${DB_ROOT_PASSWORD}" -e "CREATE DATABASE IF NOT EXISTS \${WP_DATABASE_NAME}\ CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
 #     fi
 
 #     # Create a new user and grant privileges if specified
-#     if [ -n "$MYSQL_USER" ] && [ -n "$MYSQL_PASSWORD" ]; then
-#         echo "Creating user: $MYSQL_USER with access to $MYSQL_DATABASE_NAME"
-#         mysql -u root -p"${MYSQL_ROOT_PASSWORD}" <<EOF
-#         CREATE USER IF NOT EXISTS '${MYSQL_USER}'@'%' IDENTIFIED BY '${MYSQL_PASSWORD}';
-#         GRANT ALL PRIVILEGES ON \${MYSQL_DATABASE_NAME}\.* TO '${MYSQL_USER}'@'%';
+#     if [ -n "$DB_USER" ] && [ -n "$DB_PASSWORD" ]; then
+#         echo "Creating user: $DB_USER with access to $WP_DATABASE_NAME"
+#         mysql -u root -p"${DB_ROOT_PASSWORD}" <<EOF
+#         CREATE USER IF NOT EXISTS '${DB_USER}'@'%' IDENTIFIED BY '${DB_PASSWORD}';
+#         GRANT ALL PRIVILEGES ON \${WP_DATABASE_NAME}\.* TO '${DB_USER}'@'%';
 #         FLUSH PRIVILEGES;
 # EOF
 #     fi
@@ -1940,28 +2292,28 @@ done
 echo "MariaDB is ready."
 
 # Check if the database directory exists
-if [ ! -d "/var/lib/mysql/${MYSQL_DATABASE_NAME}" ]; then
+if [ ! -d "/var/lib/mysql/${WP_DATABASE_NAME}" ]; then
     echo "Initializing MariaDB database..."
 
     # Secure MariaDB installation
     mysql -u root <<EOF
     -- Set the root password
-    ALTER USER 'root'@'localhost' IDENTIFIED BY '${MYSQL_ROOT_PASSWORD}';
+    ALTER USER 'root'@'localhost' IDENTIFIED BY '${DB_ROOT_PASSWORD}';
     FLUSH PRIVILEGES;
 EOF
 
 #     # Create a new database if specified
-#     if [ -n "$MYSQL_DATABASE_NAME" ]; then
-#         echo "Creating database: $MYSQL_DATABASE_NAME"
-#         mysql -u root -p"${MYSQL_ROOT_PASSWORD}" -e "CREATE DATABASE IF NOT EXISTS \${MYSQL_DATABASE_NAME}\ CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+#     if [ -n "$WP_DATABASE_NAME" ]; then
+#         echo "Creating database: $WP_DATABASE_NAME"
+#         mysql -u root -p"${DB_ROOT_PASSWORD}" -e "CREATE DATABASE IF NOT EXISTS \${WP_DATABASE_NAME}\ CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
 #     fi
 
 #     # Create a new user and grant privileges if specified
-#     if [ -n "$MYSQL_USER" ] && [ -n "$MYSQL_PASSWORD" ]; then
-#         echo "Creating user: $MYSQL_USER with access to $MYSQL_DATABASE_NAME"
-#         mysql -u root -p"${MYSQL_ROOT_PASSWORD}" <<EOF
-#         CREATE USER IF NOT EXISTS '${MYSQL_USER}'@'%' IDENTIFIED BY '${MYSQL_PASSWORD}';
-#         GRANT ALL PRIVILEGES ON \${MYSQL_DATABASE_NAME}\.* TO '${MYSQL_USER}'@'%';
+#     if [ -n "$DB_USER" ] && [ -n "$DB_PASSWORD" ]; then
+#         echo "Creating user: $DB_USER with access to $WP_DATABASE_NAME"
+#         mysql -u root -p"${DB_ROOT_PASSWORD}" <<EOF
+#         CREATE USER IF NOT EXISTS '${DB_USER}'@'%' IDENTIFIED BY '${DB_PASSWORD}';
+#         GRANT ALL PRIVILEGES ON \${WP_DATABASE_NAME}\.* TO '${DB_USER}'@'%';
 #         FLUSH PRIVILEGES;
 # EOF
 #     fi
@@ -2025,22 +2377,22 @@ echo "MariaDB is ready."
 # Secure MariaDB installation
 mysql -u root <<EOF
 -- Set the root password
-ALTER USER 'root'@'localhost' IDENTIFIED BY '${MYSQL_ROOT_PASSWORD}';
+ALTER USER 'root'@'localhost' IDENTIFIED BY '${DB_ROOT_PASSWORD}';
 FLUSH PRIVILEGES;
 EOF
 
 # Create a new database if specified
-if [ -n "$MYSQL_DATABASE_NAME" ]; then
-    echo "Creating database: $MYSQL_DATABASE_NAME"
-    mysql -u root -p"${MYSQL_ROOT_PASSWORD}" -e "CREATE DATABASE IF NOT EXISTS \`${MYSQL_DATABASE_NAME}\` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+if [ -n "$WP_DATABASE_NAME" ]; then
+    echo "Creating database: $WP_DATABASE_NAME"
+    mysql -u root -p"${DB_ROOT_PASSWORD}" -e "CREATE DATABASE IF NOT EXISTS \`${WP_DATABASE_NAME}\` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
 fi
 
 # Create a new user and grant privileges if specified
-if [ -n "$MYSQL_USER" ] && [ -n "$MYSQL_PASSWORD" ]; then
-    echo "Creating user: $MYSQL_USER with access to $MYSQL_DATABASE_NAME"
-    mysql -u root -p"${MYSQL_ROOT_PASSWORD}" <<EOF
-    CREATE USER IF NOT EXISTS '${MYSQL_USER}'@'%' IDENTIFIED BY '${MYSQL_PASSWORD}';
-    GRANT ALL PRIVILEGES ON \`${MYSQL_DATABASE_NAME}\`.* TO '${MYSQL_USER}'@'%';
+if [ -n "$DB_USER" ] && [ -n "$DB_PASSWORD" ]; then
+    echo "Creating user: $DB_USER with access to $WP_DATABASE_NAME"
+    mysql -u root -p"${DB_ROOT_PASSWORD}" <<EOF
+    CREATE USER IF NOT EXISTS '${DB_USER}'@'%' IDENTIFIED BY '${DB_PASSWORD}';
+    GRANT ALL PRIVILEGES ON \`${WP_DATABASE_NAME}\`.* TO '${DB_USER}'@'%';
     FLUSH PRIVILEGES;
 EOF
 fi
@@ -2084,28 +2436,28 @@ done
 echo "MariaDB is ready."
 
 # Check if the database directory exists
-if [ ! -d "/var/lib/mysql/${MYSQL_DATABASE_NAME}" ]; then
+if [ ! -d "/var/lib/mysql/${WP_DATABASE_NAME}" ]; then
     echo "Initializing MariaDB database..."
 
     # Secure MariaDB installation
     mysql -u root <<EOF
     -- Set the root password
-    ALTER USER 'root'@'localhost' IDENTIFIED BY '${MYSQL_ROOT_PASSWORD}';
+    ALTER USER 'root'@'localhost' IDENTIFIED BY '${DB_ROOT_PASSWORD}';
     FLUSH PRIVILEGES;
 EOF
 
 #     # Create a new database if specified
-#     if [ -n "$MYSQL_DATABASE_NAME" ]; then
-#         echo "Creating database: $MYSQL_DATABASE_NAME"
-#         mysql -u root -p"${MYSQL_ROOT_PASSWORD}" -e "CREATE DATABASE IF NOT EXISTS \`${MYSQL_DATABASE_NAME}\` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+#     if [ -n "$WP_DATABASE_NAME" ]; then
+#         echo "Creating database: $WP_DATABASE_NAME"
+#         mysql -u root -p"${DB_ROOT_PASSWORD}" -e "CREATE DATABASE IF NOT EXISTS \`${WP_DATABASE_NAME}\` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
 #     fi
 
 #     # Create a new user and grant privileges if specified
-#     if [ -n "$MYSQL_USER" ] && [ -n "$MYSQL_PASSWORD" ]; then
-#         echo "Creating user: $MYSQL_USER with access to $MYSQL_DATABASE_NAME"
-#         mysql -u root -p"${MYSQL_ROOT_PASSWORD}" <<EOF
-#         CREATE USER IF NOT EXISTS '${MYSQL_USER}'@'%' IDENTIFIED BY '${MYSQL_PASSWORD}';
-#         GRANT ALL PRIVILEGES ON \`${MYSQL_DATABASE_NAME}\`.* TO '${MYSQL_USER}'@'%';
+#     if [ -n "$DB_USER" ] && [ -n "$DB_PASSWORD" ]; then
+#         echo "Creating user: $DB_USER with access to $WP_DATABASE_NAME"
+#         mysql -u root -p"${DB_ROOT_PASSWORD}" <<EOF
+#         CREATE USER IF NOT EXISTS '${DB_USER}'@'%' IDENTIFIED BY '${DB_PASSWORD}';
+#         GRANT ALL PRIVILEGES ON \`${WP_DATABASE_NAME}\`.* TO '${DB_USER}'@'%';
 #         FLUSH PRIVILEGES;
 # EOF
 #     fi
@@ -2148,22 +2500,22 @@ echo "MariaDB is ready."
 # Secure MariaDB installation
 mysql -u root <<EOF
 -- Set the root password
-ALTER USER 'root'@'localhost' IDENTIFIED BY '${MYSQL_ROOT_PASSWORD}';
+ALTER USER 'root'@'localhost' IDENTIFIED BY '${DB_ROOT_PASSWORD}';
 FLUSH PRIVILEGES;
 EOF
 
 # Create a new database if specified
-if [ -n "$MYSQL_DATABASE_NAME" ]; then
-    echo "Creating database: $MYSQL_DATABASE_NAME"
-    mysql -u root -p"${MYSQL_ROOT_PASSWORD}" -e "CREATE DATABASE IF NOT EXISTS \`${MYSQL_DATABASE_NAME}\` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+if [ -n "$WP_DATABASE_NAME" ]; then
+    echo "Creating database: $WP_DATABASE_NAME"
+    mysql -u root -p"${DB_ROOT_PASSWORD}" -e "CREATE DATABASE IF NOT EXISTS \`${WP_DATABASE_NAME}\` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
 fi
 
 # Create a new user and grant privileges if specified
-if [ -n "$MYSQL_USER" ] && [ -n "$MYSQL_PASSWORD" ]; then
-    echo "Creating user: $MYSQL_USER with access to $MYSQL_DATABASE_NAME"
-    mysql -u root -p"${MYSQL_ROOT_PASSWORD}" <<EOF
-    CREATE USER IF NOT EXISTS '${MYSQL_USER}'@'%' IDENTIFIED BY '${MYSQL_PASSWORD}';
-    GRANT ALL PRIVILEGES ON \`${MYSQL_DATABASE_NAME}\`.* TO '${MYSQL_USER}'@'%';
+if [ -n "$DB_USER" ] && [ -n "$DB_PASSWORD" ]; then
+    echo "Creating user: $DB_USER with access to $WP_DATABASE_NAME"
+    mysql -u root -p"${DB_ROOT_PASSWORD}" <<EOF
+    CREATE USER IF NOT EXISTS '${DB_USER}'@'%' IDENTIFIED BY '${DB_PASSWORD}';
+    GRANT ALL PRIVILEGES ON \`${WP_DATABASE_NAME}\`.* TO '${DB_USER}'@'%';
     FLUSH PRIVILEGES;
 EOF
 fi
@@ -2179,6 +2531,142 @@ wait "$pid"
 echo "Starting MariaDB in the foreground..."
 exec mysqld
 
+
+
+
+
+
+
+
+Your MariaDB container setup is mostly solid, but there are a few adjustments and checks to make sure everything runs smoothly.
+
+1. Dockerfile Adjustments
+The Dockerfile looks mostly correct, but here are some improvements:
+
+Permissions: After copying files, ensure ownership and permissions are appropriate.
+Configuration File Path: Confirm the db-config.cnf file is placed in the correct path (/etc/mysql/mariadb.conf.d/ or /etc/mysql/conf.d/) for your MariaDB setup to load it automatically.
+Here’s a refined version:
+
+dockerfile
+Copy code
+# Use Debian as a base image (Debian 12)
+FROM debian:bookworm
+
+# Update & install packages
+RUN apt-get update -y && \
+    apt-get install -y mariadb-server
+
+# Copy configuration and initialization script
+COPY ./tools/db-script.sh /
+COPY ./tools/db-config.cnf /etc/mysql/mariadb.conf.d/
+
+# Ensure permissions for the initialization script
+RUN chmod +x /db-script.sh
+
+# Expose the MariaDB port
+EXPOSE 3306
+
+# Run the MariaDB setup script and start the server in the foreground
+CMD ["/db-script.sh"]
+2. MariaDB Initialization Script (db-script.sh)
+Your script handles initialization well, but here are a few potential improvements:
+
+Root User Initialization: Since root access is required to create the database and users, make sure DB_ROOT_PASSWORD is set properly.
+Database Creation: Add a command to create the database if it does not exist (e.g., CREATE DATABASE IF NOT EXISTS ...).
+Error Handling: Check if mysqld fails to start by adding a timeout or failure check in the script.
+Below is a refined version of db-script.sh:
+
+bash
+Copy code
+#!/bin/bash
+
+# Prepare necessary directories
+mkdir -p /run/mysqld /var/log/mysql
+chown -R mysql:mysql /run/mysqld /var/log/mysql
+
+# Check if the database directory exists
+if [ ! -d "/var/lib/mysql/${WP_DATABASE_NAME}" ]; then
+    echo "Initializing MariaDB database..."
+
+    # Start mysqld in the background for initialization
+    mysqld --skip-networking --socket=/run/mysqld/mysqld.sock &
+    mysql_pid=$!
+
+    # Wait for mysqld to be ready
+    until mysqladmin ping --socket=/run/mysqld/mysqld.sock --silent; do
+        echo "Waiting for MariaDB to be ready..."
+        sleep 2
+    done
+
+    # Secure root user
+    echo "Initializing root user..."
+    mysql -u root --socket=/run/mysqld/mysqld.sock <<EOF
+    ALTER USER 'root'@'localhost' IDENTIFIED BY '${DB_ROOT_PASSWORD}';
+    FLUSH PRIVILEGES;
+EOF
+
+    # Create the database
+    echo "Creating database: '${WP_DATABASE_NAME}'..."
+    mysql -u root -p"${DB_ROOT_PASSWORD}" --socket=/run/mysqld/mysqld.sock <<EOF
+    CREATE DATABASE IF NOT EXISTS \`${WP_DATABASE_NAME}\` CHARACTER SET utf8 COLLATE utf8_general_ci;
+EOF
+
+    # Create a new user and grant privileges if specified
+    if [ -n "$DB_USER" ] && [ -n "$DB_PASSWORD" ]; then
+        echo "Creating user: '${DB_USER}' with access to '${WP_DATABASE_NAME}'"
+        mysql -u root -p"${DB_ROOT_PASSWORD}" --socket=/run/mysqld/mysqld.sock <<EOF
+        CREATE USER IF NOT EXISTS '${DB_USER}'@'%' IDENTIFIED BY '${DB_PASSWORD}';
+        GRANT ALL PRIVILEGES ON \`${WP_DATABASE_NAME}\`.* TO '${DB_USER}'@'%';
+        FLUSH PRIVILEGES;
+EOF
+    fi
+
+    echo "MariaDB initialization complete."
+
+    # Stop the background mysqld instance
+    kill "$mysql_pid"
+    wait "$mysql_pid"
+else
+    echo "MariaDB already initialized."
+fi
+
+# Start MariaDB in the foreground
+echo "Starting MariaDB in the foreground..."
+exec mysqld
+3. MariaDB Configuration File (db-config.cnf)
+Ensure the db-config.cnf file is appropriately set up to configure MariaDB as needed. A common configuration might look like this, depending on your needs:
+
+ini
+Copy code
+[mysqld]
+# Example of some MariaDB configuration
+bind-address = 0.0.0.0                 # Allow connections from other containers
+skip-networking = 0                    # Enable networking
+character-set-server = utf8mb4
+collation-server = utf8mb4_general_ci
+4. Environment Variables
+Double-check that all required environment variables are defined in the .env file:
+
+DB_ROOT_PASSWORD
+WP_DATABASE_NAME
+DB_USER
+DB_PASSWORD
+5. Testing and Debugging
+To verify everything works correctly:
+
+Build and Run:
+
+bash
+Copy code
+docker-compose build
+docker-compose up -d
+Check Logs: Use docker-compose logs mariadb to see if there are any issues during startup.
+
+MySQL Connectivity: From within the WordPress container, verify that you can connect to the MariaDB instance:
+
+bash
+Copy code
+docker exec -it wordpress_container_name mysql -u DB_USER -p -h mariadb
 
 ### --------------------------------------------
 
@@ -2332,6 +2820,511 @@ This should be a solid configuration for your NGINX setup. Just ensure that:
 $DOMAIN_NAME is properly defined.
 The paths to fastcgi_params and SSL certificates are accurate.
 The fastcgi_pass setting is correct based on your network setup.
+
+
+
+
+
+
+Your NGINX container setup is mostly well done, but there are a few small issues that might prevent it from working as expected.
+
+1. Dockerfile Issues
+Self-Signed SSL Certificate Creation
+Environment Variables in openssl: The openssl command in your Dockerfile uses ${DOMAIN_NAME}, but this value won't be expanded directly in the RUN command because Docker's build process does not inherit environment variables from the .env file.
+Solution: You can hard-code the domain name or pass it as a build argument. Alternatively, you could create the certificate in the CMD or ENTRYPOINT script after the container has access to environment variables.
+EXPOSE Command
+You expose only port 443, which is correct for HTTPS. However, ensure that your docker-compose.yml file explicitly maps 443:443 under the NGINX service so it’s accessible outside the container.
+Redundant -y in apt-get Commands
+Minor but noticeable, there’s a redundant -y in the apt-get install line. It’s already covered, so you can remove one of them for clarity.
+2. Nginx Configuration File (default-nginx.conf) Issues
+Your NGINX configuration file is generally correct, but there are a few specific areas to address:
+
+server_name Directive
+$DOMAIN_NAME in the configuration file won’t resolve directly unless you’re passing it correctly via environment variables. If ${DOMAIN_NAME} is supposed to be set by Docker, you’ll need to ensure the container has access to this environment variable.
+ssl Directive
+The line ssl on; is outdated. NGINX doesn’t require this setting if listen ... ssl; is used. You can remove ssl on; since it’s not needed and may cause errors with newer NGINX versions.
+fastcgi_pass Configuration
+fastcgi_pass wordpress:9000; looks correct as long as your WordPress container is actually named wordpress in docker-compose.yml.
+Ensure that your fastcgi_params file, usually located at /etc/nginx/fastcgi_params, is present and configured correctly.
+Minor Syntax Clean-Up
+Here is a cleaned-up version of your NGINX configuration:
+
+nginx
+Copy code
+server {
+    listen                  443 ssl;
+    listen                  [::]:443 ssl;
+    server_name             ${DOMAIN_NAME} www.${DOMAIN_NAME} localhost;
+    
+    # SSL Configuration
+    ssl_certificate         /etc/ssl/certs/nginx-selfsigned.crt;
+    ssl_certificate_key     /etc/ssl/private/nginx-selfsigned.key;
+    ssl_protocols           TLSv1.2 TLSv1.3;
+
+    # File Handling
+    root                    /var/www/wordpress;
+    index                   index.html index.php;
+    try_files               $uri $uri/ =404;
+
+    location ~ \.php$ {
+        fastcgi_pass        wordpress:9000;
+        fastcgi_index       index.php;
+        include             fastcgi_params;
+        fastcgi_param       SCRIPT_FILENAME $document_root$fastcgi_script_name;
+        fastcgi_param       PATH_INFO $fastcgi_path_info;
+    }
+}
+3. Ensuring Compatibility in docker-compose.yml
+Ensure that in your docker-compose.yml file:
+
+The environment variable DOMAIN_NAME is accessible in the NGINX container if needed.
+The NGINX service maps port 443:443 explicitly.
+4. Testing and Debugging
+After making these adjustments:
+
+Rebuild and Restart: Rebuild the container and check logs to confirm there are no SSL or configuration errors.
+
+bash
+Copy code
+docker-compose build
+docker-compose up -d
+Access Logs: Check NGINX logs to troubleshoot any runtime issues.
+
+bash
+Copy code
+docker-compose logs nginx
+Verify NGINX Access: Access the HTTPS URL and confirm SSL is working correctly.
+
+
+
+
+
+
+
+
+I found this example:
+dockerfile:
+"
+FROM debian:buster
+RUN apt -y update && apt install -y nginx && apt install openssl -y
+COPY ./tools/script.sh /
+CMD [ "/script.sh" ]
+"
+
+script.sh:
+"
+#!/bin/bash
+openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/ssl/private/nginx-selfsigned.key -out $CERTS_ -subj "/C=MO/L=KH/O=1337/OU=student/CN=sahafid.42.ma"
+echo "
+server {
+    listen 443 ssl;
+    listen [::]:443 ssl;
+    #server_name www.$DOMAIN_NAME $DOMAIN_NAME;
+    ssl_certificate $CERTS_;
+    ssl_certificate_key /etc/ssl/private/nginx-selfsigned.key;" > /etc/nginx/sites-available/default
+echo '
+    ssl_protocols TLSv1.3;
+    index index.php;
+    root /var/www/html;
+    location ~ [^/]\.php(/|$) { 
+            try_files $uri =404;
+            fastcgi_pass wordpress:9000;
+            include fastcgi_params;
+            fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+        }
+} ' >>  /etc/nginx/sites-available/default
+nginx -g "daemon off;"
+"
+
+config.conf:
+"
+server {
+    listen 443 ssl;
+    listen [::]:443 ssl;
+    server_name www.sahafid.1337.ma sahafid.1337.ma;
+    ssl_certificate here_certs;
+    ssl_certificate_key /etc/ssl/private/nginx-selfsigned.key;
+    ssl_protocols TLSv1.3;
+    index index.php;
+    root /var/www/html;
+    location ~ [^/]\.php(/|$) { 
+            try_files $uri =404;
+            fastcgi_pass wordpress:9000;
+            include fastcgi_params;
+            fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+        }
+}
+"
+
+can you explain what is happening in the script.sh and if the echo is necessary?
+
+
+ChatGPT said:
+ChatGPT
+Certainly! Let’s break down the script.sh and evaluate its components and necessity.
+
+Breakdown of script.sh
+bash
+Copy code
+#!/bin/bash
+
+# Generate a self-signed SSL certificate using OpenSSL
+openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
+  -keyout /etc/ssl/private/nginx-selfsigned.key \
+  -out $CERTS_ \
+  -subj "/C=MO/L=KH/O=1337/OU=student/CN=sahafid.42.ma"
+
+# Create a server block configuration for Nginx (part 1)
+echo "
+server {
+    listen 443 ssl;
+    listen [::]:443 ssl;
+    #server_name www.$DOMAIN_NAME $DOMAIN_NAME;
+    ssl_certificate $CERTS_;
+    ssl_certificate_key /etc/ssl/private/nginx-selfsigned.key;" > /etc/nginx/sites-available/default
+
+# Add additional configuration details (part 2)
+echo '
+    ssl_protocols TLSv1.3;
+    index index.php;
+    root /var/www/html;
+    location ~ [^/]\.php(/|$) { 
+            try_files $uri =404;
+            fastcgi_pass wordpress:9000;
+            include fastcgi_params;
+            fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+        }
+} ' >>  /etc/nginx/sites-available/default
+
+# Start Nginx in the foreground
+nginx -g "daemon off;"
+What It Does
+Generate SSL Certificate with OpenSSL
+
+bash
+Copy code
+openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
+    -keyout /etc/ssl/private/nginx-selfsigned.key \
+    -out $CERTS_ \
+    -subj "/C=MO/L=KH/O=1337/OU=student/CN=sahafid.42.ma"
+Generates a self-signed SSL certificate for one year (-days 365).
+Creates a private key (-keyout) and a certificate (-out).
+-subj specifies the certificate details like country (C=MO), organization (O=1337), etc.
+The $CERTS_ environment variable is used as the path to save the generated certificate.
+Create the Nginx Configuration
+
+Two echo commands are used to construct the /etc/nginx/sites-available/default file, which defines the server block for Nginx.
+
+Part 1: Adds basic settings like listen directives and SSL certificate paths.
+
+bash
+Copy code
+echo "
+server {
+    listen 443 ssl;
+    listen [::]:443 ssl;
+    #server_name www.$DOMAIN_NAME $DOMAIN_NAME;
+    ssl_certificate $CERTS_;
+    ssl_certificate_key /etc/ssl/private/nginx-selfsigned.key;" > /etc/nginx/sites-available/default
+Part 2: Adds remaining server configurations for SSL protocols, PHP handling, and root directory.
+
+bash
+Copy code
+echo '
+    ssl_protocols TLSv1.3;
+    index index.php;
+    root /var/www/html;
+    location ~ [^/]\.php(/|$) { 
+            try_files $uri =404;
+            fastcgi_pass wordpress:9000;
+            include fastcgi_params;
+            fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+        }
+} ' >>  /etc/nginx/sites-available/default
+Why the split into two echo commands? This is likely for readability or organizational purposes, but it’s not strictly necessary. The entire configuration could be written in a single echo block or copied as a pre-created file instead.
+
+Run Nginx
+
+bash
+Copy code
+nginx -g "daemon off;"
+Starts the Nginx process in the foreground (daemon off) to prevent the container from exiting.
+Is the echo Necessary?
+No, the echo commands are not strictly necessary.
+
+Instead of dynamically generating the Nginx configuration file using echo, you could:
+
+Include a static configuration file (e.g., default) in the COPY step of the Dockerfile.
+Copy the file directly to the appropriate location during the Docker build process:
+dockerfile
+Copy code
+COPY config.conf /etc/nginx/sites-available/default
+This approach simplifies script.sh and avoids runtime generation of the configuration file.
+Why Use echo?
+The use of echo provides flexibility, allowing:
+
+Dynamic configuration based on environment variables ($CERTS_, $DOMAIN_NAME).
+The script to adapt the configuration without modifying or including additional files.
+Recommendations:
+If configuration values like $CERTS_ or $DOMAIN_NAME change often, keep the echo logic.
+If they are static, use pre-built configuration files for simplicity and better maintainability.
+Let me know if you'd like a streamlined example or further clarification!
+
+
+
+
+
+
+You said:
+would my way work aswell, because I can't have the 'RUN openssl reg ...' in the dockerfile, because of '-subj "/C=/ST=/L=/O=/CN=${DOMAIN_NAME}"'. The '${DOMAIN_NAME}' is not possible.
+So I did it like this:
+Dockerfile:
+"
+# Use Debian as a base image (Debian 12)
+FROM debian:bookworm
+# Update & intstall your package manager
+RUN apt-get update -y && \
+    apt-get upgrade -y && \
+    apt-get install -y nginx openssl -y
+
+# # Create a self-signed SSL certificate for TLS (or use your own cert files)
+# RUN openssl req \
+# 	-x509 \
+# 	-nodes \
+# 	-days 365 \ 
+# 	-newkey rsa:2048 \
+# 	-keyout "/etc/ssl/private/nginx-selfsigned.key" \
+# 	-subj "/C=/ST=/L=/O=/CN=${DOMAIN_NAME}" \
+# 	-out "/etc/ssl/certs/nginx-selfsigned.crt"
+
+# Copy custom MariaDB configuration script from the 'tools' directory to the container’s root directory
+COPY ./tools/nginx-config.conf /etc/nginx/conf.d/
+COPY ./tools/nginx-script.sh /
+
+# Expose NGINX port for HTTPS
+EXPOSE 443
+
+# Start NGINX in the foreground
+# CMD ["nginx", "-g", "daemon off;"]
+CMD [ "/script.sh" ]
+"
+
+script.sh:
+"
+#!/bin/bash
+
+# Create a self-signed SSL certificate for TLS (or use your own cert files)
+openssl req \
+	-x509 \
+	-nodes \
+	-days 365 \ 
+	-newkey rsa:2048 \
+	-keyout "/etc/ssl/private/nginx-selfsigned.key" \
+	-subj "/C=/ST=/L=/O=/CN=${DOMAIN_NAME}" \
+	-out "/etc/ssl/certs/nginx-selfsigned.crt"
+
+# Start NGINX in the foreground
+nginx -g "daemon off;"
+"
+
+
+config.conf:
+"
+server {
+	# Directives
+	listen                  443 ssl;
+	listen                  [::]:443 ssl;
+	server_name             $DOMAIN_NAME www.$DOMAIN_NAME localhost;
+	
+	# SSL
+	# ssl                     on;
+	ssl_certificate         /etc/ssl/certs/nginx-selfsigned.crt;
+	ssl_certificate_key     /etc/ssl/private/nginx-selfsigned.key;
+	ssl_protocols           TLSv1.2 TLSv1.3;
+
+	# File Handling
+	root                    /var/www/wordpress;
+	index                   index.html index.php;
+	try_files               $uri $uri/ =404;
+
+	location ~ \.php$ {
+        fastcgi_pass        WordPress:9000;
+        fastcgi_index       index.php;
+        include             fastcgi_params;
+        fastcgi_param       SCRIPT_FILENAME $document_root$fastcgi_script_name;
+        fastcgi_param       PATH_INFO $fastcgi_path_info;
+		
+	}
+}
+
+"
+
+Is this way correct and will it work?
+ChatGPT said:
+ChatGPT
+Yes, your approach is correct and should work, assuming everything is configured properly. By moving the OpenSSL certificate generation to script.sh and using environment variables (${DOMAIN_NAME}) at runtime, you achieve flexibility without breaking the Dockerfile's build process.
+
+Here’s a detailed analysis of your setup:
+
+Dockerfile
+Your Dockerfile:
+
+Installs the required packages (nginx and openssl) during the build process.
+Copies the configuration and the script into the container.
+Defers dynamic actions (like using ${DOMAIN_NAME}) to the runtime script, avoiding issues with unavailable variables during the build.
+Strengths:
+
+The Docker image build remains static and environment-agnostic, which is a best practice.
+By deferring dynamic actions to the container's runtime (script.sh), the image can adapt to different environments.
+Key Points:
+
+Why RUN openssl fails: Environment variables like ${DOMAIN_NAME} are not resolved at build time because they are injected at runtime. Moving this to script.sh ensures the variables are available when the container runs.
+The EXPOSE instruction is correct for making port 443 accessible.
+script.sh
+Your script.sh dynamically generates the SSL certificate using the runtime environment variable ${DOMAIN_NAME} and starts Nginx.
+
+Breakdown:
+bash
+Copy code
+openssl req \
+    -x509 \
+    -nodes \
+    -days 365 \
+    -newkey rsa:2048 \
+    -keyout "/etc/ssl/private/nginx-selfsigned.key" \
+    -subj "/C=/ST=/L=/O=/CN=${DOMAIN_NAME}" \
+    -out "/etc/ssl/certs/nginx-selfsigned.crt"
+Creates the self-signed SSL certificate with details populated from the ${DOMAIN_NAME} variable.
+The /C=/ST=/L=/O=/CN=${DOMAIN_NAME} allows for flexibility in defining the certificate's common name (CN) dynamically.
+bash
+Copy code
+nginx -g "daemon off;"
+Starts Nginx in the foreground, keeping the container running.
+config.conf
+This file is a configuration for Nginx that defines the server behavior.
+
+Key Features:
+SSL Configuration:
+
+Points to the dynamically generated certificate (/etc/ssl/certs/nginx-selfsigned.crt) and private key (/etc/ssl/private/nginx-selfsigned.key).
+Enables TLS 1.2 and 1.3.
+Dynamic Domain Support:
+
+nginx
+Copy code
+server_name $DOMAIN_NAME www.$DOMAIN_NAME localhost;
+Allows the server_name directive to adapt based on the runtime environment variable ${DOMAIN_NAME}.
+PHP Handling:
+
+nginx
+Copy code
+location ~ \.php$ {
+    fastcgi_pass WordPress:9000;
+    ...
+}
+Configures Nginx to forward PHP requests to a FastCGI process running on the container WordPress at port 9000.
+Root and Index Directives:
+
+nginx
+Copy code
+root /var/www/wordpress;
+index index.html index.php;
+Specifies the document root and default index files.
+Will This Work?
+Yes, your setup is well-structured and should work if:
+
+Environment Variables:
+
+Ensure ${DOMAIN_NAME} is properly set when running the container (e.g., via docker run -e DOMAIN_NAME=example.com).
+Container Network:
+
+Ensure Nginx can communicate with the PHP service (WordPress:9000) as specified in fastcgi_pass. This requires a properly configured Docker network if these are in separate containers.
+Configuration File Location:
+
+Ensure Nginx loads your custom configuration file (/etc/nginx/conf.d/nginx-config.conf). By default, Nginx includes configurations from /etc/nginx/conf.d/*.conf.
+File Permissions:
+
+Verify permissions for generated SSL certificates and configuration files.
+Suggested Improvements:
+Validate Environment Variable: Add a check in script.sh to ensure ${DOMAIN_NAME} is not empty:
+
+bash
+Copy code
+if [ -z "${DOMAIN_NAME}" ]; then
+    echo "DOMAIN_NAME is not set. Exiting."
+    exit 1
+fi
+Default Configuration: Consider a fallback for server_name if ${DOMAIN_NAME} is missing:
+
+nginx
+Copy code
+server_name $DOMAIN_NAME www.$DOMAIN_NAME localhost;
+Simplify Dockerfile Comments: Remove commented-out code (RUN openssl ...) to avoid confusion.
+
+Conclusion
+Your approach is correct and follows best practices for dynamic configuration in Docker. The setup should work as expected, provided you address the runtime dependencies like environment variables and network connectivity. Let me know if you'd like further clarification or assistance with testing!
+
+
+
+
+
+These warnings are caused by missing values for several subject attributes in the openssl req command used to generate the SSL certificate.
+
+C= stands for Country Name.
+ST= stands for State or Province.
+L= stands for Locality (City).
+O= stands for Organization.
+Since you haven’t specified these fields, OpenSSL is skipping them. The command still generates the certificate, but these attributes are left empty.
+
+This is usually not an issue if you're creating a self-signed certificate for local or testing purposes (like in your case with nginx), but for production, it’s a good practice to fill out those values to avoid warnings or errors from browsers when using the certificate.
+
+
+
+
+
+4. Test the Server Configuration with NGINX:
+You can also test the NGINX configuration for errors before trying to start the server by running this command inside the container:
+
+bash
+Copy code
+docker exec -it <nginx-container-name> nginx -t
+If everything is configured correctly, you should see a message like:
+
+vbnet
+Copy code
+nginx: the configuration file /etc/nginx/nginx.conf syntax is ok
+nginx: configuration file /etc/nginx/nginx.conf test is successful
+If there are errors, NGINX will output them, and you can fix the issues based on the error messages.
+
+
+
+
+docker network ls
+docker network inspect bridge
+
+
+
+
+SSL Certificate Creation Logs:
+
+objectivec
+Copy code
+Create a self-signed SSL certificate...
+.+...+.+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*...........+...
+This part is generated by the openssl req command, which is used to generate a self-signed SSL certificate. The characters you're seeing like +, *, and . represent the progress of the SSL certificate generation process, which is normal output for OpenSSL commands. These are just indicators of the internal progress, but they don't affect the result of the SSL certificate creation.
+
+
+
+Accessing NGINX: Ensure that NGINX is running properly by accessing it through the browser at https://<your_domain_or_ip>. You should see your website served over HTTPS.
+Certificate in Use: If you're using a self-signed certificate, browsers might show a warning saying the connection is not trusted. For a production environment, you'd want to use a certificate from a trusted certificate authority (CA).
+
+
+
+
+
+
+
+
 ### --------------------------------------------
 
 ---
@@ -2376,3 +3369,10 @@ services:
 ---
 
 
+7. Permissions and Ownership of Host Folders
+Ensure that the directories ${HOME}/data/mariadb and ${HOME}/data/wordpress have correct permissions and ownership to allow Docker to bind these directories without issues:
+
+bash
+Copy code
+sudo chown -R $USER:$USER ${HOME}/data/mariadb
+sudo chown -R $USER:$USER ${HOME}/data/wordpress

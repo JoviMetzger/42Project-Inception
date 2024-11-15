@@ -1,10 +1,43 @@
 #!/bin/bash
 
-# Wait for the MariaDB database to be ready
-echo "Waiting for the database to be ready..."
-until mysqladmin ping -h ${MYSQL_HOST_NAME} --silent; do
+# List of required environment variables
+required_vars=(
+    "DOMAIN_NAME"
+    "WP_DATABASE_NAME"
+    "WP_DATABASE_HOST"
+    "DB_ROOT_PASSWORD"
+    "DB_USER"
+    "WP_ADMIN"
+    "WP_ADMIN_PASSWORD"
+    "WP_ADMIN_EMAIL"
+    "WP_USER"
+    "WP_USER_PASSWORD"
+    "WP_USER_EMAIL"
+)
+
+# Ensure .env variables are not empty. (Loop through the list and check if any variable is empty)
+for var in "${required_vars[@]}"; do
+    if [ -z "${!var}" ]; then
+        echo "'${var}' is not set. Exiting."
+        exit 1
+    fi
+done
+
+# # Wait for the MariaDB database to be ready
+# echo "Waiting for the MariaDB database to be ready..."
+# until mysqladmin ping -h ${WP_DATABASE_HOST} --silent; do
+#     sleep 2
+# done
+until mysql -h"$DB_HOST" -u"$DB_USER" -p"$DB_PASSWORD" &>/dev/null; do
+    echo "Waiting for database..."
     sleep 2
 done
+
+# until mysql -h"$WP_DATABASE_HOST" -u"$DB_USER" -p"$DB_PASSWORD" &>/dev/null; do
+#     echo "Waiting for database..."
+#     sleep 2
+# done
+
 
 # Set the working directory
 cd /var/www/wordpress
@@ -12,29 +45,18 @@ cd /var/www/wordpress
 # Install WordPress
 if [ ! -f wp-login.php ]; then 
 	echo "Downloading WordPress..."
-	wp core download \
-		--path="/var/www/wordpress" \
-		--allow-root
+	wp core download --allow-root
 fi
 
-# Check if wp-config.php exists, and create it if it doesn't
-if [ -f /var/www/wordpress/wp-config.php ]; then
-	echo "Wordpress is already exists, Skipping configuration."
-else
-    echo "Creating wp-config.php..."
-    wp config create \
-        --path="/var/www/wordpress" \
-        --dbname=${MYSQL_DATABASE_NAME} \
-        --dbuser=${MYSQL_USER} \
-        --dbpass=${MYSQL_PASSWORD} \
-        --dbhost=${MYSQL_HOST_NAME} \
-        --allow-root
+# Copy the wp-config.php if it doesn't already exist
+if [ ! -f wp-config.php ]; then
+    echo "Copying wp-config.php..."
+    cp /etc/wp-config.php wp-config.php
 fi
 
 # Set up WordPress admin
 echo "Setting up WordPress admin user..."
 wp core install \
-    --path="/var/www/wordpress" \
     --url="${DOMAIN_NAME}" \
     --title="inception" \
     --admin_user="${WP_ADMIN}" \
@@ -44,11 +66,11 @@ wp core install \
 
 # Create additional WordPress user
 echo "Creating WordPress user..."
-wp user create ${WP_USER} ${WP_USER_EMAIL} \
-    --path="/var/www/wordpress" \
-    --user_pass=${WP_USER_PASSWORD} \
+wp user create "${WP_USER}" "${WP_USER_EMAIL}" \
+    --user_pass="${WP_USER_PASSWORD}" \
     --allow-root
 
 # Start PHP-FPM in the foreground
 echo "Starting PHP-FPM in the foreground..."
-exec /usr/bin/php-fpm -F
+# exec php-fpm -F
+exec php7.4-fpm -F

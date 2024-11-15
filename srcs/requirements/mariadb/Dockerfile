@@ -3,7 +3,8 @@ FROM debian:bookworm
 
 # Update & intstall your package manager
 RUN apt-get update -y && \
-    apt-get install -y mariadb-server
+    apt-get install -y mariadb-server && \
+    apt-get install -y curl
 
 # Copy custom MariaDB configuration script from the 'tools' directory to the container’s root directory
 # `db-config.cnf` is located in the MariaDB configuration directory (e.g., /etc/mysql/mariadb.conf.d/ or /etc/mysql/conf.d/) for loading on startup
