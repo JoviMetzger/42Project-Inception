@@ -34,7 +34,7 @@ $table_prefix = 'wp_';
 
 // Absolute path to the WordPress directory.
 if ( ! defined( 'ABSOLUTE_PATH' ) ) {
-	define( 'ABSOLUTE_PATH', '/var/www/wordpress/wordpress' );
+	define( 'ABSOLUTE_PATH', '/var/www/html/wordpress' );
 }
 
 // Sets up WordPress vars and included files.

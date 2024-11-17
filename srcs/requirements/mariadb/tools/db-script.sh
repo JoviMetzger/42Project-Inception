@@ -7,6 +7,7 @@ required_vars=(
     "WP_DATABASE_HOST"
     "DB_ROOT_PASSWORD"
     "DB_USER"
+    "DB_PASSWORD"
     "WP_ADMIN"
     "WP_ADMIN_PASSWORD"
     "WP_ADMIN_EMAIL"
@@ -15,7 +16,7 @@ required_vars=(
     "WP_USER_EMAIL"
 )
 
-# Ensure .env variables are not empty. (Loop through the list and check if any variable is empty)
+# Ensure '.env' variables are not empty. (Loop through the list and check if any variable is empty)
 for var in "${required_vars[@]}"; do
     if [ -z "${!var}" ]; then
         echo "'${var}' is not set. Exiting."

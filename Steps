@@ -1023,7 +1023,7 @@ Copy code
         timeout: 5s
         retries: 5
 6. NGINX Volume Configuration
-Your NGINX service’s volume section includes wordpress:/var/www/wordpress, which might conflict since this is generally handled by the WordPress container alone. Unless NGINX needs access to specific WordPress files (like static assets), you may want to remove this volume reference from NGINX.
+Your NGINX service’s volume section includes wordpress:/var/www/html, which might conflict since this is generally handled by the WordPress container alone. Unless NGINX needs access to specific WordPress files (like static assets), you may want to remove this volume reference from NGINX.
 
 7. Permissions and Ownership of Host Folders
 Ensure that the directories ${HOME}/data/mariadb and ${HOME}/data/wordpress have correct permissions and ownership to allow Docker to bind these directories without issues:
@@ -1065,7 +1065,7 @@ services:
     env_file:
       - .env
     volumes:
-      - wordpress:/var/www/wordpress
+      - wordpress:/var/www/html
     networks:
       - inception
 
@@ -1332,6 +1332,7 @@ The error you're encountering indicates that the mysql-client package is unavail
 Solution: Use the Correct MySQL Client Package
 In recent versions of Debian, the MySQL client package has been replaced with mariadb-client. Since you are using MariaDB in your stack, the correct package to install would be mariadb-client instead of mysql-client.
 ### --------------------------------------------
+
 
 
 is it okay that this is happening now in the dockerfile instead of the script.sh?
@@ -1620,7 +1621,7 @@ Your setup is almost correct, but there are a few improvements and fixes needed.
 1. Dockerfile for WordPress Container
 Your Dockerfile is mostly correct but has a few points to check:
 
-Directory Structure: Make sure the directory /var/www/wordpress exists and has appropriate permissions. If it doesn’t, WordPress installation may fail.
+Directory Structure: Make sure the directory /var/www/html exists and has appropriate permissions. If it doesn’t, WordPress installation may fail.
 Environment Variables in wp-config.php: Your wp-config.php relies on environment variables like ${WP_DATABASE_NAME}. But PHP won’t directly replace those. You may need to use a tool like envsubst or add commands in the script to replace placeholders.
 Here’s an adjusted Dockerfile:
 
@@ -1639,7 +1640,7 @@ RUN curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli
     mv wp-cli.phar /usr/local/bin/wp
 
 # Create the directory where WordPress will be installed
-RUN mkdir -p /var/www/wordpress && chown -R www-data:www-data /var/www/wordpress
+RUN mkdir -p /var/www/html && chown -R www-data:www-data /var/www/html
 
 # Copy the script and config
 COPY ./tools/wp-script.sh /
@@ -1656,8 +1657,8 @@ CMD ["/wp-script.sh"]
 2. wp-script.sh Script
 Your script seems to cover most requirements, but here are some improvements:
 
-WordPress Path: Ensure the /var/www/wordpress directory exists before running wp core download.
-Configuration File Location: In the current setup, you’re using a custom wp-config.php that might not be correctly applied to /var/www/wordpress/wp-config.php. Copy or symlink it to the correct location.
+WordPress Path: Ensure the /var/www/html directory exists before running wp core download.
+Configuration File Location: In the current setup, you’re using a custom wp-config.php that might not be correctly applied to /var/www/html/wp-config.php. Copy or symlink it to the correct location.
 Database Variables: Confirm WP_DATABASE_NAME, DB_USER, DB_PASSWORD, and WP_DATABASE_HOST are correctly sourced from .env.
 Here’s an improved version of wp-script.sh:
 
@@ -1672,7 +1673,7 @@ until mysqladmin ping -h "${WP_DATABASE_HOST}" --silent; do
 done
 
 # Change to WordPress directory
-cd /var/www/wordpress
+cd /var/www/html
 
 # Download WordPress if not already downloaded
 if [ ! -f wp-login.php ]; then 
@@ -1731,13 +1732,13 @@ define('NONCE_SALT',       'ao;c@w@)!D@ujk+]D7O2 ?@T8b)il~LRzM|:ac`ykb;K;+.8/Yo4
 
 // Absolute path to the WordPress directory.
 if ( ! defined( 'ABSPATH' ) ) {
-    define( 'ABSPATH', '/var/www/wordpress' );
+    define( 'ABSPATH', '/var/www/html' );
 }
 
 // Sets up WordPress vars and included files.
 require_once ABSPATH . 'wp-settings.php';
 4. Additional Tips
-Permissions: Ensure /var/www/wordpress is writable by www-data user.
+Permissions: Ensure /var/www/html is writable by www-data user.
 Database Connectivity: Ensure MariaDB is accessible using the host specified in WP_DATABASE_HOST. If the WordPress container can't reach the database, it might be due to networking issues or the wrong hostname.
 Logs: Use docker-compose logs wordpress to identify specific errors.
 After making these changes, restart your containers:
@@ -1752,6 +1753,195 @@ bash
 Copy code
 docker-compose logs -f wordpress
 This should help resolve most issues and get your WordPress container working correctly.
+
+
+docker exec -it mariadb mysql -ubob -p
+MariaDB [(none)]> SHOW DATABASES;
++--------------------+
+| Database           |
++--------------------+
+| WordPressDB        |
+| information_schema |
++--------------------+
+2 rows in set (0.000 sec)
+
+shouldn't mariadb be in there aswell?
+
+ChatGPT said:
+ChatGPT
+The absence of a database explicitly named mariadb in the SHOW DATABASES output is not an issue unless you expect such a database to exist for your setup. Let me clarify:
+
+Explanation:
+Default and User-Created Databases:
+
+The SHOW DATABASES; command lists all databases currently accessible to the logged-in user.
+By default, MariaDB does not create a database named mariadb. It typically includes:
+information_schema: A system database for metadata.
+User-created databases (e.g., WordPressDB in your case).
+Your Database WordPressDB:
+
+If WordPressDB is intended to be the database used by WordPress, this is correct and expected.
+MariaDB itself does not have a "self-referencing" database; its functionality is tied to these databases and the system metadata.
+
+
+
+
+
+
+
+
+
+
+Confirm both wordpress and mariadb are connected to the same network.
+How do I check that?
+$ docker network inspect inception_net
+[
+    {
+        "Name": "inception_net",
+        "Id": "ab3dfa78b2597856d4f70933ba09f396e15c031eb425704db08e12696f983d12",
+        "Created": "2024-11-17T16:05:22.508771843+01:00",
+        "Scope": "local",
+        "Driver": "bridge",
+        "EnableIPv6": false,
+        "IPAM": {
+            "Driver": "default",
+            "Options": null,
+            "Config": [
+                {
+                    "Subnet": "172.18.0.0/16",
+                    "Gateway": "172.18.0.1"
+                }
+            ]
+        },
+        "Internal": false,
+        "Attachable": false,
+        "Ingress": false,
+        "ConfigFrom": {
+            "Network": ""
+        },
+        "ConfigOnly": false,
+        "Containers": {
+            "385d8e8062ac3a1796d13e065be4ad16dcae998e3851282d926c03aea7150065": {
+                "Name": "wordpress",
+                "EndpointID": "e5fc211c722176da66b72690a3e6f2f793318d2808fb6c798704897d9dbf1a29",
+                "MacAddress": "02:42:ac:12:00:03",
+                "IPv4Address": "172.18.0.3/16",
+                "IPv6Address": ""
+            },
+            "80435b2bd6ec91a3f486364c9d335ebd1ddc7d0d86039383d7ce443062c016d7": {
+                "Name": "nginx",
+                "EndpointID": "3dd49a7cc5ca091438ea5dbb09bd04da2de06df3081782d19916a15beb479d69",
+                "MacAddress": "02:42:ac:12:00:04",
+                "IPv4Address": "172.18.0.4/16",
+                "IPv6Address": ""
+            },
+            "bb75159fafac513d9d9391ff7cb5faaedb89d7557671e0e45f84f76004528d16": {
+                "Name": "mariadb",
+                "EndpointID": "47a603a457836784d4817c5818b227b22c524208c5293be5cb31cd646e671e1c",
+                "MacAddress": "02:42:ac:12:00:02",
+                "IPv4Address": "172.18.0.2/16",
+                "IPv6Address": ""
+            }
+        },
+        "Options": {},
+        "Labels": {
+            "com.docker.compose.network": "inception",
+            "com.docker.compose.project": "srcs",
+            "com.docker.compose.version": "2.29.7"
+        }
+    }
+]
+ChatGPT said:
+ChatGPT
+From the output of docker network inspect inception_net, we can confirm that both the wordpress and mariadb containers are connected to the same network (inception_net). Here's the relevant part of the output:
+
+Key Details from the Network Inspection
+Network Name: inception_net
+Containers Connected:
+wordpress:
+IPv4 Address: 172.18.0.3
+mariadb:
+IPv4 Address: 172.18.0.2
+nginx:
+IPv4 Address: 172.18.0.4
+Confirmation
+Both wordpress and mariadb are listed under Containers in the inception_net network.
+The IPv4Address assignments confirm that they are reachable on this network (172.18.0.x).
+
+
+
+
+
+docker exec -it wordpress bash
+Edit the /etc/hosts file: Open /etc/hosts with a text editor (e.g., nano or vi):
+
+bash
+Copy code
+nano /etc/hosts
+Add the mariadb entry: Add the following line to /etc/hosts:
+
+Copy code
+172.18.0.2    mariadb
+Save and exit the editor:
+
+For nano, press CTRL + X, then press Y to confirm, and Enter to save.
+Test connectivity: Now try pinging mariadb again from within the WordPress container:
+
+bash
+Copy code
+ping mariadb
+
+
+
+
+
+
+
+
+
+
+Yes, it looks like the ping command is also not available in your WordPress container by default. This is because many Docker images, especially minimal ones like the official WordPress image, come with a stripped-down set of utilities, and ping may not be included.
+
+To install ping in the WordPress container:
+Access the WordPress container: First, open a shell inside your WordPress container:
+
+bash
+Copy code
+docker exec -it wordpress bash
+Install iputils-ping: In many Linux distributions (including Debian/Ubuntu, which is what the WordPress Docker image is based on), the ping utility is provided by the iputils-ping package. To install it, run the following command inside the container:
+
+bash
+Copy code
+apt-get update && apt-get install -y iputils-ping
+Test the ping command: After installation, you should be able to ping the mariadb container:
+
+bash
+Copy code
+ping mariadb
+If ping works after this, it means the network connectivity issue between the WordPress and MariaDB containers has been resolved.
+
+Alternative: Use nc (Netcat)
+If you're unable or prefer not to install ping, you can also use nc (Netcat) to check if the MariaDB container is accessible from the WordPress container:
+
+Install netcat (if necessary): If the nc command is not available, you can install it with:
+
+bash
+Copy code
+apt-get update && apt-get install -y netcat
+Test the connection: Once nc is installed, test the connection to the MariaDB container on port 3306:
+
+bash
+Copy code
+nc -zv mariadb 3306
+This will try to connect to mariadb on port 3306 (the default MySQL/MariaDB port), and it will show whether the connection is successful.
+
+GRANT ALL PRIVILEGES ON *.* TO 'root'@'wordpress.inception_net' IDENTIFIED BY 'root' WITH GRANT OPTION;
+FLUSH PRIVILEGES;
+
+
+
+
+docker inspect wordpress
 
 
 ---
@@ -2763,7 +2953,7 @@ ssl_prefer_server_ciphers on;
 4. File Handling
 nginx
 Copy code
-root /var/www/wordpress;
+root /var/www/html;
 index index.html index.php;
 try_files $uri $uri/ =404;
 These settings look fine:
@@ -2802,7 +2992,7 @@ server {
     ssl_prefer_server_ciphers on;
 
     # File Handling
-    root                    /var/www/wordpress;
+    root                    /var/www/html;
     index                   index.html index.php;
     try_files               $uri $uri/ =404;
 
@@ -2862,7 +3052,7 @@ server {
     ssl_protocols           TLSv1.2 TLSv1.3;
 
     # File Handling
-    root                    /var/www/wordpress;
+    root                    /var/www/html;
     index                   index.html index.php;
     try_files               $uri $uri/ =404;
 
@@ -3143,7 +3333,7 @@ server {
 	ssl_protocols           TLSv1.2 TLSv1.3;
 
 	# File Handling
-	root                    /var/www/wordpress;
+	root                    /var/www/html;
 	index                   index.html index.php;
 	try_files               $uri $uri/ =404;
 
@@ -3227,7 +3417,7 @@ Root and Index Directives:
 
 nginx
 Copy code
-root /var/www/wordpress;
+root /var/www/html;
 index index.html index.php;
 Specifies the document root and default index files.
 Will This Work?
@@ -3320,6 +3510,186 @@ Certificate in Use: If you're using a self-signed certificate, browsers might sh
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Step 1: Verify Docker Compose Network
+If you're using Docker Compose, containers must share the same network for hostnames (like mariadb) to resolve correctly.
+
+List running containers:
+
+bash
+Copy code
+docker ps
+Check the container names and ensure both WordPress and MariaDB are running.
+
+Inspect Docker networks:
+
+bash
+Copy code
+docker network ls
+Look for the network your containers should be part of (e.g., default or a custom network).
+
+Inspect the network details:
+
+bash
+Copy code
+docker network inspect <network-name>
+Confirm both wordpress and mariadb are connected to the same network.
+
+Step 2: Test Hostname Resolution
+From the WordPress container, check if mariadb resolves to an IP address:
+
+bash
+Copy code
+docker exec -it wordpress ping mariadb
+Success: If you get responses, the containers are networked correctly.
+Failure: The mariadb hostname is not resolving, likely due to:
+Containers not on the same network.
+Incorrect service name for MariaDB in WP_DATABASE_HOST.
+Step 3: Manually Connect Using IP
+If the hostname doesn’t resolve, try using MariaDB’s container IP address directly:
+
+Get MariaDB’s IP address:
+
+bash
+Copy code
+docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' mariadb
+Example output: 172.18.0.2
+
+Test connection using the IP:
+
+bash
+Copy code
+mysql -h "172.18.0.2" -u "${DB_USER}" -p
+If this works, the issue is with hostname resolution.
+
+Step 4: Check Service Name
+If using Docker Compose, the hostname should match the service name defined for MariaDB in the docker-compose.yml file.
+
+Example:
+
+yaml
+Copy code
+services:
+  wordpress:
+    ...
+    environment:
+      WP_DATABASE_HOST: mariadb
+
+  mariadb:
+    ...
+    container_name: mariadb
+Ensure the environment variable WP_DATABASE_HOST in WordPress matches the service name mariadb.
+Step 5: Test MariaDB from Its Container
+To rule out issues with MariaDB itself:
+
+Connect to the MariaDB container:
+
+bash
+Copy code
+docker exec -it mariadb bash
+Log in to MySQL locally:
+
+bash
+Copy code
+mysql -u"${DB_USER}" -p
+Check if the database is accessible and verify that the user credentials are correct.
+
+Step 6: Restart Services
+Restart both containers to reset the network configuration:
+
+bash
+Copy code
+docker-compose down
+docker-compose up -d
+Step 7: Verify Firewall or Host Settings
+If the containers are on the same network but still cannot communicate:
+
+Check if Docker’s internal DNS resolver is working:
+
+bash
+Copy code
+docker exec -it wordpress cat /etc/resolv.conf
+It should point to Docker’s DNS (e.g., 127.0.0.11).
+
+Ensure no firewalls or external configurations are blocking communication.
+
+Recap of Key Fixes
+Ensure WP_DATABASE_HOST matches the MariaDB service name or IP address.
+Verify both containers are on the same Docker network.
+Use the correct credentials and test connectivity manually.
+Restart the containers if necessary.
+Let me know if you need further guidance!
+
+
+
+
+
+
+You said:
+ docker exec -it mariadb mysql -ubob -p
+MariaDB [(none)]> SHOW DATABASES;
++--------------------+
+| Database           |
++--------------------+
+| WordPressDB        |
+| information_schema |
++--------------------+
+2 rows in set (0.000 sec)
+
+shouldn't mariadb be in there aswell?
+ChatGPT said:
+ChatGPT
+The absence of a database explicitly named mariadb in the SHOW DATABASES output is not an issue unless you expect such a database to exist for your setup. Let me clarify:
+
+Explanation:
+Default and User-Created Databases:
+
+The SHOW DATABASES; command lists all databases currently accessible to the logged-in user.
+By default, MariaDB does not create a database named mariadb. It typically includes:
+information_schema: A system database for metadata.
+User-created databases (e.g., WordPressDB in your case).
+Your Database WordPressDB:
+
+If WordPressDB is intended to be the database used by WordPress, this is correct and expected.
+MariaDB itself does not have a "self-referencing" database; its functionality is tied to these databases and the system metadata.
+Next Steps:
+Verify Configuration Matches:
+
+Ensure the DB_NAME in your .env file matches the WordPressDB you see listed here:
+env
+Copy code
+WP_DATABASE_NAME=WordPressDB
+Also ensure the environment variable WP_DATABASE_HOST points to this MariaDB server's hostname.
+Verify WordPress Connection: If everything matches but WordPress is still having issues:
+
+Confirm DB_USER and DB_PASSWORD in your .env file match the credentials you're testing with mysql -ubob -p.
+Test Connection from WordPress: From within the WordPress container:
+
+bash
+Copy code
+docker exec -it wordpress bash
+mysql -h "mariadb" -u "bob" -p "WordPressDB"
+If it connects successfully, WordPress should be able to interact with the database.
 
 
 

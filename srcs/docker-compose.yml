@@ -9,11 +9,6 @@ services:                                                                  # Ind
                     - mariadb:/var/lib/mysql                               # Bind the mariadb volume to the MySQL data directory in the container (Ensures the MySQL database persists across container restarts)
               networks:
                     - inception                                            # Connects to the "inception" network, allowing it to communicate with other services
-            #   healthcheck:
-            #         test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
-            #         interval: 10s
-            #         timeout: 5s
-            #         retries: 5
         wordpress:                                                         # The WordPress application itself.
               build: requirements/wordpress
               container_name: wordpress
@@ -23,7 +18,7 @@ services:                                                                  # Ind
               env_file:
                     - .env
               volumes:
-                    - wordpress:/var/www/wordpress                         # Bind the wordpress volume to the WordPress root directory in the container
+                    - wordpress:/var/www/html                              # Bind the wordpress volume to the WordPress root directory in the container
               networks:
                     - inception
         nginx:                                                             # The web server that will serve the website.
@@ -37,7 +32,7 @@ services:                                                                  # Ind
               ports:
                     - "443:443"                                            # Exposes port 443 for HTTPS traffic
               volumes:
-                    - wordpress:/var/www/wordpress                         # You can leave ngnix volumes section empty
+                    - wordpress:/var/www/html                              # You can leave ngnix volumes section empty
               networks:
                     - inception
 
