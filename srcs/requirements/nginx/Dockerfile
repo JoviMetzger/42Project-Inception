@@ -14,5 +14,4 @@ COPY ./tools/nginx-script.sh /
 EXPOSE 443
 
 # Start NGINX in the foreground
-# CMD ["nginx", "-g", "daemon off;"]
 CMD [ "/nginx-script.sh" ]

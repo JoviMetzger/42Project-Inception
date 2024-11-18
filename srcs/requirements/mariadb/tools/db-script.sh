@@ -39,7 +39,7 @@ if [ ! -d "/var/lib/mysql/${WP_DATABASE_NAME}" ]; then
     # Wait for mysqld to be ready
     until mysqladmin ping --socket=/run/mysqld/mysqld.sock --silent; do
         echo "Waiting for MariaDB to be ready..."
-        sleep 2
+        sleep 5
     done
 
     # Create root user
@@ -55,14 +55,6 @@ EOF
     mysql -u root -p"${DB_ROOT_PASSWORD}" --socket=/run/mysqld/mysqld.sock <<EOF
     CREATE DATABASE IF NOT EXISTS \`${WP_DATABASE_NAME}\` CHARACTER SET utf8 COLLATE utf8_general_ci;
 EOF
-
-    # # Create a new user and grant privileges if specified
-    # if [ -n "$DB_USER" ] && [ -n "$DB_PASSWORD" ]; then
-    #     echo "Creating user: '$DB_USER' with access to '$WP_DATABASE_NAME'"
-    #     mysql -u root -p"${DB_ROOT_PASSWORD}" <<EOF
-    #     CREATE USER IF NOT EXISTS '${DB_USER}'@'%' IDENTIFIED BY '${DB_PASSWORD}';
-    #     GRANT ALL PRIVILEGES ON \`${WP_DATABASE_NAME}\`.* TO '${DB_USER}'@'%';
-    #     FLUSH PRIVILEGES;
 
     # Create a new user and grant privileges if specified
     if [ -n "$DB_USER" ] && [ -n "$DB_PASSWORD" ]; then
@@ -84,5 +76,5 @@ else
 fi
 
 # Keep MariaDB running in the foreground
-echo "Starting MariaDB in the foreground..."
+echo "Starting MariaDB..."
 exec mysqld

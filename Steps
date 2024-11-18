@@ -1941,7 +1941,89 @@ FLUSH PRIVILEGES;
 
 
 
+
+
+
+
 docker inspect wordpress
+
+
+
+
+docker exec -it wordpress bash
+mysql -h mariadb -u bob -pbob
+
+
+
+
+Verify environment variable substitution in wp-config.php:
+
+Environment variables like ${WP_DATABASE_HOST} may not be substituted correctly in your wp-config.php.
+Update the script to replace placeholders directly:
+bash
+Copy code
+sed -i "s/\${WP_DATABASE_NAME}/${WP_DATABASE_NAME}/g" /var/www/html/wordpress/wp-config.php
+sed -i "s/\${DB_USER}/${DB_USER}/g" /var/www/html/wordpress/wp-config.php
+sed -i "s/\${DB_PASSWORD}/${DB_PASSWORD}/g" /var/www/html/wordpress/wp-config.php
+sed -i "s/\${WP_DATABASE_HOST}/${WP_DATABASE_HOST}/g" /var/www/html/wordpress/wp-config.php
+
+
+
+
+RUN sed -i "s|\${WP_DATABASE_NAME}|wordpress|g" /etc/wp-config.php && \
+    sed -i "s|\${DB_USER}|bob|g" /etc/wp-config.php && \
+    sed -i "s|\${DB_PASSWORD}|bob|g" /etc/wp-config.php && \
+    sed -i "s|\${WP_DATABASE_HOST}|mariadb|g" /etc/wp-config.php
+
+
+
+
+
+Testing the Fixes
+Rebuild and restart the containers:
+
+bash
+Copy code
+docker-compose down
+docker-compose build
+docker-compose up -d
+Monitor logs:
+
+bash
+Copy code
+docker logs wordpress -f
+Verify functionality by accessing WordPress in your browser:
+
+bash
+Copy code
+https://<DOMAIN_NAME>
+Let me know if you encounter further issues!
+
+
+
+
+
+
+4. Test Database Connection from WordPress Container
+From the wordpress container, test connectivity to MariaDB:
+
+bash
+Copy code
+docker exec -it wordpress mysql -u bob -pbob -h mariadb -e "SHOW DATABASES;"
+Expected output:
+
+text
+Copy code
++--------------------+
+| Database           |
++--------------------+
+| information_schema |
+| mysql              |
+| performance_schema |
+| sys                |
+| wordpress          |
++--------------------+
+If this works, the database connection is functional.
 
 
 ---
