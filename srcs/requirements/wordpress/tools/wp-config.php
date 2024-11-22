@@ -32,6 +32,8 @@ define('NONCE_SALT',       'ao;c@w@)!D@ujk+]D7O2 ?@T8b)il~LRzM|:ac`ykb;K;+.8/Yo4
 // Defines the prefix for WordPress database tables
 $table_prefix = 'wp_';
 
+define( 'WP_DEBUG', true );
+
 // Absolute path to the WordPress directory.
 if ( ! defined( 'ABSOLUTE_PATH' ) ) {
 	define( 'ABSOLUTE_PATH', '/var/www/html/wordpress' );
