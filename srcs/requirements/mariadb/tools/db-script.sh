@@ -112,15 +112,13 @@ for var in "${required_vars[@]}"; do
 done
 
 if [ ! -d /run/mysqld ]; then
-    echo "Initializing WordPressDB database..."
+    echo "Initializing MariaDB..."
 
 	# Create necessary directories and set permissions as root
     mkdir -p /run/mysqld 
     mkdir -p /var/log/mysql
     chown -R mysql:mysql /run/mysqld 
     chown -R mysql:mysql /var/log/mysql
-
-	mysql_install_db
 
 	# Set up the database and the user
 	{
@@ -131,6 +129,10 @@ if [ ! -d /run/mysqld ]; then
 		echo "FLUSH PRIVILEGES;"
 	} | mysqld --bootstrap
 
+    echo "MariaDB initialization complete."
+
+else
+    echo "MariaDB already initialized."
 fi
 
 # Keep MariaDB running in the foreground

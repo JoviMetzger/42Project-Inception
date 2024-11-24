@@ -5,6 +5,11 @@ FROM debian:bookworm
 RUN apt-get update -y && \
     apt-get -y install php8.2 php8.2-fpm php-mysql mariadb-client wget curl sendmail
 
+# Install WP-CLI (wp command)
+RUN curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar \
+    && chmod +x wp-cli.phar \
+    && mv wp-cli.phar /usr/local/bin/wp
+
 # Copy script from 'tools' directory into the container’s root directory (/).
 COPY ./tools/wp-script.sh /
 COPY ./tools/wp-config.php /var/www/html/wordpress/wp-config.php

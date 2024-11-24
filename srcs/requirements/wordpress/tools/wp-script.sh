@@ -107,6 +107,7 @@ chown -R www-data:www-data /var/www/html/wordpress
 
 # Wait for MariaDB to be ready
 echo "Waiting for MariaDB..."
+sleep 2
 while ! mysqladmin ping -h $WP_DATABASE_HOST --silent; do
 	echo "MariaDB is not ready yet. Retrying in 10 seconds..."
     sleep 2
@@ -119,10 +120,10 @@ cd /var/www/html/wordpress
 # Install WordPress
 if [ ! -f /var/www/html/wordpress/wp-login.php ]; then
 	echo "Downloading WordPress..."
-	wp --allow-root core download --path=/var/www/html/wordpress
+    wp --allow-root core download --path=/var/www/html/wordpress
 fi
 
-# Install WordPress core files
+# Install WordPress
 if [ ! -f /var/www/html/wordpress/wp-config.php ]; then
     # echo "Downloading WordPress core files..."
     # wp --allow-root core download --path=/var/www/html/wordpress
@@ -135,7 +136,7 @@ if [ ! -f /var/www/html/wordpress/wp-config.php ]; then
         --dbpass="${DB_PASSWORD}" \
         --dbhost="${WP_DATABASE_HOST}" \
         --path=/var/www/html/wordpress \
-        --allow-root
+        --allow-root || echo "Error creating wp-config.php"
 
     # Install WordPress
     echo "Installing WordPress..."
@@ -146,7 +147,7 @@ if [ ! -f /var/www/html/wordpress/wp-config.php ]; then
         --admin_password="${WP_ADMIN_PASSWORD}" \
         --admin_email="${WP_ADMIN_EMAIL}" \
         --path=/var/www/html/wordpress \
-        --allow-root
+        --allow-root || echo "Error installing WordPress"
 
     # Set up the user
     echo "Creating additional WordPress user..."
