@@ -10,6 +10,9 @@ RUN apt-get update -y && \
 COPY ./tools/nginx-config.conf /etc/nginx/conf.d/
 COPY ./tools/nginx-script.sh /
 
+# Set permissions for the script
+RUN chmod +x /nginx-script.sh
+
 # Expose NGINX port for HTTPS
 EXPOSE 443
 
