@@ -16,9 +16,11 @@ lc-messages-dir         = /usr/share/mysql
 bind-address            = 0.0.0.0                             # Allow connections from other containers
 query_cache_size        = 16M
 log_error               = /var/log/mysql/error.log
+log-bin                 = /var/log/mysql/mysql-bin.log
 expire_logs_days        = 10
 character-set-server    = utf8mb4
 collation-server        = utf8mb4_general_ci
+innodb_use_native_aio   = 0
 
 [embedded]
 [mariadb]

@@ -111,6 +111,12 @@ for var in "${required_vars[@]}"; do
     fi
 done
 
+# Move the configuration file to the correct location
+mv /db-config.cnf /etc/mysql/mariadb.conf.d/db-config.cnf
+
+# Set proper permissions
+chmod 644 /etc/mysql/mariadb.conf.d/db-config.cnf
+
 if [ ! -d /run/mysqld ]; then
     echo "Initializing MariaDB..."
 
@@ -123,7 +129,7 @@ if [ ! -d /run/mysqld ]; then
 	# Set up the database and the user
 	{
 		echo "FLUSH PRIVILEGES;"
-		echo "CREATE DATABASE IF NOT EXISTS \`$WP_DATABASE_NAM\`;"
+		echo "CREATE DATABASE IF NOT EXISTS \`$WP_DATABASE_NAME\`;"
 		echo "CREATE USER IF NOT EXISTS '$DB_USER'@'%' IDENTIFIED BY '$DB_PASSWORD';"
 		echo "GRANT ALL ON \`$WP_DATABASE_NAM\`.* TO '$DB_USER'@'%' IDENTIFIED BY '$DB_PASSWORD';"
 		echo "FLUSH PRIVILEGES;"

@@ -9,8 +9,6 @@ all: up
 up:
 	mkdir -p ${HOME}/data/mariadb
 	mkdir -p ${HOME}/data/wordpress
-	sudo chown -R $USER:$USER ${HOME}/data/mariadb
-	sudo chown -R $USER:$USER ${HOME}/data/wordpress
 	docker-compose -f $(COMPOSE_FILE) up --build -d
 
 # Stops and removes the containers, networks
@@ -41,8 +39,7 @@ sudo rm -rf ${HOME}/data/mariadb
 sudo rm -rf ${HOME}/data/wordpress
 
 
+
 mkdir -p ${HOME}/data/mariadb
 mkdir -p ${HOME}/data/wordpress
-sudo chown -R $USER:$USER ${HOME}/data/mariadb
-sudo chown -R $USER:$USER ${HOME}/data/wordpress
 docker-compose up --build -d

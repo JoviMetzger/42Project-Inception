@@ -9,7 +9,8 @@ RUN apt-get update -y && \
 # Copy custom MariaDB configuration script from the 'tools' directory to the container’s root directory
 # `db-config.cnf` is located in the MariaDB configuration directory (e.g., /etc/mysql/mariadb.conf.d/ or /etc/mysql/conf.d/) for loading on startup
 COPY ./tools/db-script.sh /
-COPY ./tools/db-config.cnf /etc/mysql/mariadb.conf.d/
+COPY ./tools/db-config.cnf /
+# COPY ./tools/db-config.cnf /etc/mysql/mariadb.conf.d/
 
 # Set permissions for the script -> Make sure the custom script is executable
 RUN chmod +x /db-script.sh

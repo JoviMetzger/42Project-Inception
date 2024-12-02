@@ -3630,6 +3630,67 @@ Certificate in Use: If you're using a self-signed certificate, browsers might sh
 
 
 
+s$ curl -k https://jmetzger.42.fr
+curl: (6) Could not resolve host: jmetzger.42.fr
+jmetzger@jmetzger-VirtualBox:/mnt/shared/42Project-Inception-main/srcs$ openssl s_client -connect jmetzger.42.fr:443
+40178B4D30700000:error:10080002:BIO routines:BIO_lookup_ex:system lib:../crypto/bio/bio_addr.c:738:Name or service not known
+connect:errno=22
+jmetzger@jmetzger-VirtualBox:/mnt/shared/42Project-Inception-main/srcs$ nslookup jmetzger.42.fr
+Server:         127.0.0.53
+Address:        127.0.0.53#53
+
+** server can't find jmetzger.42.fr: NXDOMAIN
+
+
+
+
+
+$ sudo netstat -tuln | grep 443
+sudo: netstat: command not found
+jmetzger@jmetzger-VirtualBox:/mnt/shared/42Project-Inception-main/srcs$ sudo apt install net-tools
+
+
+
+
+
+
+Step 1: Determine Your Virtualization Platform
+The steps depend on whether you're using VirtualBox, VMware, Hyper-V, or another virtualization software.
+
+For VirtualBox:
+Open VirtualBox Manager.
+
+Select your VM.
+
+Click on Settings > Network:
+
+Ensure the network adapter is set to NAT or Bridged Adapter.
+If the adapter is NAT, click Advanced > Port Forwarding:
+
+Add rules for ports 80 and 443:
+Rule 1:
+Name: HTTP
+Protocol: TCP
+Host Port: 80
+Guest Port: 80
+Rule 2:
+Name: HTTPS
+Protocol: TCP
+Host Port: 443
+Guest Port: 443
+Click OK to save and restart your VM
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
