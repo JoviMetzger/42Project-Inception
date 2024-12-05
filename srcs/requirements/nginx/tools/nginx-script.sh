@@ -14,8 +14,8 @@ openssl req \
     -days 365 \
     -newkey rsa:2048 \
     -subj "/C=NL/ST=Holland/L=Amsterdam/O=Codam/CN=${DOMAIN_NAME}" \
-    -out "/etc/ssl/selfsigned.crt" \
-    -keyout "/etc/ssl/selfsigned.key"
+    -out "/etc/nginx/ssl/selfsigned.crt" \
+    -keyout "/etc/nginx/ssl/selfsigned.key"
 
 # # Replace $DOMAIN_NAME in the Nginx configuration template
 # echo "Configuring Nginx..."
@@ -23,4 +23,4 @@ openssl req \
 
 # Start NGINX in the foreground
 echo "Starting nginx..."
-nginx -g "daemon off;"
+exec nginx -g "daemon off;"
