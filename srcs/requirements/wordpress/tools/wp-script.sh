@@ -45,35 +45,6 @@ if [ ! -f /var/www/html/wordpress/wp-login.php ]; then
     wp --allow-root core download --path=/var/www/html/wordpress
 fi
 
-# Install WordPress
-# # Create wp-config.php
-# echo "Creating wp-config.php..."
-# wp config create \
-#     --dbname="${WP_DATABASE_NAME}" \
-#     --dbuser="${DB_USER}" \
-#     --dbpass="${DB_PASSWORD}" \
-#     --dbhost="${WP_DATABASE_HOST}" \
-#     --path=/var/www/html/wordpress \
-#     --allow-root || echo "Error creating wp-config.php"
-
-# # Install WordPress
-# echo "Installing WordPress..."
-# wp core install \
-#     --url="${DOMAIN_NAME}" \
-#     --title="inception" \
-#     --admin_user="${WP_ADMIN}" \
-#     --admin_password="${WP_ADMIN_PASSWORD}" \
-#     --admin_email="${WP_ADMIN_EMAIL}" \
-#     --path=/var/www/html/wordpress \
-#     --allow-root || echo "Error installing WordPress"
-
-# # Set up the user
-# echo "Creating additional WordPress user..."
-# wp user create "${WP_USER}" "${WP_USER_EMAIL}" \
-#     --user_pass="${WP_USER_PASSWORD}" \
-#     --path=/var/www/html/wordpress \
-#     --allow-root
-
 # Start PHP-FPM in the foreground
 echo "Starting PHP-FPM..."
 exec /usr/sbin/php-fpm8.2 -F

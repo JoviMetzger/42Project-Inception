@@ -59,4 +59,3 @@ volumes:                                                                   # Vol
                     o: bind                                                # Bind mounts the host directory to the container
                     device: ${HOME}/data/wordpress                         # This is the host directory where WordPress files (themes, plugins, uploads) will be stored
  
-
