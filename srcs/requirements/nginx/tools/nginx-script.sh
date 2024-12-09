@@ -17,10 +17,6 @@ openssl req \
     -out "/etc/nginx/ssl/selfsigned.crt" \
     -keyout "/etc/nginx/ssl/selfsigned.key"
 
-# # Replace $DOMAIN_NAME in the Nginx configuration template
-# echo "Configuring Nginx..."
-# envsubst '${DOMAIN_NAME}' < /etc/nginx/conf.d/nginx-config.conf.template > /etc/nginx/conf.d/nginx-config.conf
-
 # Start NGINX in the foreground
 echo "Starting nginx..."
 exec nginx -g "daemon off;"

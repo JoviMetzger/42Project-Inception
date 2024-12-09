@@ -316,7 +316,7 @@ Database Administrator
 DB_USER=bob:
 This creates a MySQL user named bob, which will be the non-root user for interacting with the WordPress database.
 
-DB_PASSWORD=bob:
+DB_USER_PASSWORD=bob:
 The password for the bob MySQL user is set to bob.
 
 WordPress Admin (WordPress Backend)
@@ -368,7 +368,7 @@ DOMAIN_NAME=jmetzger.42.fr              # Intra user name
 DB_DATABASE=maria_database              # Name of the MySQL database that will be used for WordPress
 DB_ROOT_PASSWORD=root                   # Password your choice 
 DB_USER=bob                             # User your choice
-DB_PASSWORD=bob                         # Password your choice  
+DB_USER_PASSWORD=bob                         # Password your choice  
 
 # WORDPRESS ADMIN
 WP_ADMIN=wordpress                      # User your choice
@@ -392,12 +392,12 @@ Copy code
 WP_DB_HOST=mariadb
 This will allow WordPress to locate the MariaDB service correctly.
 2. Consistent Variable Naming
-For database settings, Docker's WordPress image expects WORDPRESS_DB_HOST, WORDPRESS_DB_USER, and WORDPRESS_DB_PASSWORD environment variables. In your case, you need to rename WP_DB_HOST, DB_USER, and DB_PASSWORD as follows to ensure compatibility:
+For database settings, Docker's WordPress image expects WORDPRESS_DB_HOST, WORDPRESS_DB_USER, and WORDPRESS_DB_USER_PASSWORD environment variables. In your case, you need to rename WP_DB_HOST, DB_USER, and DB_USER_PASSWORD as follows to ensure compatibility:
 plaintext
 Copy code
 WORDPRESS_DB_HOST=mariadb
 WORDPRESS_DB_USER=bob
-WORDPRESS_DB_PASSWORD=bob
+WORDPRESS_DB_USER_PASSWORD=bob
 WORDPRESS_DB_NAME=WordPressDB  # This should match your `WP_DATABASE_NAME` setting.
 Also, remove WP_DATABASE_NAME and WP_DB_HOST from .env to avoid confusion, as they are not recognized by the WordPress Docker image.
 3. Updated .env File
@@ -411,13 +411,13 @@ DOMAIN_NAME=jmetzger.42.fr              # Intra user name
 # MARIADB DATABASE
 DB_ROOT_PASSWORD=root                # Root password for MariaDB
 DB_USER=bob                          # User for MariaDB
-DB_PASSWORD=bob                      # Password for MariaDB
+DB_USER_PASSWORD=bob                      # Password for MariaDB
 MYSQL_DATABASE=WordPressDB              # Name of the database for WordPress
 
 # WORDPRESS CONNECTION TO DATABASE
 WORDPRESS_DB_HOST=mariadb               # Hostname for MariaDB as set in docker-compose.yml
 WORDPRESS_DB_USER=bob                   # MariaDB user WordPress will connect with
-WORDPRESS_DB_PASSWORD=bob               # Password for the MariaDB user
+WORDPRESS_DB_USER_PASSWORD=bob               # Password for the MariaDB user
 WORDPRESS_DB_NAME=WordPressDB           # Database name WordPress will use
 
 # WORDPRESS ADMIN
@@ -589,7 +589,7 @@ services:
     args:
       DB_DATABASE: ${DB_DATABASE}      # Passes environment variables to the build process
       DB_USER: $DB_USER
-      DB_PASSWORD: $DB_PASSWORD
+      DB_USER_PASSWORD: $DB_USER_PASSWORD
       DB_ROOT_PASSWORD: $DB_ROOT_PASSWORD
     container_name: mariadb                  # Names the container "mariadb" for easier reference
     image: mariadb                           # Pulls the official MariaDB image
@@ -625,7 +625,7 @@ services:
     args:
       DB_DATABASE: "${DB_DATABASE}"    # Passes environment variables to the build process
       DB_USER: "${DB_USER}"
-      DB_PASSWORD: "${DB_PASSWORD}"
+      DB_USER_PASSWORD: "${DB_USER_PASSWORD}"
       DB_HOSTNAME: "${DB_HOSTNAME}"
     container_name: wordpress                # Names the container "wordpress"
     image: wordpress                         # Uses the official WordPress image
@@ -819,7 +819,7 @@ Copy code
 args:
   DB_DATABASE : ${DB_DATABASE}
   DB_USER : $DB_USER
-  DB_PASSWORD : $DB_PASSWORD
+  DB_USER_PASSWORD : $DB_USER_PASSWORD
   DB_ROOT_PASSWORD : $DB_ROOT_PASSWORD
 In this section, the args are passing the database details (like the database name, user, and password) to the build process when Docker creates the MariaDB image.
 These values come from environment variables (typically defined in the .env file), and Docker substitutes them during the build phase.
@@ -836,7 +836,7 @@ Dockerfile
 Copy code
 ARG DB_DATABASE
 ARG DB_USER
-ARG DB_PASSWORD
+ARG DB_USER_PASSWORD
 ARG DB_ROOT_PASSWORD
 
 # Use these ARG values to set up the MariaDB configuration at build-time.
@@ -891,7 +891,7 @@ Ports: What ports need to be exposed to access the services externally?
 Example: Nginx may expose port 443 to serve your web application over HTTPS.
 Environment Variables: Does the service need environment variables to be configured, like database credentials?
 
-Example: MariaDB needs variables like DB_USER, DB_PASSWORD, and DB_DATABASE to set up the database.
+Example: MariaDB needs variables like DB_USER, DB_USER_PASSWORD, and DB_DATABASE to set up the database.
 3. Services Section
 For each component, you define a service. A service represents a container and its associated configuration.
 
@@ -922,7 +922,7 @@ depends_on:
 To avoid hardcoding sensitive configuration values (like database passwords) directly in your docker-compose.yml, use an .env file.
 
 Why? This keeps your Compose file clean and allows you to easily change configuration settings without editing the file itself.
-Example: You can use .env to set variables like DB_USER, DB_PASSWORD, and DB_DATABASE.
+Example: You can use .env to set variables like DB_USER, DB_USER_PASSWORD, and DB_DATABASE.
 yaml
 Copy code
 env_file:
@@ -1034,10 +1034,10 @@ Ensure your .env file includes all necessary environment variables, specifically
 DB_ROOT_PASSWORD
 MYSQL_DATABASE
 DB_USER
-DB_PASSWORD
+DB_USER_PASSWORD
 WORDPRESS_DB_HOST
 WORDPRESS_DB_USER
-WORDPRESS_DB_PASSWORD
+WORDPRESS_DB_USER_PASSWORD
 4. Database Connection (WORDPRESS_DB_HOST)
 For WORDPRESS_DB_HOST, specify mariadb as the hostname in the .env file. It should look something like:
 
@@ -1510,7 +1510,7 @@ define( 'WP_DATABASE_NAME', 'db1' );
 define( 'DB_USER', 'user' );
 
 /** MySQL database password */
-define( 'DB_PASSWORD', 'pwd' );
+define( 'DB_USER_PASSWORD', 'pwd' );
 
 /** MySQL hostname */
 define( 'DB_HOST', 'mariadb' );
@@ -1695,7 +1695,7 @@ Your script seems to cover most requirements, but here are some improvements:
 
 WordPress Path: Ensure the /var/www/html directory exists before running wp core download.
 Configuration File Location: In the current setup, you’re using a custom wp-config.php that might not be correctly applied to /var/www/html/wp-config.php. Copy or symlink it to the correct location.
-Database Variables: Confirm WP_DATABASE_NAME, DB_USER, DB_PASSWORD, and WP_DATABASE_HOST are correctly sourced from .env.
+Database Variables: Confirm WP_DATABASE_NAME, DB_USER, DB_USER_PASSWORD, and WP_DATABASE_HOST are correctly sourced from .env.
 Here’s an improved version of wp-script.sh:
 
 bash
@@ -1751,7 +1751,7 @@ Copy code
 // ** MySQL settings ** //
 define('DB_NAME', getenv('WP_DATABASE_NAME'));
 define('DB_USER', getenv('DB_USER'));
-define('DB_PASSWORD', getenv('DB_PASSWORD'));
+define('DB_USER_PASSWORD', getenv('DB_USER_PASSWORD'));
 define('DB_HOST', getenv('WP_DATABASE_HOST'));
 define('DB_CHARSET', 'utf8');
 define('DB_COLLATE', '');
@@ -2000,7 +2000,7 @@ bash
 Copy code
 sed -i "s/\${WP_DATABASE_NAME}/${WP_DATABASE_NAME}/g" /var/www/html/wordpress/wp-config.php
 sed -i "s/\${DB_USER}/${DB_USER}/g" /var/www/html/wordpress/wp-config.php
-sed -i "s/\${DB_PASSWORD}/${DB_PASSWORD}/g" /var/www/html/wordpress/wp-config.php
+sed -i "s/\${DB_USER_PASSWORD}/${DB_USER_PASSWORD}/g" /var/www/html/wordpress/wp-config.php
 sed -i "s/\${WP_DATABASE_HOST}/${WP_DATABASE_HOST}/g" /var/www/html/wordpress/wp-config.php
 
 
@@ -2008,7 +2008,7 @@ sed -i "s/\${WP_DATABASE_HOST}/${WP_DATABASE_HOST}/g" /var/www/html/wordpress/wp
 
 RUN sed -i "s|\${WP_DATABASE_NAME}|wordpress|g" /etc/wp-config.php && \
     sed -i "s|\${DB_USER}|bob|g" /etc/wp-config.php && \
-    sed -i "s|\${DB_PASSWORD}|bob|g" /etc/wp-config.php && \
+    sed -i "s|\${DB_USER_PASSWORD}|bob|g" /etc/wp-config.php && \
     sed -i "s|\${WP_DATABASE_HOST}|mariadb|g" /etc/wp-config.php
 
 
@@ -2136,10 +2136,10 @@ EOF
     fi
 
     # Create a new user and grant privileges if specified
-    if [ -n "$DB_USER" ] && [ -n "$DB_PASSWORD" ]; then
+    if [ -n "$DB_USER" ] && [ -n "$DB_USER_PASSWORD" ]; then
         echo "Creating user: $DB_USER with access to $WP_DATABASE_NAME"
         mysql -u root -p"${DB_ROOT_PASSWORD}" <<EOF
-        CREATE USER IF NOT EXISTS '${DB_USER}'@'%' IDENTIFIED BY '${DB_PASSWORD}';
+        CREATE USER IF NOT EXISTS '${DB_USER}'@'%' IDENTIFIED BY '${DB_USER_PASSWORD}';
         GRANT ALL PRIVILEGES ON \`${WP_DATABASE_NAME}\`.* TO '${DB_USER}'@'%';
         FLUSH PRIVILEGES;
 EOF
@@ -2156,7 +2156,7 @@ exec mysqld
 ```
 
 Environment Variables: 
-$DB_NAME, $DB_USER, and $DB_PASSWORD should be set in the environment before running the script, or you can hard-code them (not recommended for security reasons).
+$DB_NAME, $DB_USER, and $DB_USER_PASSWORD should be set in the environment before running the script, or you can hard-code them (not recommended for security reasons).
 
 
 ### --------------------------------------------
@@ -2348,7 +2348,7 @@ docker-compose logs mariadb
 (Accessing the MariaDB Instance):
 Might need to install `sudo apt install mysql-client-core-8.0`
 ```bash
-mysql -h 127.0.0.1 -P 3306 -u "$DB_USER" -p"$DB_PASSWORD"
+mysql -h 127.0.0.1 -P 3306 -u "$DB_USER" -p"$DB_USER_PASSWORD"
 ```
 -> If everything works till here your database is running 
 - 1. Verify Database and User Creation:
@@ -2424,11 +2424,11 @@ Query OK, 0 rows affected (0.00 sec)
 - 5. Retry Connecting from the Host
 Exit from the container and try connecting again from your host:
 ```bash
-$ mysql -h 127.0.0.1 -P 3306 -u "$DB_USER" -p"$DB_PASSWORD"
+$ mysql -h 127.0.0.1 -P 3306 -u "$DB_USER" -p"$DB_USER_PASSWORD"
 ```
 -> Should look like:
 ```sql
-$ mysql -h 127.0.0.1 -P 3306 -u "$DB_USER" -p"$DB_PASSWORD"
+$ mysql -h 127.0.0.1 -P 3306 -u "$DB_USER" -p"$DB_USER_PASSWORD"
 
 Enter password: 
 Welcome to the MySQL monitor.  Commands end with ; or \g.
@@ -2510,10 +2510,10 @@ mariadb  | mysqld: Can't create file '/var/log/mysql/error.log' (errno: 2 "No su
 ```
 Check your script.sh
 
-3) PROBLEM AT `mysql -h 127.0.0.1 -P 3306 -u "$DB_USER" -p"$DB_PASSWORD"`
+3) PROBLEM AT `mysql -h 127.0.0.1 -P 3306 -u "$DB_USER" -p"$DB_USER_PASSWORD"`
 Similar output:
 ```bash
-$ mysql -h 127.0.0.1 -P 3306 -u "$DB_USER" -p"$DB_PASSWORD"
+$ mysql -h 127.0.0.1 -P 3306 -u "$DB_USER" -p"$DB_USER_PASSWORD"
 
 ERROR 1045 (28000): Access denied for user '<username>'@'172.18.0.1' (using password: YES)
 ```
@@ -2571,10 +2571,10 @@ why did you remove:
 #     fi
 
 #     # Create a new user and grant privileges if specified
-#     if [ -n "$DB_USER" ] && [ -n "$DB_PASSWORD" ]; then
+#     if [ -n "$DB_USER" ] && [ -n "$DB_USER_PASSWORD" ]; then
 #         echo "Creating user: $DB_USER with access to $WP_DATABASE_NAME"
 #         mysql -u root -p"${DB_ROOT_PASSWORD}" <<EOF
-#         CREATE USER IF NOT EXISTS '${DB_USER}'@'%' IDENTIFIED BY '${DB_PASSWORD}';
+#         CREATE USER IF NOT EXISTS '${DB_USER}'@'%' IDENTIFIED BY '${DB_USER_PASSWORD}';
 #         GRANT ALL PRIVILEGES ON \${WP_DATABASE_NAME}\.* TO '${DB_USER}'@'%';
 #         FLUSH PRIVILEGES;
 # EOF
@@ -2617,10 +2617,10 @@ EOF
 #     fi
 
 #     # Create a new user and grant privileges if specified
-#     if [ -n "$DB_USER" ] && [ -n "$DB_PASSWORD" ]; then
+#     if [ -n "$DB_USER" ] && [ -n "$DB_USER_PASSWORD" ]; then
 #         echo "Creating user: $DB_USER with access to $WP_DATABASE_NAME"
 #         mysql -u root -p"${DB_ROOT_PASSWORD}" <<EOF
-#         CREATE USER IF NOT EXISTS '${DB_USER}'@'%' IDENTIFIED BY '${DB_PASSWORD}';
+#         CREATE USER IF NOT EXISTS '${DB_USER}'@'%' IDENTIFIED BY '${DB_USER_PASSWORD}';
 #         GRANT ALL PRIVILEGES ON \${WP_DATABASE_NAME}\.* TO '${DB_USER}'@'%';
 #         FLUSH PRIVILEGES;
 # EOF
@@ -2696,10 +2696,10 @@ if [ -n "$WP_DATABASE_NAME" ]; then
 fi
 
 # Create a new user and grant privileges if specified
-if [ -n "$DB_USER" ] && [ -n "$DB_PASSWORD" ]; then
+if [ -n "$DB_USER" ] && [ -n "$DB_USER_PASSWORD" ]; then
     echo "Creating user: $DB_USER with access to $WP_DATABASE_NAME"
     mysql -u root -p"${DB_ROOT_PASSWORD}" <<EOF
-    CREATE USER IF NOT EXISTS '${DB_USER}'@'%' IDENTIFIED BY '${DB_PASSWORD}';
+    CREATE USER IF NOT EXISTS '${DB_USER}'@'%' IDENTIFIED BY '${DB_USER_PASSWORD}';
     GRANT ALL PRIVILEGES ON \`${WP_DATABASE_NAME}\`.* TO '${DB_USER}'@'%';
     FLUSH PRIVILEGES;
 EOF
@@ -2761,10 +2761,10 @@ EOF
 #     fi
 
 #     # Create a new user and grant privileges if specified
-#     if [ -n "$DB_USER" ] && [ -n "$DB_PASSWORD" ]; then
+#     if [ -n "$DB_USER" ] && [ -n "$DB_USER_PASSWORD" ]; then
 #         echo "Creating user: $DB_USER with access to $WP_DATABASE_NAME"
 #         mysql -u root -p"${DB_ROOT_PASSWORD}" <<EOF
-#         CREATE USER IF NOT EXISTS '${DB_USER}'@'%' IDENTIFIED BY '${DB_PASSWORD}';
+#         CREATE USER IF NOT EXISTS '${DB_USER}'@'%' IDENTIFIED BY '${DB_USER_PASSWORD}';
 #         GRANT ALL PRIVILEGES ON \`${WP_DATABASE_NAME}\`.* TO '${DB_USER}'@'%';
 #         FLUSH PRIVILEGES;
 # EOF
@@ -2819,10 +2819,10 @@ if [ -n "$WP_DATABASE_NAME" ]; then
 fi
 
 # Create a new user and grant privileges if specified
-if [ -n "$DB_USER" ] && [ -n "$DB_PASSWORD" ]; then
+if [ -n "$DB_USER" ] && [ -n "$DB_USER_PASSWORD" ]; then
     echo "Creating user: $DB_USER with access to $WP_DATABASE_NAME"
     mysql -u root -p"${DB_ROOT_PASSWORD}" <<EOF
-    CREATE USER IF NOT EXISTS '${DB_USER}'@'%' IDENTIFIED BY '${DB_PASSWORD}';
+    CREATE USER IF NOT EXISTS '${DB_USER}'@'%' IDENTIFIED BY '${DB_USER_PASSWORD}';
     GRANT ALL PRIVILEGES ON \`${WP_DATABASE_NAME}\`.* TO '${DB_USER}'@'%';
     FLUSH PRIVILEGES;
 EOF
@@ -2920,10 +2920,10 @@ EOF
 EOF
 
     # Create a new user and grant privileges if specified
-    if [ -n "$DB_USER" ] && [ -n "$DB_PASSWORD" ]; then
+    if [ -n "$DB_USER" ] && [ -n "$DB_USER_PASSWORD" ]; then
         echo "Creating user: '${DB_USER}' with access to '${WP_DATABASE_NAME}'"
         mysql -u root -p"${DB_ROOT_PASSWORD}" --socket=/run/mysqld/mysqld.sock <<EOF
-        CREATE USER IF NOT EXISTS '${DB_USER}'@'%' IDENTIFIED BY '${DB_PASSWORD}';
+        CREATE USER IF NOT EXISTS '${DB_USER}'@'%' IDENTIFIED BY '${DB_USER_PASSWORD}';
         GRANT ALL PRIVILEGES ON \`${WP_DATABASE_NAME}\`.* TO '${DB_USER}'@'%';
         FLUSH PRIVILEGES;
 EOF
@@ -2958,7 +2958,7 @@ Double-check that all required environment variables are defined in the .env fil
 DB_ROOT_PASSWORD
 WP_DATABASE_NAME
 DB_USER
-DB_PASSWORD
+DB_USER_PASSWORD
 5. Testing and Debugging
 To verify everything works correctly:
 
@@ -4296,7 +4296,7 @@ WP_DATABASE_NAME=WordPressDB
 Also ensure the environment variable WP_DATABASE_HOST points to this MariaDB server's hostname.
 Verify WordPress Connection: If everything matches but WordPress is still having issues:
 
-Confirm DB_USER and DB_PASSWORD in your .env file match the credentials you're testing with mysql -ubob -p.
+Confirm DB_USER and DB_USER_PASSWORD in your .env file match the credentials you're testing with mysql -ubob -p.
 Test Connection from WordPress: From within the WordPress container:
 
 bash
@@ -4360,3 +4360,23 @@ bash
 Copy code
 sudo chown -R $USER:$USER ${HOME}/data/mariadb
 sudo chown -R $USER:$USER ${HOME}/data/wordpress
+
+
+
+
+
+
+
+
+
+sudo apt-get install -y iputils-ping
+
+
+
+
+
+STUCK at:
+docker exec -it wordpress ping mariadb
+
+docker exec -it nginx bash
+root@b4c6412326ad:/# cat /var/log/nginx/error.log

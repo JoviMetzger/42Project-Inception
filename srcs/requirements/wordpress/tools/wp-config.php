@@ -7,7 +7,7 @@ define('DB_NAME', '${WP_DATABASE_NAME}');
 define('DB_USER', '${DB_USER}');
 
 // MySQL database password
-define('DB_PASSWORD', '${DB_PASSWORD}');
+define('DB_USER_PASSWORD', '${DB_USER_PASSWORD}');
 
 // MySQL hostname (Database for the server)
 define('DB_HOST', '${WP_DATABASE_HOST}');
@@ -35,9 +35,10 @@ $table_prefix = 'wp_';
 define( 'WP_DEBUG', true );
 
 // Absolute path to the WordPress directory.
-if ( ! defined( 'ABSOLUTE_PATH' ) ) {
-	define( 'ABSOLUTE_PATH', '/var/www/html/wordpress' );
+if ( ! defined( 'ABSPATH' ) ) {
+	define('ABSPATH', __DIR__ . '/');
+	// define( 'ABSPATH', '/var/www/html/wordpress/' ); // Could also use this
 }
 
 // Sets up WordPress vars and included files.
-require_once ABSOLUTE_PATH . 'wp-settings.php';
+require_once ABSPATH . 'wp-settings.php';
