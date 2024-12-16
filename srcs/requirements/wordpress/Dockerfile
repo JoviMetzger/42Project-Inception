@@ -3,7 +3,7 @@ FROM debian:bookworm
    
 # Update & intstall your package manager
 RUN apt-get update -y && \
-    apt-get install -y php8.2 php8.2-fpm php-mysql mariadb-client wget curl sendmail net-tools
+    apt-get install -y php8.2 php8.2-fpm php-mysql mariadb-client wget curl sendmail
 
 # Install WP-CLI (wp command)
 RUN curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar \

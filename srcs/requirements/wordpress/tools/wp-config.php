@@ -1,16 +1,19 @@
 <?php
 // ** MySQL settings - This info is saved inside your .env ** //
 // The name of the database for WordPress
-define('DB_NAME', '${WP_DATABASE_NAME}');
+// define('DB_NAME', '${WP_DATABASE_NAME}');	 # Manully changed this!!!!!!!!!!!!
+define('DB_NAME', 'wordpress');
 
 // MySQL database username
-define('DB_USER', '${DB_USER}');
+// define('DB_USER', '${DB_USER}');	 # Manully changed this!!!!!!!!!!!!
+define('DB_USER', 'bob');
 
 // MySQL database password
-define('DB_USER_PASSWORD', '${DB_USER_PASSWORD}');
+// define('DB_USER_PASSWORD', '${DB_USER_PASSWORD}');	 # Manully changed this!!!!!!!!!!!!
+define('DB_USER_PASSWORD', 'bob');
 
 // MySQL hostname (Database for the server)
-define('DB_HOST', '${WP_DATABASE_HOST}');
+define('DB_HOST', 'mariadb');            # Manully changed this!!!!!!!!!!!!
 
 // Database Charset to use in creating database tables.
 define('DB_CHARSET', 'utf8');

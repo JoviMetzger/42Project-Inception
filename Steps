@@ -4380,3 +4380,23 @@ docker exec -it wordpress ping mariadb
 
 docker exec -it nginx bash
 root@b4c6412326ad:/# cat /var/log/nginx/error.log
+
+
+
+
+
+
+
+
+
+
+
+problem Currently: 
+2024/12/16 15:09:20 [error] 10#10: *3 FastCGI sent in stderr: "PHP message: PHP Warning:  mysqli_real_connect(): (HY000/1045): Access denied for user '${DB_USER}'@'wordpress.inception_net' (using password: NO) in /var/www/html/wordpress/wp-includes/class-wpdb.php on line 1982" while reading response header from upstream, client: 172.18.0.1, server: jmetzger.42.fr, request: "GET /index.php HTTP/1.1", upstream: "fastcgi://172.18.0.3:9000", host: "jmetzger.42.fr"
+
+>>
+This either means that the useranme and password information in your wp-Config.php file is incorrect or that contact with the database server at mariadb could not be established. This could mean your host's database server is down.
+- Are you sure you have the correct username and password?
+- Are you sure you have typed the correct hostname?
+- Are you sure the database server is running?
+<<
