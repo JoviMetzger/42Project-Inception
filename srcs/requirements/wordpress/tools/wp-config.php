@@ -1,19 +1,16 @@
 <?php
 // ** MySQL settings - This info is saved inside your .env ** //
 // The name of the database for WordPress
-// define('DB_NAME', '${WP_DATABASE_NAME}');	 # Manully changed this!!!!!!!!!!!!
-define('DB_NAME', 'wordpress');
+define('DB_NAME', getenv('WP_DATABASE_NAME'));
 
 // MySQL database username
-// define('DB_USER', '${DB_USER}');	 # Manully changed this!!!!!!!!!!!!
-define('DB_USER', 'bob');
+define('DB_USER', getenv('DB_USER'));
 
 // MySQL database password
-// define('DB_USER_PASSWORD', '${DB_USER_PASSWORD}');	 # Manully changed this!!!!!!!!!!!!
-define('DB_USER_PASSWORD', 'bob');
+define('DB_USER_PASSWORD', getenv('DB_USER_PASSWORD'));
 
 // MySQL hostname (Database for the server)
-define('DB_HOST', 'mariadb');            # Manully changed this!!!!!!!!!!!!
+define('DB_HOST', getenv('WP_DATABASE_HOST'));
 
 // Database Charset to use in creating database tables.
 define('DB_CHARSET', 'utf8');
@@ -35,7 +32,8 @@ define('NONCE_SALT',       'ao;c@w@)!D@ujk+]D7O2 ?@T8b)il~LRzM|:ac`ykb;K;+.8/Yo4
 // Defines the prefix for WordPress database tables
 $table_prefix = 'wp_';
 
-define( 'WP_DEBUG', true );
+// define( 'WP_DEBUG', true );
+define( 'WP_DEBUG', false );
 
 // Absolute path to the WordPress directory.
 if ( ! defined( 'ABSPATH' ) ) {

@@ -30,19 +30,25 @@ chown -R www-data:www-data /var/www/html/wordpress
 
 # Wait for MariaDB to be ready
 echo "Waiting for MariaDB..."
-sleep 2
-while ! mysqladmin ping -h $WP_DATABASE_HOST --silent; do
-	echo "MariaDB is not ready yet. Retrying..."
-    sleep 2
-done
+# sleep 2
+# while ! mysqladmin ping -h $WP_DATABASE_HOST --silent; do
+# 	echo "MariaDB is not ready yet. Retrying..."
+#     sleep 2
+# done
+until mysqladmin -h$WP_DATABASE_HOST -u${DB_USER} -p${DB_USER_PASSWORD} ping; do
+           sleep 2
+    done
 
 # Set the working directory
 cd /var/www/html/wordpress
 
 # Install WordPress
 if [ ! -f /var/www/html/wordpress/wp-login.php ]; then
-	echo "Downloading WordPress..."
-    wp --allow-root core download --path=/var/www/html/wordpress
+	# echo "Downloading WordPress..."
+    # wp --allow-root core download --path=/var/www/html/wordpress
+    wp core install --url="${DOMAIN_NAME}" --title="inception" --admin_user="${WP_DB_ADMIN}" --admin_password="${WP_DB_ADMIN_PASSWORD}" --admin_email="${WP_DB_EMAIL}" --allow-root
+    echo "creating wordpress user......" 
+	wp user create ${WP_DB_USER} ${WP_DB_USER_EMAIL} --user_pass=${WP_DB_PASSWORD} --allow-root
 fi
 
 # Start PHP-FPM in the foreground
