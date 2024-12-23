@@ -24,32 +24,48 @@ for var in "${required_vars[@]}"; do
     fi
 done
 
+
 # Create required directories and set permissions
 mkdir -p /var/www/html/wordpress
-chown -R www-data:www-data /var/www/html/wordpress
+touch /run/php/php8.2-fpm.pid;
+chown -R www-data:www-data /var/www/*;
+chown -R 755 /var/www/*;
 
 # Wait for MariaDB to be ready
-echo "Waiting for MariaDB..."
-# sleep 2
-# while ! mysqladmin ping -h $WP_DATABASE_HOST --silent; do
-# 	echo "MariaDB is not ready yet. Retrying..."
-#     sleep 2
-# done
-until mysqladmin -h$WP_DATABASE_HOST -u${DB_USER} -p${DB_USER_PASSWORD} ping; do
-           sleep 2
-    done
-
-# Set the working directory
-cd /var/www/html/wordpress
+echo "Waiting for MariaDB to connect..."
+until mysqladmin -h${WP_DATABASE_HOST} -u${DB_USER} -p${DB_USER_PASSWORD} ping; do
+        sleep 2
+done
 
 # Install WordPress
-if [ ! -f /var/www/html/wordpress/wp-login.php ]; then
-	# echo "Downloading WordPress..."
-    # wp --allow-root core download --path=/var/www/html/wordpress
-    wp core install --url="${DOMAIN_NAME}" --title="inception" --admin_user="${WP_DB_ADMIN}" --admin_password="${WP_DB_ADMIN_PASSWORD}" --admin_email="${WP_DB_EMAIL}" --allow-root
-    echo "creating wordpress user......" 
-	wp user create ${WP_DB_USER} ${WP_DB_USER_EMAIL} --user_pass=${WP_DB_PASSWORD} --allow-root
+# Set the working directory
+cd /var/www/html/wordpress
+# if [ ! -f /var/www/html/wordpress/wp-login.php ]; then
+	echo "Downloading WordPress..."
+    wp --allow-root core download --path=/var/www/html/wordpress
+# fi
+
+
+echo "Initializing Wordpress..."
+if [ ! -f /var/www/html/wordpress/wp-config.php ]; then
+
+    # Creating Admin
+	echo "Creating wordpress Admin"
+    wp core install \
+        --url="${DOMAIN_NAME}" \
+        --title="inception" \
+        --admin_user="${WP_ADMIN}" \
+        --admin_password="${WP_ADMIN_PASSWORD}" \
+        --admin_email="${WP_ADMIN_EMAIL}" \
+        --allow-root
+
+    # Creating User
+    echo "Creating wordpress User" 
+	wp user create ${WP_USER} ${WP_USER_EMAIL} \
+        --user_pass=${WP_USER_PASSWORD} \
+        --allow-root
 fi
+echo "Wordpress initialization complete."
 
 # Start PHP-FPM in the foreground
 echo "Starting PHP-FPM..."
