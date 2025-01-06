@@ -26,20 +26,20 @@ fi
 
 # Continue with WordPress configuration (if any)
 if [ ! -f /var/www/html/wordpress/wp-config.php ]; then
-    echo "Creating wp-config.php file..."
-    # wp core config \
-    #     --path=/var/www/html/wordpress \
-    #     --dbname=${WP_DATABASE_NAME} \
-    #     --dbuser=${DB_USER} \
-    #     --dbpass=${DB_USER_PASSWORD} \
-    #     --dbhost=${WP_DATABASE_HOST} \
-    #     --allow-root
+#     echo "Creating wp-config.php file..."
+#     wp core config \
+#         --path=/var/www/html/wordpress \
+#         --dbname=${WP_DATABASE_NAME} \
+#         --dbuser=${DB_USER} \
+#         --dbpass=${DB_USER_PASSWORD} \
+#         --dbhost=${WP_DATABASE_HOST} \
+#         --allow-root
 
     echo "Running WordPress installation..."
     wp core install \
         --path=/var/www/html/wordpress \
         --url=${DOMAIN_NAME} \
-        --title="WordPress Site" \
+        --title="Inception" \
         --admin_user=${WP_ADMIN_USER} \
         --admin_password=${WP_ADMIN_PASSWORD} \
         --admin_email=${WP_ADMIN_EMAIL} \
@@ -50,5 +50,5 @@ echo "WordPress setup complete."
 
 # Start PHP-FPM in the foreground
 echo "Starting PHP-FPM..."
-exec /usr/sbin/php-fpm8.2 -F
+exec /usr/sbin/php-fpm8.2 
 
