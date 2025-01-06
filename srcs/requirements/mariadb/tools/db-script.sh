@@ -20,9 +20,9 @@ if [ ! -d /run/mysqld ]; then
 	# Set up the database and the user
 	{
 		echo "FLUSH PRIVILEGES;"
-		echo "CREATE DATABASE IF NOT EXISTS \`$WP_DATABASE_NAME\`;"
+		echo "CREATE DATABASE IF NOT EXISTS '$WP_DATABASE_NAME';"
 		echo "CREATE USER IF NOT EXISTS '$DB_USER'@'%' IDENTIFIED BY '$DB_USER_PASSWORD';"
-		echo "GRANT ALL ON \`$WP_DATABASE_NAME\`.* TO '$DB_USER'@'%' IDENTIFIED BY '$DB_USER_PASSWORD';"
+		echo "GRANT ALL PRIVILEGES ON '$WP_DATABASE_NAME'.* TO '$DB_USER'@'%' IDENTIFIED BY '$DB_USER_PASSWORD';"
 		echo "FLUSH PRIVILEGES;"
 	} | mysqld --bootstrap
 

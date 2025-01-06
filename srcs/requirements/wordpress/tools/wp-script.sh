@@ -27,13 +27,13 @@ fi
 # Continue with WordPress configuration (if any)
 if [ ! -f /var/www/html/wordpress/wp-config.php ]; then
     echo "Creating wp-config.php file..."
-    wp core config \
-        --path=/var/www/html/wordpress \
-        --dbname=${WP_DATABASE_NAME} \
-        --dbuser=${DB_USER} \
-        --dbpass=${DB_USER_PASSWORD} \
-        --dbhost=${WP_DATABASE_HOST} \
-        --allow-root
+    # wp core config \
+    #     --path=/var/www/html/wordpress \
+    #     --dbname=${WP_DATABASE_NAME} \
+    #     --dbuser=${DB_USER} \
+    #     --dbpass=${DB_USER_PASSWORD} \
+    #     --dbhost=${WP_DATABASE_HOST} \
+    #     --allow-root
 
     echo "Running WordPress installation..."
     wp core install \
