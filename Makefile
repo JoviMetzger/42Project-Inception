@@ -33,7 +33,29 @@
 
 # .PHONY: all up down re clean deepclean
 
+# # List of required environment variables
+# required_vars=(
+#     "DOMAIN_NAME"
+#     "WP_DATABASE_NAME"
+#     "WP_DATABASE_HOST"
+#     "DB_ROOT_PASSWORD"
+#     "DB_USER"
+#     "DB_USER_PASSWORD"
+#     "WP_ADMIN"
+#     "WP_ADMIN_PASSWORD"
+#     "WP_ADMIN_EMAIL"
+#     "WP_USER"
+#     "WP_USER_PASSWORD"
+#     "WP_USER_EMAIL"
+# )
 
+# # Ensure '.env' variables are not empty. (Loop through the list and check if any variable is empty)
+# for var in "${required_vars[@]}"; do
+#     if [ -z "${!var}" ]; then
+#         echo "'${var}' is not set. Exiting."
+#         exit 1
+#     fi
+# done
 
 docker-compose down
 docker stop $(docker ps -qa); docker rm $(docker ps -qa); docker rmi -f $(docker images -qa); docker volume rm $(docker volume ls -q); docker network rm $(docker network ls -q) 2>/dev/null

@@ -1,72 +1,54 @@
 #!/bin/bash
 
-# List of required environment variables
-required_vars=(
-    "DOMAIN_NAME"
-    "WP_DATABASE_NAME"
-    "WP_DATABASE_HOST"
-    "DB_ROOT_PASSWORD"
-    "DB_USER"
-    "DB_USER_PASSWORD"
-    "WP_ADMIN"
-    "WP_ADMIN_PASSWORD"
-    "WP_ADMIN_EMAIL"
-    "WP_USER"
-    "WP_USER_PASSWORD"
-    "WP_USER_EMAIL"
-)
-
-# Ensure environment variables are not empty
-for var in "${required_vars[@]}"; do
-    if [ -z "${!var}" ]; then
-        echo "'${var}' is not set. Exiting."
-        exit 1
-    fi
-done
-
-
-# Create required directories and set permissions
-mkdir -p /var/www/html/wordpress
-touch /run/php/php8.2-fpm.pid;
-chown -R www-data:www-data /var/www/*;
-chown -R 755 /var/www/*;
-
 # Wait for MariaDB to be ready
 echo "Waiting for MariaDB to connect..."
+sleep 5
 until mysqladmin -h${WP_DATABASE_HOST} -u${DB_USER} -p${DB_USER_PASSWORD} ping; do
-        sleep 2
+    sleep 2
 done
 
-# Install WordPress
-# Set the working directory
-cd /var/www/html/wordpress
-# if [ ! -f /var/www/html/wordpress/wp-login.php ]; then
-	echo "Downloading WordPress..."
-    wp --allow-root core download --path=/var/www/html/wordpress
-# fi
+# Download WordPress if not already present
+if [ ! -f /var/www/html/wordpress/index.php ]; then
+    echo "Downloading and extracting WordPress..."
+    curl -O https://wordpress.org/latest.tar.gz
+    tar -xvf latest.tar.gz
+    mv wordpress/* /var/www/html/wordpress/
+    rm -rf wordpress latest.tar.gz
+    echo "WordPress downloaded."
 
+    # Set correct permissions
+    echo "Setting permissions for WordPress..."
+    chown -R www-data:www-data /var/www/html/wordpress
+    chmod -R 755 /var/www/html/wordpress
+else
+    echo "WordPress is already downloaded."
+fi
 
-echo "Initializing Wordpress..."
+# Continue with WordPress configuration (if any)
 if [ ! -f /var/www/html/wordpress/wp-config.php ]; then
-
-    # Creating Admin
-	echo "Creating wordpress Admin"
-    wp core install \
-        --url="${DOMAIN_NAME}" \
-        --title="inception" \
-        --admin_user="${WP_ADMIN}" \
-        --admin_password="${WP_ADMIN_PASSWORD}" \
-        --admin_email="${WP_ADMIN_EMAIL}" \
+    echo "Creating wp-config.php file..."
+    wp core config \
+        --path=/var/www/html/wordpress \
+        --dbname=${WP_DATABASE_NAME} \
+        --dbuser=${DB_USER} \
+        --dbpass=${DB_USER_PASSWORD} \
+        --dbhost=${WP_DATABASE_HOST} \
         --allow-root
 
-    # Creating User
-    echo "Creating wordpress User" 
-	wp user create ${WP_USER} ${WP_USER_EMAIL} \
-        --user_pass=${WP_USER_PASSWORD} \
+    echo "Running WordPress installation..."
+    wp core install \
+        --path=/var/www/html/wordpress \
+        --url=${DOMAIN_NAME} \
+        --title="WordPress Site" \
+        --admin_user=${WP_ADMIN_USER} \
+        --admin_password=${WP_ADMIN_PASSWORD} \
+        --admin_email=${WP_ADMIN_EMAIL} \
         --allow-root
 fi
-echo "Wordpress initialization complete."
+
+echo "WordPress setup complete."
 
 # Start PHP-FPM in the foreground
 echo "Starting PHP-FPM..."
 exec /usr/sbin/php-fpm8.2 -F
+

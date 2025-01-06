@@ -1,29 +1,5 @@
 #!/bin/bash
 
-# List of required environment variables
-required_vars=(
-    "DOMAIN_NAME"
-    "WP_DATABASE_NAME"
-    "WP_DATABASE_HOST"
-    "DB_ROOT_PASSWORD"
-    "DB_USER"
-    "DB_USER_PASSWORD"
-    "WP_ADMIN"
-    "WP_ADMIN_PASSWORD"
-    "WP_ADMIN_EMAIL"
-    "WP_USER"
-    "WP_USER_PASSWORD"
-    "WP_USER_EMAIL"
-)
-
-# Ensure '.env' variables are not empty. (Loop through the list and check if any variable is empty)
-for var in "${required_vars[@]}"; do
-    if [ -z "${!var}" ]; then
-        echo "'${var}' is not set. Exiting."
-        exit 1
-    fi
-done
-
 # Move the configuration file to the correct location
 mv /db-config.cnf /etc/mysql/mariadb.conf.d/db-config.cnf
 
@@ -36,8 +12,10 @@ if [ ! -d /run/mysqld ]; then
 	# Create necessary directories and set permissions as root
     mkdir -p /run/mysqld 
     mkdir -p /var/log/mysql
+	mkdir -p /var/lib/mysql
     chown -R mysql:mysql /run/mysqld 
     chown -R mysql:mysql /var/log/mysql
+	chown -R mysql:mysql /var/lib/mysql
 
 	# Set up the database and the user
 	{
@@ -53,6 +31,18 @@ if [ ! -d /run/mysqld ]; then
 else
     echo "MariaDB already initialized."
 fi
+
+# # Check if MariaDB is reachable
+# if mysqladmin ping -h 127.0.0.1 --silent; then
+#     echo "MariaDB is running."
+
+#     # Test database and user existence
+#     echo "SHOW DATABASES;" | mysql -u root -p"${DB_ROOT_PASSWORD}"
+#     echo "SHOW GRANTS FOR '${DB_USER}'@'%';" | mysql -u root -p"${DB_ROOT_PASSWORD}"
+# else
+#     echo "MariaDB is not running or reachable."
+# fi
+
 
 # Keep MariaDB running in the foreground
 echo "Starting MariaDB..."

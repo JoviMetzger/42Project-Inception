@@ -1,11 +1,5 @@
 #!/bin/bash
 
-# Ensure ${DOMAIN_NAME} is not empty.
-if [ -z "${DOMAIN_NAME}" ]; then
-    echo "DOMAIN_NAME is not set. Exiting."
-    exit 1
-fi
-
 # Create a self-signed SSL certificate for TLS (or use your own cert files)
 echo "Creating a self-signed SSL certificate..."
 openssl req \
