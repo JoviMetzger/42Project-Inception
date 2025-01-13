@@ -1,14 +1,41 @@
 # Use Debian as a base image (Debian 12)
 FROM debian:bookworm
-   
+
+# ARG DOMAIN_NAME
+# ARG WP_DATABASE_NAME
+# ARG WP_DATABASE_HOST
+# ARG DB_USER=
+# ARG DB_USER_PASSWORD
+# ARG WP_ADMIN
+# ARG WP_ADMIN_PASSWORD
+# ARG WP_ADMIN_EMAIL
+# ARG WP_USER
+# ARG WP_USER_PASSWORD
+# ARG WP_USER_EMAIL
+
+# Set environment variables using ENV
+ENV DOMAIN_NAME=${DOMAIN_NAME}
+ENV WP_DATABASE_NAME=${WP_DATABASE_NAME}
+ENV WP_DATABASE_HOST=${WP_DATABASE_HOST}
+ENV DB_USER=${DB_USER}
+ENV DB_USER_PASSWORD=${DB_USER_PASSWORD}
+ENV WP_ADMIN=${WP_ADMIN}
+ENV WP_ADMIN_PASSWORD=${WP_ADMIN_PASSWORD}
+ENV WP_ADMIN_EMAIL=${WP_ADMIN_EMAIL}
+ENV WP_USER=${WP_USER}
+ENV WP_USER_PASSWORD=${WP_USER_PASSWORD}
+ENV WP_USER_EMAIL=${WP_USER_EMAIL}
+
 # Update & intstall your package manager
-RUN apt-get update -y && \
-    apt-get install -y php8.2 php8.2-fpm php-mysql mariadb-client wget curl sendmail
+RUN apt-get update -y && apt-get -y install php8.2 php-fpm php-mysql mariadb-client wget curl sendmail
+
+# Create necessary directories
+RUN  mkdir -p /run/php
 
 # Copy script from 'tools' directory into the container’s root directory (/).
-COPY ./tools/wp-script.sh /
-COPY ./tools/wp-config.php /var/www/html/wordpress/wp-config.php
-COPY ./tools/www.conf /etc/php/8.2/fpm/pool.d
+COPY /tools/www.conf /etc/php/8.2/fpm/pool.d
+COPY /tools/wp-config.php /etc/wp-config.php
+COPY tools/wp-script.sh wp-script.sh
 
 # Make sure the script is executable (NOT necessary for 'wp-config.php', since PHP just reads it)
 RUN chmod +x /wp-script.sh

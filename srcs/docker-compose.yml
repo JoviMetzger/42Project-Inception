@@ -3,6 +3,11 @@ services:                                                                # Indiv
             build: requirements/mariadb                                  # Builds the image from a Dockerfile located in "requirements/mariadb"
             container_name: mariadb                                      # Names the container "mariadb" for easier reference
             restart: unless-stopped                                      # Restarts the container automatically unless explicitly stopped
+            environment:
+                  WP_DATABASE_NAME: ${WP_DATABASE_NAME}
+                  DB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+                  DB_USER: ${DB_USER}
+                  DB_USER_PASSWORD: ${DB_USER_PASSWORD}
             env_file:
                   - .env                                                 # Loads environment variables from the ".env" file
             volumes: 
@@ -15,6 +20,18 @@ services:                                                                # Indiv
             depends_on:
                   - mariadb
             restart: unless-stopped
+            environment:
+                  DOMAIN_NAME: ${DOMAIN_NAME}
+                  WP_DATABASE_NAME: ${WP_DATABASE_NAME}
+                  WP_DATABASE_HOST: ${WP_DATABASE_HOST}
+                  DB_USER: ${DB_USER}
+                  DB_USER_PASSWORD: ${DB_USER_PASSWORD}
+                  WP_ADMIN: ${WP_ADMIN}
+                  WP_ADMIN_PASSWORD: ${WP_ADMIN_PASSWORD}
+                  WP_ADMIN_EMAIL: ${WP_ADMIN_EMAIL}
+                  WP_USER: ${WP_USER}
+                  WP_USER_PASSWORD: ${WP_USER_PASSWORD}
+                  WP_USER_EMAIL: ${WP_USER_EMAIL}
             env_file:
                   - .env
             volumes:
@@ -27,6 +44,9 @@ services:                                                                # Indiv
             depends_on:
                   - wordpress
             restart: unless-stopped
+            environment:
+                  DOMAIN_NAME: ${DOMAIN_NAME}
+
             env_file:
                   - .env
             ports:

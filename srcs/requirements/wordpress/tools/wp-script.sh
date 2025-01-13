@@ -1,54 +1,39 @@
 #!/bin/bash
 
-# Wait for MariaDB to be ready
-echo "Waiting for MariaDB to connect..."
-sleep 5
-until mysqladmin -h${WP_DATABASE_HOST} -u${DB_USER} -p${DB_USER_PASSWORD} ping; do
-    sleep 2
-done
+# Create necessary directories and set permissions
+mkdir -p /var/www/html/wordpress
+touch /run/php/php8.2-fpm.pid;
+chown -R www-data:www-data /var/www/*;
+chown -R 755 /var/www/*;
 
-# Download WordPress if not already present
-if [ ! -f /var/www/html/wordpress/index.php ]; then
-    echo "Downloading and extracting WordPress..."
-    curl -s -O https://wordpress.org/latest.tar.gz > /dev/null 2>&1
-    tar -xvf latest.tar.gz > /dev/null 2>&1
-    mv wordpress/* /var/www/html/wordpress/ > /dev/null 2>&1
-    rm -rf wordpress latest.tar.gz > /dev/null 2>&1
-    echo "WordPress downloaded."
-
-    # Set correct permissions
-    echo "Setting permissions for WordPress..."
-    chown -R www-data:www-data /var/www/html/wordpress
-    chmod -R 755 /var/www/html/wordpress
+# Download/Install WordPress if not already present
+if [ ! -f /var/www/html/wordpress/wp-config.php ]; then
 
     # Install WP-CLI (wp command)
-    curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar 
-    chmod +x wp-cli.phar
-    mv wp-cli.phar /usr/local/bin/wp
+	curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
+	chmod +x wp-cli.phar
+	mv /etc/wp-config.php /var/www/html/wordpress/
+	mv wp-cli.phar /usr/local/bin/wp
+    
+    cd /var/www/html/wordpress
+    
+    # Downloading WordPress"
+    wp --allow-root core download
+    echo "WordPress downloaded."
 
-    # Check if wp-config.php exists; if not, create it
-    if [ ! -f /var/www/html/wordpress/wp-config.php ]; then
-        echo "Configuring WordPress..."
-        wp config create \
-        --dbname=${WP_DATABASE_NAME} \
-        --dbuser=${DB_USER} \
-        --dbpass=${DB_USER_PASSWORD} \
-        --dbhost=${WP_DATABASE_HOST} \
-        --path=/var/www/html/wordpress \
-        --allow-root
-    else
-        echo "wp-config.php already exists, skipping configuration."
-    fi
+    # Wait for MariaDB to be ready
+    echo "Waiting for MariaDB to connect..."
+    until mysqladmin -h${WP_DATABASE_HOST} -u${DB_USER} -p${DB_USER_PASSWORD} ping; do
+           sleep 2
+    done
 
-    echo "Running WordPress installation..."
-    wp core install \
-        --path=/var/www/html/wordpress \
-        --url=${DOMAIN_NAME} \
-        --title="Inception" \
-        --admin_user=${WP_ADMIN_USER} \
-        --admin_password=${WP_ADMIN_PASSWORD} \
-        --admin_email=${WP_ADMIN_EMAIL} \
-        --allow-root
+    # Creating Wordpress Admin
+	echo "Creating Wordpress Admin..."
+    wp core install --url="${DOMAIN_NAME}" --title="inception" --admin_user="${WP_ADMIN}" --admin_password="${WP_ADMIN_PASSWORD}" --admin_email="${WP_ADMIN_EMAIL}" --allow-root
+    
+    # Creating Wordpress User"
+    echo "Creating Wordpress User..." 
+	wp user create ${WP_USER} ${WP_USER_EMAIL} --user_pass="${WP_USER_PASSWORD}" --allow-root
 
     echo "WordPress setup complete."
 else
@@ -57,4 +42,4 @@ fi
 
 # Start PHP-FPM in the foreground
 echo "Starting PHP-FPM..."
-exec /usr/sbin/php-fpm8.2 
+exec /usr/sbin/php-fpm8.2 -F

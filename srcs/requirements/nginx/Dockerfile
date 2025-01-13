@@ -11,7 +11,7 @@ RUN mkdir -p /etc/nginx/ssl && \
     chmod 700 /etc/nginx/ssl
 
 # Copy custom MariaDB configuration script from the 'tools' directory to the container’s root directory
-COPY ./tools/nginx-config.conf /etc/nginx/conf.d/
+COPY ./tools/nginx-config.conf /etc/nginx/conf.d/default.conf
 COPY ./tools/nginx-script.sh /
 
 # Set permissions for the script
