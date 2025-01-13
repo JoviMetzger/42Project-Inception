@@ -29,11 +29,11 @@ if [ ! -f /var/www/html/wordpress/wp-config.php ]; then
 
     # Creating Wordpress Admin
 	echo "Creating Wordpress Admin..."
-    wp core install --url="${DOMAIN_NAME}" --title="inception" --admin_user="${WP_ADMIN}" --admin_password="${WP_ADMIN_PASSWORD}" --admin_email="${WP_ADMIN_EMAIL}" --allow-root
+    wp core install --url=${DOMAIN_NAME} --title="inception" --admin_user=${WP_ADMIN} --admin_password=${WP_ADMIN_PASSWORD} --admin_email=${WP_ADMIN_EMAIL} --allow-root
     
-    # Creating Wordpress User"
+    # Creating Wordpress User
     echo "Creating Wordpress User..." 
-	wp user create ${WP_USER} ${WP_USER_EMAIL} --user_pass="${WP_USER_PASSWORD}" --allow-root
+	wp user create ${WP_USER} ${WP_USER_EMAIL} --user_pass=${WP_USER_PASSWORD} --allow-root
 
     echo "WordPress setup complete."
 else

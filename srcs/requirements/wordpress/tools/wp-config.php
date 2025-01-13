@@ -18,6 +18,10 @@ define('DB_CHARSET', 'utf8');
 // The Database Collate type.
 define('DB_COLLATE', '');
 
+
+// !!! ---------- FIX ^^^^ ---------- !!!
+
+
 // ** Authentication Unique Keys and Salts. ** //
 // Find generated key here: https://api.wordpress.org/secret-key/1.1/salt/ 
 define('AUTH_KEY',         'fzf#`/XEP-@vfB^#X15b6@aSIw]a|Aq+cp2tu9T`MI >(:Y$WA:|~U|-g>>I}%s?');
