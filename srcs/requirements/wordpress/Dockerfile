@@ -22,7 +22,6 @@ RUN  mkdir -p /run/php
 
 # Copy script from 'tools' directory into the container’s root directory (/).
 COPY /tools/www.conf /etc/php/8.2/fpm/pool.d
-COPY /tools/wp-config.php /etc/wp-config.php
 COPY tools/wp-script.sh wp-script.sh
 
 # Make sure the script is executable (NOT necessary for 'wp-config.php', since PHP just reads it)
