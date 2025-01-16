@@ -3,7 +3,7 @@ COMPOSE_FILE = ./srcs/docker-compose.yml
 ENV_FILE = ./srcs/.env
 
 # Colors
-RED				= \e[1;91m
+RED			= \e[1;91m
 RESET			= \033[0m
 
 # --- Targets ---
