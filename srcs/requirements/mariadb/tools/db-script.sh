@@ -15,7 +15,8 @@ chown -R mysql:mysql /var/log/mysql
 chown -R mysql:mysql /var/lib/mysql
 
 echo "Initializing MariaDB..."
-# Set up the database and the user
+# Setting up the database, user, and permissions in bootstrap mode. 
+# --bootstrap: Runs MariaDB in a lightweight, non-networked mode without plugins, or other unnecessary features during initialization.
 {
 	echo "FLUSH PRIVILEGES;"
 	echo "CREATE DATABASE IF NOT EXISTS \`$WP_DATABASE_NAME\`;"

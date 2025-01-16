@@ -10,11 +10,12 @@ RUN apt-get update -y && \
 RUN mkdir -p /etc/nginx/ssl && \
     chmod 700 /etc/nginx/ssl
 
-# Copy custom MariaDB configuration script from the 'tools' directory to the container’s root directory
+# Copy custom Nginx configuration from the 'tools' directory into 'default.conf' file (overwrite default.conf)
+# Copy custom Nginx script from the 'tools' directory to the container’s root directory (/)
 COPY ./tools/nginx-config.conf /etc/nginx/conf.d/default.conf
 COPY ./tools/nginx-script.sh /
 
-# Set permissions for the script
+# Set permissions for the script -> Make sure the custom script is executable
 RUN chmod +x /nginx-script.sh
 
 # Expose NGINX port for HTTPS

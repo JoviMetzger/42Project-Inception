@@ -1,31 +1,24 @@
-services:                                                                # Individual services (containers) that make up your application
-      mariadb:                                                           # The database service.
-            build: requirements/mariadb                                  # Builds the image from a Dockerfile located in "requirements/mariadb"
-            container_name: mariadb                                      # Names the container "mariadb" for easier reference
-            restart: unless-stopped                                      # Restarts the container automatically unless explicitly stopped
-            environment:
-                  WP_DATABASE_NAME: ${WP_DATABASE_NAME}
-                  DB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
-                  DB_USER: ${DB_USER}
-                  DB_USER_PASSWORD: ${DB_USER_PASSWORD}
+services:                                                             # Individual services (containers) that make up your application
+      mariadb:                                                        # The database service (MariaDB).
+            build: requirements/mariadb                               # Builds the image from a Dockerfile located in "requirements/mariadb"
+            container_name: mariadb                                   # Names the container "mariadb" for easier reference
+            restart: unless-stopped                                   # Restarts the container automatically unless explicitly stopped
             env_file:
-                  - .env                                                 # Loads environment variables from the ".env" file
+                  - .env                                              # Loads environment variables from the ".env" file
             volumes: 
-                  - mariadb:/var/lib/mysql                               # Bind the mariadb volume to the MySQL data directory in the container (Ensures the MySQL database persists across container restarts)
+                  - mariadb:/var/lib/mysql                            # Bind the mariadb volume to the MySQL data directory in the container (Ensures the MySQL database persists across container restarts)
             networks:
-                  - inception                                            # Connects to the "inception" network, allowing it to communicate with other services
-      wordpress:                                                         # The WordPress application itself.
-            build: requirements/wordpress
-            container_name: wordpress
+                  - inception                                         # Connects to the "inception" network, allowing it to communicate with other services
+
+      wordpress:                                                      # The WordPress application service
+            build: requirements/wordpress                             # Builds the image for WordPress from the Dockerfile in "requirements/wordpress"
+            container_name: wordpress                                 # Names the container "wordpress" for easier reference
             depends_on:
-                  - mariadb
-            restart: unless-stopped
-            environment:
-                  DOMAIN_NAME: ${DOMAIN_NAME}
+                  - mariadb                                           # Ensures that the WordPress container starts after the MariaDB container
+            restart: unless-stopped                                   # Restarts the container automatically unless explicitly stopped
+            environment:                                              # Environment variables injected into WordPress container (NEED THIS: Because variables are NOT passed at Runtime, unlike Mariadb or Nginx)
+                  DOMAIN_NAME: ${DOMAIN_NAME}                                         
                   WP_DATABASE_NAME: ${WP_DATABASE_NAME}
-                  WP_DATABASE_HOST: ${WP_DATABASE_HOST}
-                  DB_USER: ${DB_USER}
-                  DB_USER_PASSWORD: ${DB_USER_PASSWORD}
                   WP_ADMIN: ${WP_ADMIN}
                   WP_ADMIN_PASSWORD: ${WP_ADMIN_PASSWORD}
                   WP_ADMIN_EMAIL: ${WP_ADMIN_EMAIL}
@@ -33,49 +26,45 @@ services:                                                                # Indiv
                   WP_USER_PASSWORD: ${WP_USER_PASSWORD}
                   WP_USER_EMAIL: ${WP_USER_EMAIL}
             env_file:
-                  - .env
+                  - .env                                              # Loads environment variables from the ".env" file
             volumes:
-                  - wordpress:/var/www/html                              # Bind the wordpress volume to the WordPress root directory in the container
+                  - wordpress:/var/www/html                           # Bind the WordPress volume to the WordPress root directory in the container (Ensures the MySQL database persists across container restarts)
             networks:
-                  - inception
-      nginx:                                                             # The web server that will serve the website.
-            build: requirements/nginx
-            container_name: nginx
+                  - inception                                         # Connects to the "inception" network, allowing it to communicate with other services
+
+      nginx:                                                          # The web server service that will serve the website (NGINX).
+            build: requirements/nginx                                 # Builds the image for NGINX from the Dockerfile in "requirements/nginx"
+            container_name: nginx                                     # Names the container "nginx" for easier reference
             depends_on:
-                  - wordpress
-            restart: unless-stopped
-            environment:
-                  DOMAIN_NAME: ${DOMAIN_NAME}
-
+                  - wordpress                                         # Ensures that the NGINX container starts after the WordPress container
+            restart: unless-stopped                                   # Restarts the container automatically unless explicitly stopped
             env_file:
-                  - .env
+                  - .env                                              # Loads environment variables from the ".env" file
             ports:
-                  - "443:443"                                            # Exposes port 443 for HTTPS traffic
+                  - "443:443"                                         # Exposes port 443 for HTTPS traffic, allowing the server to handle SSL-secured connections
             volumes:
-                  - wordpress:/var/www/html                              # You can leave ngnix volumes section empty
+                  - wordpress:/var/www/html                           # Mounts the WordPress files from the "wordpress" volume
             networks:
-                  - inception
+                  - inception                                         # Connects to the "inception" network, allowing it to communicate with other services
 
+networks:                                                             # Network configuration
+      inception:                                                      # The name of the network within the Compose file. It's just an identifier.
+            name: inception_net                                       # The actual name of the network that Docker will create
+            driver: bridge                                            # The network driver, which is "bridge" by default for containers to communicate with each other
 
-networks:                                                                  # Network configuration
-      inception:   
-            name: inception_net                                            # The name of the network within the Compose file. It's just an identifier.                                               
-            driver: bridge
-
-
-volumes:                                                                   # Volumes configuration to persist data
-      mariadb:
-            name: mariadb_vol
-            driver: local                                                # Volume is located locally
+volumes:                                                              # Volumes configuration to persist data across container restarts
+      mariadb:                                                        # Configures the MariaDB volume
+            name: mariadb_vol                                         # Sets the name of the volume to "mariadb_vol"
+            driver: local                                             # Volume is located locally
             driver_opts:
-                  type: none                                             # Setting the type of volume
-                  o: bind                                                # Binding the volume
-                  device: ${HOME}/data/mariadb                           # This is the host directory where MariaDB files will be stored
-      wordpress:
-            name: wordpress_vol
-            driver: local                                                # Volume is located locally
+                  type: none                                          # No special filesystem type is enforced
+                  o: bind                                             # Binds the volume to a host directory
+                  device: ${HOME}/data/mariadb                        # The host directory where MariaDB data will be stored
+
+      wordpress:                                                      # Configures the WordPress volume
+            name: wordpress_vol                                       # Sets the name of the volume to "wordpress_vol"
+            driver: local                                             # Volume is located locally
             driver_opts:
-                  type: none                                             # No special filesystem type is enforced
-                  o: bind                                                # Bind mounts the host directory to the container
-                  device: ${HOME}/data/wordpress                         # This is the host directory where WordPress files (themes, plugins, uploads) will be stored
- 
+                  type: none                                          # No special filesystem type is enforced
+                  o: bind                                             # Binds the volume to a host directory
+                  device: ${HOME}/data/wordpress                      # The host directory where WordPress data (themes, plugins, uploads) will be stored

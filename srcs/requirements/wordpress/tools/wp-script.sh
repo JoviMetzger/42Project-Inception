@@ -28,8 +28,9 @@ if [ ! -f wp-config.php ]; then
            sleep 2
     done
 
-    # Create wp-config.php, because I didn't create it manully
-    echo "Craete WordPress Configuration..."
+    # Create wp-config.php, because I didn't create 'wp-config.php' manully
+    # NOTE: These variables are passed after Runtime of the container
+    echo "Creating WordPress Configuration..."
 	wp config create \
         --path="/var/www/html/wordpress/" \
 		--dbname="${WP_DATABASE_NAME}" \
@@ -38,7 +39,7 @@ if [ ! -f wp-config.php ]; then
 		--dbhost="${WP_DATABASE_HOST}" \
 		--allow-root
 
-    # Creating Wordpress Admin
+    # Create Wordpress Admin
 	echo "Creating Wordpress Admin..."
     wp core install \
         --path="/var/www/html/wordpress/" \
@@ -49,7 +50,7 @@ if [ ! -f wp-config.php ]; then
         --admin_email="${WP_ADMIN_EMAIL}" \
         --allow-root
 
-    # Creating Wordpress User
+    # Create Wordpress User
     echo "Creating Wordpress User..." 
 	wp user create ${WP_USER} ${WP_USER_EMAIL} \
         --path="/var/www/html/wordpress/" \

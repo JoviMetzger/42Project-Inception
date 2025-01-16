@@ -1,8 +1,9 @@
 # MySQL Server Configuration File
 
+# General server settings
 [server]
 
-# MySQL Server settings
+# Settings for the MySQL daemon (server)
 [mysqld]
 
 user                    = mysql
@@ -21,6 +22,10 @@ expire_logs_days        = 10
 character-set-server    = utf8mb4
 collation-server        = utf8mb4_general_ci
 innodb_use_native_aio   = 0
+
+# Configuration for MySQL client
+[client]
+default-character-set = utf8mb4
 
 [embedded]
 [mariadb]
