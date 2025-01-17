@@ -313,7 +313,7 @@ exit
 
 ## 🫖Set Up
 
-### ❄Extra
+### Extra
 
 <details>
   <summary><strong>.env</strong></summary>
