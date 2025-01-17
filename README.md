@@ -29,7 +29,7 @@ You will virtualize several Docker images, creating them in your new personal vi
 
 ## 🫖Read About 
 
-### 1️⃣What is Docker?
+## 1️⃣What is Docker?
 Docker is a platform that helps developers easily create, deploy, and run applications in containers. <br>
 Containers are lightweight, portable environments that package everything needed to run a piece of software—code, <br>
 libraries, dependencies, and configuration—so it can run reliably on any system, regardless of the environment. <br><br>
@@ -180,7 +180,11 @@ and will be preserved even if the container is destroyed.
 
 ## 🫖Set up your Virtual Machine
 
-### 1️⃣How to set up your Virtual Machine
+<details>
+  <summary><strong>1️⃣How to set up your Virtual Machine</strong></summary>
+  <br>
+
+## 1️⃣How to set up your Virtual Machine
 
 You can either use as OS Ubuntu or POP!_OS (Or something else).
 
@@ -216,7 +220,13 @@ sudo reboot
 
 ```
 
----
+<br> <br>
+
+</details>
+
+<details>
+  <summary><strong>2️⃣Create a shared folder</strong></summary>
+  <br>
 
 
 ## 2️⃣Create a shared folder
@@ -239,10 +249,13 @@ Set up shared folders in VirtualBox to easily transfer files between the host an
   ```
    Replace `<foldername>` with the name you set for the shared folder.
 - **'cd'** into `/mnt/shared` *(You will find all your folders in there)*
-<br>
+<br> <br>
 
+</details>
 
----
+<details>
+  <summary><strong>3️⃣Connect to your host terminal</strong></summary>
+  <br>
 
 
 ## 3️⃣Connect to your host terminal
@@ -286,13 +299,13 @@ exit
 ```
 &emsp;&emsp; **-> if you want to stop the connection** 
 
+<br> <br>
 
-<br> 
+</details>
+
 
 ---
 
-<br>
-<br>
 
 
 ## 🫖Set Up
@@ -436,11 +449,11 @@ A service represents a container and its associated configuration.<br>
 
 &emsp;`Image:` What Docker image will be used *(e.g., mariadb, wordpress, or nginx)*? <br>
 &emsp;`Build:` If you need a custom image, you specify a build section that <br>
-&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; tells Docker Compose where to find the Dockerfile. <br>
+&emsp;&emsp;&emsp;&emsp;&emsp; tells Docker Compose where to find the Dockerfile. <br>
 &emsp;`Environment Variables:` What configuration does the container need at runtime? <br>
-&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; For instance, databases need credentials. <br>
+&emsp;&emsp;&emsp;&emsp;&emsp; For instance, databases need credentials. <br>
 &emsp;`Volumes:` Do you need to store data persistently or <br>
-&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; share files between the container and the host? *(what ports to expose)* <br>
+&emsp;&emsp;&emsp;&emsp;&emsp; share files between the container and the host? *(what ports to expose)* <br>
 &emsp;`Ports:` Which ports need to be mapped between the host and the container? <br>
 &emsp;`Network:` Do the containers need to communicate which each other? <br><br>
 
@@ -810,7 +823,6 @@ It can only serve WordPress properly if the WordPress container is already up an
 WordPress:
 Once MariaDB is up, start the WordPress container. During startup, WordPress will try to connect to the database, so having MariaDB ready beforehand is essential.
 WordPress will connect to MariaDB using environment variables (like database host, username, and password) in your docker-compose.yml file or Docker run command.
-
 
 
 
