@@ -811,26 +811,6 @@ https://<DOMAIN_NAME>
 
 
 
-### --------------------------------------------
-### Step 4 Explain -----------------------------
-
-
-MariaDB:
-WordPress relies on a database to store its data. The MariaDB container provides this, so it needs to be up and running first.
-This ensures WordPress can connect to the database as soon as it starts.
-
-Nginx:
-Nginx acts as a reverse proxy and web server for WordPress.
-It can only serve WordPress properly if the WordPress container is already up and running, so start Nginx last.
-
-WordPress:
-Once MariaDB is up, start the WordPress container. During startup, WordPress will try to connect to the database, so having MariaDB ready beforehand is essential.
-WordPress will connect to MariaDB using environment variables (like database host, username, and password) in your docker-compose.yml file or Docker run command.
-
-
-
-
-
 
 
 
@@ -1107,6 +1087,132 @@ Query OK, 0 rows affected (0.01 sec)
 
 mysql> FLUSH PRIVILEGES;
 Query OK, 0 rows affected (0.00 sec)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# MySQL Server Configuration File
+
+[server]
+# General server settings can be placed here. This section is commonly left blank
+# because most configurations are defined under the `[mysqld]` section.
+
+[mysqld]
+# Settings for the MySQL daemon (server).
+
+user                    = mysql               # The user under which the MySQL server runs.
+pid-file                = /run/mysqld/mysqld.pid # File containing the process ID of the MySQL server.
+socket                  = /var/run/mysqld/mysqld.sock # Unix socket for local connections.
+port                    = 3306                # Port for MySQL to listen on (default is 3306).
+basedir                 = /usr                # Base directory of the MySQL installation.
+datadir                 = /var/lib/mysql      # Directory where MySQL data files are stored.
+tmpdir                  = /tmp                # Temporary directory used for operations like sorting.
+lc-messages-dir         = /usr/share/mysql    # Directory containing language files for error messages.
+bind-address            = 0.0.0.0             # Listen on all network interfaces to allow external connections.
+query_cache_size        = 16M                 # Amount of memory allocated for caching query results.
+log_error               = /var/log/mysql/error.log # File to store error logs.
+log-bin                 = /var/log/mysql/mysql-bin.log # Binary log file for replication and recovery.
+expire_logs_days        = 10                  # Automatically remove binary logs older than 10 days.
+character-set-server    = utf8mb4             # Default character set for the server.
+collation-server        = utf8mb4_general_ci  # Default collation for the server.
+innodb_use_native_aio   = 0                   # Disable native asynchronous I/O (useful for certain environments).
+
+[client]
+# Configuration for MySQL client tools.
+
+default-character-set = utf8mb4               # Default character set for client connections.
+
+[embedded]
+# Settings for embedded MySQL server (if used). Typically left blank unless embedding is required.
+
+[mariadb]
+# Specific settings for MariaDB server. This section can be used for MariaDB-specific configurations.
+
+[mariadb-10.3]
+# Settings specific to MariaDB version 10.3. This section allows version-specific configurations.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+MariaDB:
+WordPress relies on a database to store its data. The MariaDB container provides this, so it needs to be up and running first.
+This ensures WordPress can connect to the database as soon as it starts.
+
+
+
+
+
+
+What Does --bootstrap Do?
+The --bootstrap option is a special mode for MariaDB's server process (mysqld) that:
+
+Starts the server without networking or any background services.
+Allows initialization scripts to run within a safe, minimal environment.
+Automatically exits after processing the commands.
+It is typically used for initial setup tasks like:
+
+Setting up system databases (mysql, information_schema, etc.).
+Creating or configuring initial users and permissions.
+Avoiding unnecessary overhead or conflicts during first-time setup.
+Why Use --bootstrap?
+Efficiency: The server is started in a lightweight mode without overhead from networking, plugins, or other features unnecessary during initialization.
+Isolation: No external connections or conflicts occur during setup.
+Automation: It’s a safe way to run one-time initialization scripts programmatically without starting the full server.
+
+
+
+
+
+
+https://docs.docker.com/compose/
+https://docs.docker.com/get-started/docker-concepts/running-containers/multi-container-applications/
+https://docs.docker.com/engine/storage/volumes/
+https://www.geeksforgeeks.org/what-is-docker-daemon/
+https://docs.docker.com/get-started/docker-overview/
+https://github.com/Forstman1/inception-42/blob/main/README.md
+https://mariadb.com/kb/en/creating-a-custom-container-image/
+https://www.datanovia.com/en/lessons/wordpress-docker-setup-files-example-for-local-development/
+https://www.massolit-media.com/tech-writing/wordpress-and-docker-dockerfiles/
+https://www.docker.com/blog/how-to-use-the-official-nginx-docker-image/
+https://developer.wordpress.org/advanced-administration/wordpress/wp-config/
+https://medium.com/swlh/wordpress-deployment-with-nginx-php-fpm-and-mariadb-using-docker-compose-55f59e5c1a
+
+
+
+
+
+
+
+
+
+
+
 ```
 
 -->
@@ -1861,6 +1967,78 @@ drwxr-xr-x 30 root     root     16384 Nov 24 17:17 wp-includes
 -rw-r--r--  1 root     root      5102 Nov 24 17:17 wp-trackback.php
 -rw-r--r--  1 root     root      3246 Nov 24 17:17 xmlrpc.php
 "
+
+
+
+
+Example www.conf File
+Here’s an example of a minimal www.conf file suitable for a WordPress container:
+
+ini
+Copy
+Edit
+[www]
+user = www-data
+group = www-data
+
+listen = 9000                           ; PHP-FPM listens on port 9000
+
+pm = dynamic                            ; Process management style
+pm.max_children = 10                    ; Max number of child processes
+pm.start_servers = 3                    ; Start this many processes on startup
+pm.min_spare_servers = 2                ; Minimum spare workers
+pm.max_spare_servers = 5                ; Maximum spare workers
+
+; Logging settings
+access.log = /var/log/php-fpm/access.log
+error_log = /var/log/php-fpm/error.log
+log_level = notice
+
+; Security and permissions
+listen.owner = www-data
+listen.group = www-data
+listen.mode = 0660
+How to Use www.conf in Your WordPress Dockerfile
+Locate or Create the File:
+
+Use the default file from PHP-FPM or create a custom one like the example above.
+Include It in the Docker Image:
+
+Your Dockerfile copies the file:
+dockerfile
+Copy
+Edit
+COPY /tools/www.conf /etc/php/8.2/fpm/pool.d/
+This ensures your custom settings are applied when the container runs.
+Ensure PHP-FPM Uses It:
+
+PHP-FPM automatically loads configuration files from /etc/php/8.2/fpm/pool.d/. No further action is needed unless you override this behavior.
+What Happens If You Don’t Use www.conf?
+Default Configuration:
+
+PHP-FPM will use its default www.conf, which might not match your container’s needs (e.g., port 9000, resource limits).
+Incompatibility with Your Setup:
+
+If the default www.conf doesn’t listen on port 9000, your WordPress container won’t work as intended, and connections from NGINX or other services will fail.
+Suboptimal Performance:
+
+Without fine-tuning, PHP-FPM might underperform or waste resources in your environment.
+
+
+
+
+
+
+
+
+
+
+
+
+
+WordPress:
+Once MariaDB is up, start the WordPress container. During startup, WordPress will try to connect to the database, so having MariaDB ready beforehand is essential.
+WordPress will connect to MariaDB using environment variables (like database host, username, and password) in your docker-compose.yml file or Docker run command.
 
 -->
 
@@ -3234,6 +3412,14 @@ services:
 ```
 
 ### --------------------------------------------
+
+
+
+
+Nginx:
+Nginx acts as a reverse proxy and web server for WordPress.
+It can only serve WordPress properly if the WordPress container is already up and running, so start Nginx last.
+
 
 
 -->
