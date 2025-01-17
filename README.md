@@ -5,16 +5,16 @@ You will virtualize several Docker images, creating them in your new personal vi
 
 ## Step By Step
 1) [Read About *(make sure you understand)*:](#Read-About)
-    - [What is Docker?](#1.-What-is-Docker?)
-    - [What is Docker Compose?](#2.-What-is-Docker-Compose?)
-    - [What are Multi-container Applications?](#3.-What-are-Multi-container-Applications?)
-    - [What is a Docker Image?](#4.-What-is-a-Docker-Image?)
-    - [What Are Volumes?](#5.-What-Are-Volumes?)
-    - [Virtual Machine vs Docker](#6.-Virtual-Machine-vs-Docker)
+    - [What is Docker?](#What-is-Docker?)
+    - [What is Docker Compose?](#What-is-Docker-Compose?)
+    - [What are Multi-container Applications?](#What-are-Multi-container-Applications?)
+    - [What is a Docker Image?](#What-is-a-Docker-Image?)
+    - [What Are Volumes?](#What-Are-Volumes?)
+    - [Virtual Machine vs Docker](#Virtual-Machine-vs-Docker)
 2) [Set up your Virtual Machine:](#Set-up-your-Virtual-Machine)
-    - [How to set up your VM](#How-to-set-up-your-VM:)
-    - [Create a shared folder *(between your VM and host)*](#2.-Create-a-shared-folder)
-    - [Connect to your host terminal *(because VM terminal sucks)*](#3.-Connect-to-your-host-terminal)
+    - [How to set up your VM](#How-to-set-up-your-VM)
+    - [Create a shared folder *(between your VM and host)*](#Create-a-shared-folder)
+    - [Connect to your host terminal *(because VM terminal sucks)*](#Connect-to-your-host-terminal)
 3) [Set Up:](#Set-up)
     - [Extra *(getting started)*](#Extra)
     - [MariaDB](#MariaDB)
@@ -29,7 +29,7 @@ You will virtualize several Docker images, creating them in your new personal vi
 
 ## 🫖Read About 
 
-### 1. What is Docker?
+### 1️⃣What is Docker?
 Docker is a platform that helps developers easily create, deploy, and run applications in containers. <br>
 Containers are lightweight, portable environments that package everything needed to run a piece of software—code, <br>
 libraries, dependencies, and configuration—so it can run reliably on any system, regardless of the environment. <br><br>
@@ -37,20 +37,21 @@ libraries, dependencies, and configuration—so it can run reliably on any syste
 **Key Concepts in Docker:**
 1) **Containers:** <br>
 - A container is like a small, lightweight virtual machine that runs an application and its dependencies on any system.<br>
-- It ensures that the application works the same in different environments *(e.g., on your laptop, in the cloud, or on a server)*.<br>
+- It ensures that the application works the same in different environments *(your laptop, the cloud, or on a server)*.<br>
 - Unlike full virtual machines, containers share the host system’s OS kernel, <br>
  making them faster and more efficient in terms of resource usage.
 2) **Images:** <br>
 - A Docker image is like a template or blueprint for creating containers. <br>
  It contains everything needed to run an app, including the code, libraries, environment variables, and system tools.<br>
-- Images are read-only, and when a container starts from an image, it adds a writable layer on top of the image where it can make changes.<br>
+- Images are read-only, and when a container starts from an image, <br>
+ it adds a writable layer on top of the image where it can make changes.<br>
 3) &emsp;**Docker Daemon:** <br>
 - The Docker daemon is the background service that runs on your host machine and is responsible <br>
  for managing Docker containers, images, volumes, an networks.
 - It listens for Docker commands and executes them *(like pulling images, starting containers, or creating networks)*.<br>
 4) **Dockerfile:** <br>
 - A Dockerfile is a text file that contains a set of instructions for building a Docker image.<br>
-- Think of it as a recipe: it specifies the base image *(e.g., Debian)*, the app’s code, dependencies, and how to run the app.<br>
+- Think of it as a recipe: it specifies the base image *(Debian)*, the app’s code, dependencies, and how to run the app.<br>
 5) **Docker Hub:** <br>
 - Docker Hub is like GitHub for Docker images. It’s a public registry where you can find and share Docker images.<br>
 - You can pull official images *(like nginx, mysql, or python)* or push your own custom images to Docker Hub.<br>
@@ -60,7 +61,7 @@ libraries, dependencies, and configuration—so it can run reliably on any syste
 ---
 
 
-### 2. What is Docker-Compose?
+### 2️⃣What is Docker-Compose?
 Docker Compose is a tool used to easily manage and run multi-container applications.  <br>
 Using a docker-compose.yml file, you can define and start all parts of your app *(e.g., web server, database, cache)* <br>
 with a single command. *(Basiclly like a Makefile for docker)* <br>
@@ -71,7 +72,7 @@ with a single command. *(Basiclly like a Makefile for docker)* <br>
 ---
 
 
-### 3. What are Multi-container Applications?
+### 3️⃣What are Multi-container Applications?
 A multi-container application is an app that needs more than one Docker container to work.
 - For example, let's say you have an e-commerce website. It might need:
     - A web server *(like Nginx or Apache)* to serve the website.
@@ -87,7 +88,7 @@ This setup is called a multi-container application. <br>
 ---
 
 
-### 4. What is a Docker Image?
+### 4️⃣What is a Docker Image?
 A Docker image is like a blueprint or template for creating a Docker container.
 - It contains everything needed to run an application, such as the code, libraries, and dependencies.
 - When you start a container, it's created from a Docker image. <br>
@@ -101,7 +102,7 @@ to create multiple identical containers whenever you need. <br>
 ---
 
 
-### 5. What Are Volumes?
+### 5️⃣What Are Volumes?
 Docker containers are designed to be ephemeral *(short-lived)*, meaning that any data generated within <br>
 the container during runtime will be lost once the container is stopped or removed. <br>
 Volumes are used to persist important data outside of the container, <br>
@@ -147,7 +148,7 @@ and will be preserved even if the container is destroyed.
 ---
 
 
-### 6. Virtual Machine vs Docker
+### 6️⃣Virtual Machine vs Docker
 
 **Summary of Differences:**
 
@@ -179,7 +180,7 @@ and will be preserved even if the container is destroyed.
 
 ## 🫖Set up your Virtual Machine
 
-## How to set up your Virtual Machine:
+### 1️⃣How to set up your Virtual Machine
 
 You can either use as OS Ubuntu or POP!_OS (Or something else).
 
@@ -218,7 +219,7 @@ sudo reboot
 ---
 
 
-## 2. Create a shared folder:
+## 2️⃣Create a shared folder
 
 This is for the Oracle VirtualBox.
 Set up shared folders in VirtualBox to easily transfer files between the host and guest. <br> <br> 
@@ -244,7 +245,7 @@ Set up shared folders in VirtualBox to easily transfer files between the host an
 ---
 
 
-## 3. Connect to your host terminal:
+## 3️⃣Connect to your host terminal
 
 Connecting to your VM through the terminal simplifies your workflow. <br>
 It allows for easy copy-pasting, regular terminal is faster then VM-terminal, <br>
@@ -380,10 +381,12 @@ CMD ["#!/bin/bash", "app.sh"]
 ```
 
 ❗**NOTE:** <br>
-`In Dockerfile:` The RUN apt-get install command inside the Dockerfile runs as the root user by default, <br>
-&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; which is why it works without any additional permissions. <br>
-`In a Running Container:` When you're trying to manually install something by running apt-get <br>
-&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; in an already running container, you must ensure you're using the root user. 
+`In Dockerfile:` <br>
+&emsp;&emsp;&emsp;The RUN apt-get install command inside the Dockerfile runs as the root user by default, <br>
+&emsp;&emsp;&emsp; which is why it works without any additional permissions. <br>
+`In a Running Container:` <br>
+&emsp;&emsp;&emsp;When you're trying to manually install something by running apt-get <br>
+&emsp;&emsp;&emsp; in an already running container, you must ensure you're using the root user. 
 
 <br> <br>
 
@@ -400,7 +403,9 @@ CMD ["#!/bin/bash", "app.sh"]
 This Docker Compose file defines a multi-container application that consists of three main services:
 - MariaDB: The database service.
 - Nginx: The web server that will serve the website.
-- WordPress: The WordPress application itself. <br>
+- WordPress: The WordPress application itself. 
+<br>
+
 The volumes and networks help manage data persistence and network communication between these services. <br><br>
 
 **#️⃣2. Version** <br>
@@ -414,26 +419,28 @@ Each service runs in its own container and represents a specific part of your ap
 Under services, you define three services:` mariadb`,` nginx`, and `wordpress`. <br>
 Each one represents a different container that is built and managed by Docker Compose. <br><br>
 
-&emsp;&emsp;&emsp;&emsp;***Breakdown of services*** <br>
-&emsp;&emsp;&emsp;&emsp;`mariadb:` <br>
-&emsp;&emsp;&emsp;&emsp;This service defines a MariaDB container *(the database)*. <br>
-&emsp;&emsp;&emsp;&emsp;It will be used to store and serve data for your WordPress application. <br>
-&emsp;&emsp;&emsp;&emsp;`nginx:` <br>
-&emsp;&emsp;&emsp;&emsp;This service defines an Nginx container *(the web server)*. <br>
-&emsp;&emsp;&emsp;&emsp;Nginx acts as a reverse proxy that handles web traffic and directs it to the WordPress service. <br>
-&emsp;&emsp;&emsp;&emsp;`wordpress:` <br>
-&emsp;&emsp;&emsp;&emsp;This service defines a WordPress container *(the application)*. <br>
-&emsp;&emsp;&emsp;&emsp;It will run the actual WordPress site, and it depends on the MariaDB database for data storage. <br> <br>
-&emsp;&emsp;&emsp;&emsp;
+&emsp;&emsp;***Breakdown of services*** <br>
+&emsp;&emsp;`mariadb:` <br>
+&emsp;&emsp;This service defines a MariaDB container *(the database)*. <br>
+&emsp;&emsp;It will be used to store and serve data for your WordPress application. <br>
+&emsp;&emsp;`nginx:` <br>
+&emsp;&emsp;This service defines an Nginx container *(the web server)*. <br>
+&emsp;&emsp;Nginx acts as a reverse proxy that handles web traffic and directs it to the WordPress service. <br>
+&emsp;&emsp;`wordpress:` <br>
+&emsp;&emsp;This service defines a WordPress container *(the application)*. <br>
+&emsp;&emsp;It will run the actual WordPress site, and it depends on the MariaDB database for data storage. <br> <br>
 
 **#️⃣4. Services Section** <br>
 For each component, you define a service. <br>
 A service represents a container and its associated configuration.<br>
 
 &emsp;`Image:` What Docker image will be used *(e.g., mariadb, wordpress, or nginx)*? <br>
-&emsp;`Build:` If you need a custom image, you specify a build section that tells Docker Compose where to find the Dockerfile. <br>
-&emsp;`Environment Variables:` What configuration does the container need at runtime? For instance, databases need credentials. <br>
-&emsp;`Volumes:` Do you need to store data persistently or share files between the container and the host? *(what ports to expose)* <br>
+&emsp;`Build:` If you need a custom image, you specify a build section that <br>
+&emsp;&emsp; tells Docker Compose where to find the Dockerfile. <br>
+&emsp;`Environment Variables:` What configuration does the container need at runtime? <br>
+&emsp;&emsp; For instance, databases need credentials. <br>
+&emsp;`Volumes:` Do you need to store data persistently or <br>
+&emsp;&emsp; share files between the container and the host? *(what ports to expose)* <br>
 &emsp;`Ports:` Which ports need to be mapped between the host and the container? <br>
 &emsp;`Network:` Do the containers need to communicate which each other? <br><br>
 
@@ -509,16 +516,19 @@ mariadb:                       |    FROM debian:buster
 Volumes ensure that critical data *(like the MariaDB database and WordPress content)* persists across container restarts.
 - MariaDB Volume *(mariadb:/var/lib/mysql)*: <br>
   - Reason: MariaDB stores the actual database files in /var/lib/mysql within the container. <br>
-    &emsp;&emsp;&emsp;By binding this to a host directory, you ensure that your databases are persistent across container restarts. <br>
+    &emsp;&emsp;&emsp;By binding this to a host directory, you ensure that your databases <br>
+    &emsp;&emsp;&emsp;are persistent across container restarts. <br>
     &emsp;&emsp;&emsp;Without this, any database data would be lost when the container stops.<br>
 - WordPress Volume *(wordpress:/var/www/html)*: <br>
   - Reason: WordPress stores files such as themes, plugins, and uploads in /var/www/html.<br> 
     &emsp;&emsp;&emsp;By binding this directory to the host, <br>
-    &emsp;&emsp;&emsp;your WordPress website's content persists even when the container is restarted or removed.<br>
+    &emsp;&emsp;&emsp;your WordPress website's content persists even when <br>
+    &emsp;&emsp;&emsp;the container is restarted or removed.<br>
 - Nginx Volume *(nginx:/var/www/html)*: (NOT NECESSARY) <br>
   - Optional Use Case: If you need to store static files, custom configurations, or logs, you can bind mount a directory for Nginx. <br>
     &emsp;&emsp;&emsp;Since you're using WordPress and Nginx is just serving it, <br>
-    &emsp;&emsp;&emsp;this may not be necessary unless you're doing something like custom Nginx configurations.<br><br>
+    &emsp;&emsp;&emsp;this may not be necessary unless you're doing something <br>
+    &emsp;&emsp;&emsp;like custom Nginx configurations.<br><br>
 
 **#️⃣7. Networks**<br>
 Networks allow your containers to communicate with each other <br>
@@ -551,13 +561,14 @@ ensuring data persistence and internal communication. <br>
 
 ***Why do you need a custom network?*** <br>
 - `Internal Communication:` <br>
-  • All services in your Compose file *(mariadb, nginx, and wordpress)* are connected to the inception network.  <br>
+  • All services in your Compose file *(mariadb, nginx, and wordpress)* <br>
+   are connected to the inception network.  <br>
   • This allows the services to communicate internally using container names as hostnames. <br>
 - `Easy Service Discovery:` <br>
   • Docker automatically provides service discovery on custom networks.  <br>
-  • **For example**, in your WordPress container, if you set DB_HOSTNAME: mariadb, Docker will know <br>
-   to resolve mariadb to the correct container's IP address because both services <br>
-   are on the same inception network. <br>
+  • **For example**, in your WordPress container, if you set DB_HOSTNAME: mariadb, Docker will <br>
+    know to resolve mariadb to the correct container's IP address because both services <br>
+    are on the same inception network. <br>
 
 <br>
 
@@ -775,6 +786,7 @@ https://<DOMAIN_NAME>
 <br>
 <br>
 <br>
+
 
 
 
