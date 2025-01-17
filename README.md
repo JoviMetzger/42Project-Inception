@@ -12,7 +12,7 @@ You will virtualize several Docker images, creating them in your new personal vi
     - [What Are Volumes?](#5.-What-Are-Volumes?)
     - [Virtual Machine vs Docker](#6.-Virtual-Machine-vs-Docker)
 2) [Set up your Virtual Machine:](#Set-up-your-Virtual-Machine)
-    - [How to set up your VM](#How-to-set-up-your-VM)
+    - [How to set up your VM](#How-to-set-up-your-VM:)
     - [Create a shared folder *(between your VM and host)*](#2.-Create-a-shared-folder)
     - [Connect to your host terminal *(because VM terminal sucks)*](#3.-Connect-to-your-host-terminal)
 3) [Set Up:](#Set-up)
@@ -24,6 +24,7 @@ You will virtualize several Docker images, creating them in your new personal vi
 5) [Resources:](#Resources)
 
 <br>
+
 ---
 
 ## 🫖Read About 
@@ -35,23 +36,24 @@ libraries, dependencies, and configuration—so it can run reliably on any syste
 
 **Key Concepts in Docker:**
 1) **Containers:** <br>
-&emsp;&emsp;&emsp;• A container is like a small, lightweight virtual machine that runs an application and its dependencies on any system.
-&emsp;&emsp;&emsp;• It ensures that the application works the same in different environments *(e.g., on your laptop, in the cloud, or on a server)*.
-&emsp;&emsp;&emsp;• Unlike full virtual machines, containers share the host system’s OS kernel, <br>
-&emsp;&emsp;&emsp; making them faster and more efficient in terms of resource usage.
+- A container is like a small, lightweight virtual machine that runs an application and its dependencies on any system.<br>
+- It ensures that the application works the same in different environments *(e.g., on your laptop, in the cloud, or on a server)*.<br>
+- Unlike full virtual machines, containers share the host system’s OS kernel, <br>
+ making them faster and more efficient in terms of resource usage.
 2) **Images:** <br>
-&emsp;&emsp;&emsp;• A Docker image is like a template or blueprint for creating containers. <br>
-&emsp;&emsp;&emsp; It contains everything needed to run an app, including the code, libraries, environment variables, and system tools.
-&emsp;&emsp;&emsp;• Images are read-only, and when a container starts from an image, it adds a writable layer on top of the image where it can make changes.
+- A Docker image is like a template or blueprint for creating containers. <br>
+ It contains everything needed to run an app, including the code, libraries, environment variables, and system tools.<br>
+- Images are read-only, and when a container starts from an image, it adds a writable layer on top of the image where it can make changes.<br>
 3) &emsp;**Docker Daemon:** <br>
-&emsp;&emsp;&emsp;• The Docker daemon is the background service that runs on your host machine and is responsible for managing Docker containers, images, volumes, an networks.
-&emsp;&emsp;&emsp;• It listens for Docker commands and executes them *(like pulling images, starting containers, or creating networks)*.
+- The Docker daemon is the background service that runs on your host machine and is responsible <br>
+ for managing Docker containers, images, volumes, an networks.
+- It listens for Docker commands and executes them *(like pulling images, starting containers, or creating networks)*.<br>
 4) **Dockerfile:** <br>
-&emsp;&emsp;&emsp;• A Dockerfile is a text file that contains a set of instructions for building a Docker image.
-&emsp;&emsp;&emsp;• Think of it as a recipe: it specifies the base image *(e.g., Debian)*, the app’s code, dependencies, and how to run the app.
+- A Dockerfile is a text file that contains a set of instructions for building a Docker image.<br>
+- Think of it as a recipe: it specifies the base image *(e.g., Debian)*, the app’s code, dependencies, and how to run the app.<br>
 5) **Docker Hub:** <br>
-&emsp;&emsp;&emsp;• Docker Hub is like GitHub for Docker images. It’s a public registry where you can find and share Docker images.
-&emsp;&emsp;&emsp;• You can pull official images *(like nginx, mysql, or python)* or push your own custom images to Docker Hub.
+- Docker Hub is like GitHub for Docker images. It’s a public registry where you can find and share Docker images.<br>
+- You can pull official images *(like nginx, mysql, or python)* or push your own custom images to Docker Hub.<br>
 
 <br>
 
@@ -169,6 +171,7 @@ and will be preserved even if the container is destroyed.
  run different operating systems or when full OS separation is required.
 
 <br> 
+
 ---
 
 <br>
@@ -176,7 +179,7 @@ and will be preserved even if the container is destroyed.
 
 ## 🫖Set up your Virtual Machine
 
-### How to set up your Virtual Machine:
+## How to set up your Virtual Machine:
 
 You can either use as OS Ubuntu or POP!_OS (Or something else).
 
@@ -284,6 +287,7 @@ exit
 
 
 <br> 
+
 ---
 
 <br>
@@ -378,8 +382,8 @@ CMD ["#!/bin/bash", "app.sh"]
 ❗**NOTE:** <br>
 `In Dockerfile:` The RUN apt-get install command inside the Dockerfile runs as the root user by default, <br>
 &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; which is why it works without any additional permissions. <br>
-`In a Running Container:` When you're trying to manually install something by running apt-get in an already running container, <br>
-&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; you must ensure you're using the root user. 
+`In a Running Container:` When you're trying to manually install something by running apt-get <br>
+&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; in an already running container, you must ensure you're using the root user. 
 
 <br> <br>
 
@@ -414,11 +418,9 @@ Each one represents a different container that is built and managed by Docker Co
 &emsp;&emsp;&emsp;&emsp;`mariadb:` <br>
 &emsp;&emsp;&emsp;&emsp;This service defines a MariaDB container *(the database)*. <br>
 &emsp;&emsp;&emsp;&emsp;It will be used to store and serve data for your WordPress application. <br>
-&emsp;&emsp;&emsp;&emsp;
 &emsp;&emsp;&emsp;&emsp;`nginx:` <br>
 &emsp;&emsp;&emsp;&emsp;This service defines an Nginx container *(the web server)*. <br>
 &emsp;&emsp;&emsp;&emsp;Nginx acts as a reverse proxy that handles web traffic and directs it to the WordPress service. <br>
-&emsp;&emsp;&emsp;&emsp;
 &emsp;&emsp;&emsp;&emsp;`wordpress:` <br>
 &emsp;&emsp;&emsp;&emsp;This service defines a WordPress container *(the application)*. <br>
 &emsp;&emsp;&emsp;&emsp;It will run the actual WordPress site, and it depends on the MariaDB database for data storage. <br> <br>
@@ -428,12 +430,12 @@ Each one represents a different container that is built and managed by Docker Co
 For each component, you define a service. <br>
 A service represents a container and its associated configuration.<br>
 
-&emsp;&emsp;`Image:` What Docker image will be used *(e.g., mariadb, wordpress, or nginx)*? <br>
-&emsp;&emsp;`Build:` If you need a custom image, you specify a build section that tells Docker Compose where to find the Dockerfile. <br>
-&emsp;&emsp;`Environment Variables:` What configuration does the container need at runtime? For instance, databases need credentials. <br>
-&emsp;&emsp;`Volumes:` Do you need to store data persistently or share files between the container and the host? *(what ports to expose)* <br>
-&emsp;&emsp;`Ports:` Which ports need to be mapped between the host and the container? <br>
-&emsp;&emsp;`Network:` Do the containers need to communicate which each other? <br><br>
+&emsp;`Image:` What Docker image will be used *(e.g., mariadb, wordpress, or nginx)*? <br>
+&emsp;`Build:` If you need a custom image, you specify a build section that tells Docker Compose where to find the Dockerfile. <br>
+&emsp;`Environment Variables:` What configuration does the container need at runtime? For instance, databases need credentials. <br>
+&emsp;`Volumes:` Do you need to store data persistently or share files between the container and the host? *(what ports to expose)* <br>
+&emsp;`Ports:` Which ports need to be mapped between the host and the container? <br>
+&emsp;`Network:` Do the containers need to communicate which each other? <br><br>
 
 **#️⃣5. Environment Variables** <br>
 Environment variables are commonly defined in a .env file for ease of management and security. <br>
@@ -462,15 +464,15 @@ environment:
 
 **Difference Between `args` and `environment`:**
 
-1. ***args (Build Arguments):***
-&emsp;&emsp;- Build-time variables used exclusively during the image build process *(via docker build or docker-compose build)*.
-&emsp;&emsp;- Defined in the build section of docker-compose.yml and accessed using ARG in a Dockerfile.
-&emsp;&emsp;- Once the image is built, these values are no longer accessible. <br><br>
+1. ***args (Build Arguments):*** <br>
+- Build-time variables used exclusively during the image build process *(via docker build or docker-compose build)*.
+- Defined in the build section of docker-compose.yml and accessed using ARG in a Dockerfile.
+- Once the image is built, these values are no longer accessible. <br><br>
 
-2. ***environment:***
-&emsp;&emsp;- Runtime variables available to the container during execution.
-&emsp;&emsp;- These can be defined in docker-compose.yml, and accessed using ENV in a Dockerfile.
-&emsp;&emsp;- Accessible to the application within the container via environment variable methods. <br>
+2. ***environment:*** <br>
+- Runtime variables available to the container during execution.
+- These can be defined in docker-compose.yml, and accessed using ENV in a Dockerfile.
+- Accessible to the application within the container via environment variable methods. <br>
 
 In summary, args are temporary and limited to the image build process, <br>
 while environment variables are persistent during the container's runtime and directly influence the application's behavior. <br><br>
@@ -506,15 +508,15 @@ mariadb:                       |    FROM debian:buster
 **#️⃣6. Volumes** <br>
 Volumes ensure that critical data *(like the MariaDB database and WordPress content)* persists across container restarts.
 - MariaDB Volume *(mariadb:/var/lib/mysql)*: <br>
-  •Reason: MariaDB stores the actual database files in /var/lib/mysql within the container. <br>
+  - Reason: MariaDB stores the actual database files in /var/lib/mysql within the container. <br>
     &emsp;&emsp;&emsp;By binding this to a host directory, you ensure that your databases are persistent across container restarts. <br>
     &emsp;&emsp;&emsp;Without this, any database data would be lost when the container stops.<br>
 - WordPress Volume *(wordpress:/var/www/html)*: <br>
-  •Reason: WordPress stores files such as themes, plugins, and uploads in /var/www/html.<br> 
+  - Reason: WordPress stores files such as themes, plugins, and uploads in /var/www/html.<br> 
     &emsp;&emsp;&emsp;By binding this directory to the host, <br>
     &emsp;&emsp;&emsp;your WordPress website's content persists even when the container is restarted or removed.<br>
 - Nginx Volume *(nginx:/var/www/html)*: (NOT NECESSARY) <br>
-  •Optional Use Case: If you need to store static files, custom configurations, or logs, you can bind mount a directory for Nginx. <br>
+  - Optional Use Case: If you need to store static files, custom configurations, or logs, you can bind mount a directory for Nginx. <br>
     &emsp;&emsp;&emsp;Since you're using WordPress and Nginx is just serving it, <br>
     &emsp;&emsp;&emsp;this may not be necessary unless you're doing something like custom Nginx configurations.<br><br>
 
@@ -553,10 +555,11 @@ ensuring data persistence and internal communication. <br>
   • This allows the services to communicate internally using container names as hostnames. <br>
 - `Easy Service Discovery:` <br>
   • Docker automatically provides service discovery on custom networks.  <br>
-  • **For example**, in your WordPress container, if you set DB_HOSTNAME: mariadb, Docker will know to resolve mariadb <br>
-  • to the correct container's IP address because both services are on the same inception network. <br>
+  • **For example**, in your WordPress container, if you set DB_HOSTNAME: mariadb, Docker will know <br>
+   to resolve mariadb to the correct container's IP address because both services <br>
+   are on the same inception network. <br>
 
-<br> <br>
+<br>
 
 <details>
   <summary><strong>❇️❇️Example docker-compose.yml❇️❇️</strong></summary>
@@ -731,6 +734,7 @@ volumes:
 
 
 <br> 
+
 ---
 
 <br>
@@ -760,6 +764,7 @@ https://<DOMAIN_NAME>
 <br>
 
 <br> 
+
 ---
 
 <br>
@@ -770,6 +775,7 @@ https://<DOMAIN_NAME>
 <br>
 <br>
 <br>
+
 
 
 
