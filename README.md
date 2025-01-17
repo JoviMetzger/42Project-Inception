@@ -745,19 +745,19 @@ volumes:
 
 
 
-## 🌀MariaDB
+## 🌬MariaDB
 
 
 ---
 
 
-## ❄🌀WordPress
+## 🌪️WordPress
 
 
 ---
 
 
-## 🌀Nginx
+## 🌈Nginx
 
 
 <br> 
