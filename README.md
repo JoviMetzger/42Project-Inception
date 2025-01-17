@@ -45,7 +45,7 @@ libraries, dependencies, and configuration—so it can run reliably on any syste
  It contains everything needed to run an app, including the code, libraries, environment variables, and system tools.<br>
 - Images are read-only, and when a container starts from an image, <br>
  it adds a writable layer on top of the image where it can make changes.<br>
-3) &emsp;**Docker Daemon:** <br>
+3) **Docker Daemon:** <br>
 - The Docker daemon is the background service that runs on your host machine and is responsible <br>
  for managing Docker containers, images, volumes, an networks.
 - It listens for Docker commands and executes them *(like pulling images, starting containers, or creating networks)*.<br>
@@ -63,7 +63,7 @@ libraries, dependencies, and configuration—so it can run reliably on any syste
 
 ### 2️⃣What is Docker-Compose?
 Docker Compose is a tool used to easily manage and run multi-container applications.  <br>
-Using a docker-compose.yml file, you can define and start all parts of your app *(e.g., web server, database, cache)* <br>
+Using a docker-compose.yml file, you can define and start all parts of your app *(web server, database, cache)* <br>
 with a single command. *(Basiclly like a Makefile for docker)* <br>
 
 <br>
@@ -428,7 +428,7 @@ Each one represents a different container that is built and managed by Docker Co
 &emsp;&emsp;Nginx acts as a reverse proxy that handles web traffic and directs it to the WordPress service. <br>
 &emsp;&emsp;`wordpress:` <br>
 &emsp;&emsp;This service defines a WordPress container *(the application)*. <br>
-&emsp;&emsp;It will run the actual WordPress site, and it depends on the MariaDB database for data storage. <br> <br>
+&emsp;&emsp;It will run the actual WordPress site, and it depends on the MariaDB for data storage. <br> <br>
 
 **#️⃣4. Services Section** <br>
 For each component, you define a service. <br>
@@ -436,11 +436,11 @@ A service represents a container and its associated configuration.<br>
 
 &emsp;`Image:` What Docker image will be used *(e.g., mariadb, wordpress, or nginx)*? <br>
 &emsp;`Build:` If you need a custom image, you specify a build section that <br>
-&emsp;&emsp; tells Docker Compose where to find the Dockerfile. <br>
+&emsp;&emsp;&emsp;&emsp; tells Docker Compose where to find the Dockerfile. <br>
 &emsp;`Environment Variables:` What configuration does the container need at runtime? <br>
-&emsp;&emsp; For instance, databases need credentials. <br>
+&emsp;&emsp;&emsp;&emsp; For instance, databases need credentials. <br>
 &emsp;`Volumes:` Do you need to store data persistently or <br>
-&emsp;&emsp; share files between the container and the host? *(what ports to expose)* <br>
+&emsp;&emsp;&emsp;&emsp; share files between the container and the host? *(what ports to expose)* <br>
 &emsp;`Ports:` Which ports need to be mapped between the host and the container? <br>
 &emsp;`Network:` Do the containers need to communicate which each other? <br><br>
 
@@ -786,9 +786,6 @@ https://<DOMAIN_NAME>
 <br>
 <br>
 <br>
-
-
-
 
 
 
