@@ -16,8 +16,8 @@ You will virtualize several Docker images, creating them in your new personal vi
     - [Create a Shared Folder *(between your VM and host)*](#2️⃣Create-a-Shared-Folder)
     - [Connect to your host terminal *(because VM terminal sucks)*](#3️⃣Connect-to-your-host-terminal)
 3) [Set Up:](#Set-up)
-    - [Extra *(getting started)*](#-extra)
-    - [MariaDB](#❄mariadb)
+    - [Extra *(getting started)*](#🌈extra)
+    - [MariaDB](#mariadb)
     - [WordPress](#❄wordpress)
     - [Nginx](#-nginx)
 4) [Installation:](#Installation)
@@ -313,7 +313,7 @@ exit
 
 ## 🫖Set Up
 
-### Extra
+### 🌈Extra
 
 <details>
   <summary><strong>.env</strong></summary>
