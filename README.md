@@ -6,17 +6,17 @@ You will virtualize several Docker images, creating them in your new personal vi
 ## Step By Step
 1) [Read About *(make sure you understand)*:](#Read-About)
     - [What is Docker?](#1️⃣What-is-Docker)
-    - [What is Docker Compose?](#What-is-Docker-Compose)
-    - [What are Multi-container Applications?](#What-are-Multi-container-Applications)
-    - [What is a Docker Image?](#What-is-a-Docker-Image)
-    - [What Are Volumes?](#What-Are-Volumes)
-    - [Virtual Machine vs Docker](#Virtual-Machine-vs-Docker)
-2) [Set up your Virtual Machine:](#Set-up-your-Virtual-Machine)
+    - [What is Docker Compose?](#2️⃣What-is-Docker-Compose)
+    - [What are Multi-container Applications?](#3️⃣What-are-Multi-container-Applications)
+    - [What is a Docker Image?](#4️⃣What-is-a-Docker-Image)
+    - [What Are Volumes?](#5️⃣What-Are-Volumes)
+    - [Virtual Machine vs Docker](#6️⃣Virtual-Machine-vs-Docker)
+2) [Set up your Virtual Machine:](#7️⃣Set-up-your-Virtual-Machine)
     - [How to set up your Virtual Machine](#1️⃣how-to-set-up-your-Virtual-Machine)
-    - [Create a shared folder *(between your VM and host)*](#Create-a-shared-folder)
-    - [Connect to your host terminal *(because VM terminal sucks)*](#Connect-to-your-host-terminal)
+    - [Create a Shared Folder *(between your VM and host)*](#2️⃣Create-a-Shared-Folder)
+    - [Connect to your host terminal *(because VM terminal sucks)*](#3️⃣Connect-to-your-host-terminal)
 3) [Set Up:](#Set-up)
-    - [Extra *(getting started)*](#Extra)
+    - [Extra *(getting started)*](#❄️Extra)
     - [MariaDB](#MariaDB)
     - [WordPress](#WordPress)
     - [Nginx](#Nginx)
@@ -229,7 +229,7 @@ sudo reboot
   <br>
 
 
-## 2️⃣Create a shared folder
+## 2️⃣Create a Shared Folder
 
 This is for the Oracle VirtualBox.
 Set up shared folders in VirtualBox to easily transfer files between the host and guest. <br> <br> 
@@ -826,13 +826,6 @@ It can only serve WordPress properly if the WordPress container is already up an
 WordPress:
 Once MariaDB is up, start the WordPress container. During startup, WordPress will try to connect to the database, so having MariaDB ready beforehand is essential.
 WordPress will connect to MariaDB using environment variables (like database host, username, and password) in your docker-compose.yml file or Docker run command.
-
-
-
-
-
-
-
 
 
 
