@@ -5,14 +5,14 @@ You will virtualize several Docker images, creating them in your new personal vi
 
 ## Step By Step
 1) [Read About *(make sure you understand)*:](#Read-About)
-    - [What is Docker?](#What-is-Docker?)
-    - [What is Docker Compose?](#What-is-Docker-Compose?)
-    - [What are Multi-container Applications?](#What-are-Multi-container-Applications?)
-    - [What is a Docker Image?](#What-is-a-Docker-Image?)
-    - [What Are Volumes?](#What-Are-Volumes?)
+    - [What is Docker?](#1️⃣What-is-Docker)
+    - [What is Docker Compose?](#What-is-Docker-Compose)
+    - [What are Multi-container Applications?](#What-are-Multi-container-Applications)
+    - [What is a Docker Image?](#What-is-a-Docker-Image)
+    - [What Are Volumes?](#What-Are-Volumes)
     - [Virtual Machine vs Docker](#Virtual-Machine-vs-Docker)
 2) [Set up your Virtual Machine:](#Set-up-your-Virtual-Machine)
-    - [How to set up your VM](#How-to-set-up-your-VM)
+    - [How to set up your Virtual Machine](#1️⃣how-to-set-up-your-Virtual-Machine)
     - [Create a shared folder *(between your VM and host)*](#Create-a-shared-folder)
     - [Connect to your host terminal *(because VM terminal sucks)*](#Connect-to-your-host-terminal)
 3) [Set Up:](#Set-up)
@@ -29,7 +29,7 @@ You will virtualize several Docker images, creating them in your new personal vi
 
 ## 🫖Read About 
 
-## 1️⃣What is Docker?
+### 1️⃣What is Docker?
 Docker is a platform that helps developers easily create, deploy, and run applications in containers. <br>
 Containers are lightweight, portable environments that package everything needed to run a piece of software—code, <br>
 libraries, dependencies, and configuration—so it can run reliably on any system, regardless of the environment. <br><br>
@@ -303,9 +303,12 @@ exit
 
 </details>
 
+<br> 
 
 ---
 
+<br>
+<br>
 
 
 ## 🫖Set Up
@@ -449,11 +452,11 @@ A service represents a container and its associated configuration.<br>
 
 &emsp;`Image:` What Docker image will be used *(e.g., mariadb, wordpress, or nginx)*? <br>
 &emsp;`Build:` If you need a custom image, you specify a build section that <br>
-&emsp;&emsp;&emsp;&emsp;&emsp; tells Docker Compose where to find the Dockerfile. <br>
+&emsp;&emsp;&emsp;&emsp;&emsp;tells Docker Compose where to find the Dockerfile. <br>
 &emsp;`Environment Variables:` What configuration does the container need at runtime? <br>
-&emsp;&emsp;&emsp;&emsp;&emsp; For instance, databases need credentials. <br>
+&emsp;&emsp;&emsp;&emsp;&emsp;For instance, databases need credentials. <br>
 &emsp;`Volumes:` Do you need to store data persistently or <br>
-&emsp;&emsp;&emsp;&emsp;&emsp; share files between the container and the host? *(what ports to expose)* <br>
+&emsp;&emsp;&emsp;&emsp;&emsp;share files between the container and the host? *(what ports to expose)* <br>
 &emsp;`Ports:` Which ports need to be mapped between the host and the container? <br>
 &emsp;`Network:` Do the containers need to communicate which each other? <br><br>
 
