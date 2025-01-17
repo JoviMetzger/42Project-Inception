@@ -800,24 +800,24 @@ https://<DOMAIN_NAME>
 ## 🫖Resources
 
 ### Docker:
-- **Docker Compose Documentation**: [Compose Documentation](https://docs.docker.com/compose/)
-- **Multi-Container Applications**: [Running Multi-Container Applications](https://docs.docker.com/get-started/docker-concepts/running-containers/multi-container-applications/)
-- **Docker Volumes**: [Storage Volumes in Docker](https://docs.docker.com/engine/storage/volumes/)
-- **Docker Daemon**: [What is Docker Daemon? (GeeksForGeeks)](https://www.geeksforgeeks.org/what-is-docker-daemon/)
-- **Docker Overview**: [Docker Overview (Official Docs)](https://docs.docker.com/get-started/docker-overview/)
-- **GitHub ReadME**: [Inception Project Repo](https://github.com/Forstman1/inception-42/blob/main/README.md)
+- [Docker Compose Documentation](https://docs.docker.com/compose/)
+- [Multi-Container Applications](https://docs.docker.com/get-started/docker-concepts/running-containers/multi-container-applications/)
+- [Docker Volumes](https://docs.docker.com/engine/storage/volumes/)
+- [Docker Daemon](https://www.geeksforgeeks.org/what-is-docker-daemon/)
+- [Docker Overview](https://docs.docker.com/get-started/docker-overview/)
+- [GitHub ReadME](https://github.com/Forstman1/inception-42/blob/main/README.md)
 
 ### Wordpress:
-- **WordPress Docker Setup**: [WordPress Docker Setup Example](https://www.datanovia.com/en/lessons/wordpress-docker-setup-files-example-for-local-development/)
-- **WordPress and Dockerfiles**: [Dockerfiles for WordPress and Docker](https://www.massolit-media.com/tech-writing/wordpress-and-docker-dockerfiles/)
-- **WordPress `wp-config`**: [Advanced Administration: `wp-config` (WordPress Developer Docs)](https://developer.wordpress.org/advanced-administration/wordpress/wp-config/)
-- **WordPress Deployment**: [WordPress Deployment with NGINX, PHP-FPM, and MariaDB](https://medium.com/swlh/wordpress-deployment-with-nginx-php-fpm-and-mariadb-using-docker-compose-55f59e5c1a)
+- [WordPress Docker Setup](https://www.datanovia.com/en/lessons/wordpress-docker-setup-files-example-for-local-development/)
+- [WordPress and Dockerfiles](https://www.massolit-media.com/tech-writing/wordpress-and-docker-dockerfiles/)
+- [WordPress `wp-config`](https://developer.wordpress.org/advanced-administration/wordpress/wp-config/)
+- [WordPress Deployment](https://medium.com/swlh/wordpress-deployment-with-nginx-php-fpm-and-mariadb-using-docker-compose-55f59e5c1a)
 
 ### MariaDB:
-- **MariaDB Custom Container Image**: [Creating a Custom Container Image (MariaDB Docs)](https://mariadb.com/kb/en/creating-a-custom-container-image/)
+- [MariaDB Custom Container Image](https://mariadb.com/kb/en/creating-a-custom-container-image/)
 
 ### Nginx:
-- **NGINX Docker Image**: [Using the Official NGINX Docker Image](https://www.docker.com/blog/how-to-use-the-official-nginx-docker-image/)
+- [NGINX Docker Image](https://www.docker.com/blog/how-to-use-the-official-nginx-docker-image/)
 
 
 
