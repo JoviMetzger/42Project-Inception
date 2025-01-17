@@ -18,8 +18,8 @@ You will virtualize several Docker images, creating them in your new personal vi
 3) [Set Up:](#Set-up)
     - [Extra *(getting started)*](#🌈extra)
     - [MariaDB](#mariadb)
-    - [WordPress](#❄wordpress)
-    - [Nginx](#-nginx)
+    - [WordPress](#wordpress)
+    - [Nginx](#nginx)
 4) [Installation:](#Installation)
 5) [Resources:](#Resources)
 
@@ -745,19 +745,19 @@ volumes:
 
 
 
-## ❄MariaDB
+## ❄️MariaDB
 
 
 ---
 
 
-## ❄WordPress
+## ❄️WordPress
 
 
 ---
 
 
-## ❄Nginx
+## ❄️Nginx
 
 
 <br> 
