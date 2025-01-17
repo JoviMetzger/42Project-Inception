@@ -33,22 +33,22 @@ Containers are lightweight, portable environments that package everything needed
 libraries, dependencies, and configuration—so it can run reliably on any system, regardless of the environment. <br><br>
 
 **Key Concepts in Docker:**
-1) &emsp;**Containers:**
+1) &emsp;**Containers:** <br>
 &emsp;&emsp;&emsp;&emsp;- A container is like a small, lightweight virtual machine that runs an application and its dependencies on any system.
 &emsp;&emsp;&emsp;&emsp;- It ensures that the application works the same in different environments *(e.g., on your laptop, in the cloud, or on a server)*.
 &emsp;&emsp;&emsp;&emsp;- Unlike full virtual machines, containers share the host system’s OS kernel, <br>
 &emsp;&emsp;&emsp;&emsp;&emsp;&emsp; making them faster and more efficient in terms of resource usage.
-2) &emsp;**Images:**
+2) &emsp;**Images:** <br>
 &emsp;&emsp;&emsp;&emsp;- A Docker image is like a template or blueprint for creating containers. <br>
 &emsp;&emsp;&emsp;&emsp;&emsp;&emsp; It contains everything needed to run an app, including the code, libraries, environment variables, and system tools.
 &emsp;&emsp;&emsp;&emsp;- Images are read-only, and when a container starts from an image, it adds a writable layer on top of the image where it can make changes.
-3) &emsp;**Docker Daemon:**
+3) &emsp;**Docker Daemon:** <br>
 &emsp;&emsp;&emsp;&emsp;- The Docker daemon is the background service that runs on your host machine and is responsible for managing Docker containers, images, volumes, an networks.
 &emsp;&emsp;&emsp;&emsp;- It listens for Docker commands and executes them *(like pulling images, starting containers, or creating networks)*.
-4) &emsp;**Dockerfile:**
+4) &emsp;**Dockerfile:** <br>
 &emsp;&emsp;&emsp;&emsp;- A Dockerfile is a text file that contains a set of instructions for building a Docker image.
 &emsp;&emsp;&emsp;&emsp;- Think of it as a recipe: it specifies the base image *(e.g., Debian)*, the app’s code, dependencies, and how to run the app.
-5) &emsp;**Docker Hub:**
+5) &emsp;**Docker Hub:** <br>
 &emsp;&emsp;&emsp;&emsp;- Docker Hub is like GitHub for Docker images. It’s a public registry where you can find and share Docker images.
 &emsp;&emsp;&emsp;&emsp;- You can pull official images *(like nginx, mysql, or python)* or push your own custom images to Docker Hub.
 
@@ -84,9 +84,10 @@ This setup is called a multi-container application.
 A Docker image is like a blueprint or template for creating a Docker container.
 - It contains everything needed to run an application, such as the code, libraries, and dependencies.
 - When you start a container, it's created from a Docker image. <br>
-&emsp;&emsp; The image is read-only and acts as a recipe for how the container should be built. <br>
+&emsp;The image is read-only and acts as a recipe for how the container should be built. <br>
 
-Think of a Docker image like a snapshot of your app environment that can be used to create multiple identical containers whenever you need.
+Think of a Docker image like a snapshot of your app environment that can be used <br>
+to create multiple identical containers whenever you need. <br>
 
 ---
 
@@ -94,7 +95,8 @@ Think of a Docker image like a snapshot of your app environment that can be used
 ### 5. What Are Volumes?
 Docker containers are designed to be ephemeral *(short-lived)*, meaning that any data generated within <br>
 the container during runtime will be lost once the container is stopped or removed. <br>
-Volumes are used to persist important data outside of the container, allowing  you to keep that data even after the container is deleted or ontainer reboots <br>
+Volumes are used to persist important data outside of the container, <br>
+allowing  you to keep that data even after the container is deleted or ontainer reboots <br>
 
 **How volumes work:**
 - Volumes are stored on the host machine outside the container’s filesystem, usually in */var/lib/docker/volumes/*.
@@ -159,7 +161,7 @@ It's great for modern app development, where speed, portability, and scalability
 
 ## 🫖Set up your Virtual Machine
 
-### 🌙1. How to set up your Virtual Machine:
+## 1. How to set up your Virtual Machine:
 
 You can either use as OS Ubuntu or POP!_OS (Or something else).
 
@@ -198,7 +200,7 @@ sudo reboot
 ---
 
 
-### 🌙2. Create a shared folder:
+## 2. Create a shared folder:
 
 This is for the Oracle VirtualBox.
 Set up shared folders in VirtualBox to easily transfer files between the host and guest. <br> <br> 
@@ -224,7 +226,7 @@ Set up shared folders in VirtualBox to easily transfer files between the host an
 ---
 
 
-### 🌙3. Connect to your host terminal:
+## 3. Connect to your host terminal:
 
 Connecting to your VM through the terminal simplifies your workflow. <br>
 It allows for easy copy-pasting, regular terminal is faster then VM-terminal, <br>
@@ -279,10 +281,14 @@ exit
 
 ## 🧩.env:
 
-The .env file allows you to keep configuration data separate from your codebase, making the application more flexible and easier to maintain. <br>
-Instead of hardcoding values in your application, you can reference environment variables, which can be changed without altering the code. <br>
-The variables in a .env often include sensitive or configuration-specific data, such as API keys, database credentials, or application settings. <br>
-Sensitive information like passwords, API keys, and secrets should not be stored in your source code, so you store them in your .env to keep those secure. <br>
+The .env file allows you to keep configuration data separate from your codebase, <br>
+making the application more flexible and easier to maintain. <br>
+Instead of hardcoding values in your application, you can reference environment variables, <br>
+which can be changed without altering the code. <br>
+The variables in a .env often include sensitive or configuration-specific data, <br>
+such as API keys, database credentials, or application settings. <br>
+Sensitive information like passwords, API keys, and secrets should not be stored in your source code, <br>
+so you store them in your .env to keep those secure. <br>
 
 **For this projcet you can store:**
 - Database connection details *(hostname, database name, credentials)*
@@ -292,7 +298,7 @@ Sensitive information like passwords, API keys, and secrets should not be stored
 Ensure your .env file is in the same directory where you run the docker-compose command.<br>
 Docker Compose looks for the .env file in the project directory by default.<br>
 
-**Your .env file should look like this:** *(can add ofcourese more variables)*
+**Your .env file should look like this:** *(can ofcourese add more variables)*
 ```plaintext
 # GENERAL
 DOMAIN_NAME=[...]          # Intra user name
@@ -317,7 +323,7 @@ WP_USER_PASSWORD=[...]     # Password your choice
 WP_USER_EMAIL=[...]        # Email your choice
 ```
 
-<br>
+<br> <br>
 
 </details>
 
@@ -352,11 +358,11 @@ CMD ["#!/bin/bash", "app.sh"]
 
 ❗**NOTE:** <br>
 `In Dockerfile:` The RUN apt-get install command inside the Dockerfile runs as the root user by default, <br>
-&emsp;&emsp;&emsp;&emsp; which is why it works without any additional permissions. <br>
+&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; which is why it works without any additional permissions. <br>
 `In a Running Container:` When you're trying to manually install something by running apt-get in an already running container, <br>
-&emsp;&emsp;&emsp;&emsp; you must ensure you're using the root user. 
+&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; you must ensure you're using the root user. 
 
-<br>
+<br> <br>
 
 </details>
 
@@ -367,57 +373,56 @@ CMD ["#!/bin/bash", "app.sh"]
 ## 🧩Docker-compose.yml:
 
 
-**1. General Overview** <br>
+**#️⃣1. General Overview** <br>
 This Docker Compose file defines a multi-container application that consists of three main services:
 - MariaDB: The database service.
 - Nginx: The web server that will serve the website.
 - WordPress: The WordPress application itself. <br>
 The volumes and networks help manage data persistence and network communication between these services. <br><br>
 
-**2. Version** <br>
+**#️⃣2. Version** <br>
 The version key specifies the version of the Compose file format you're using.  <br>
 But the newer Docker update doesn't require a version anymore, it will give you a warning. <br><br>
 
-**3. Services** <br>
+**#️⃣3. Services** <br>
 The services key defines all the individual services *(containers)* that make up your application <br>
 that will work together to create a multi-container environment.  <br>
 Each service runs in its own container and represents a specific part of your application. <br>
 Under services, you define three services:` mariadb`,` nginx`, and `wordpress`. <br>
 Each one represents a different container that is built and managed by Docker Compose. <br><br>
 
-***Breakdown of services*** <br>
-`mariadb:` <br>
-This service defines a MariaDB container *(the database)*. <br>
-It will be used to store and serve data for your WordPress application. <br>
+&emsp;&emsp;&emsp;&emsp;***Breakdown of services*** <br>
+&emsp;&emsp;&emsp;&emsp;`mariadb:` <br>
+&emsp;&emsp;&emsp;&emsp;This service defines a MariaDB container *(the database)*. <br>
+&emsp;&emsp;&emsp;&emsp;It will be used to store and serve data for your WordPress application. <br>
+&emsp;&emsp;&emsp;&emsp;
+&emsp;&emsp;&emsp;&emsp;`nginx:` <br>
+&emsp;&emsp;&emsp;&emsp;This service defines an Nginx container *(the web server)*. <br>
+&emsp;&emsp;&emsp;&emsp;Nginx acts as a reverse proxy that handles web traffic and directs it to the WordPress service. <br>
+&emsp;&emsp;&emsp;&emsp;
+&emsp;&emsp;&emsp;&emsp;`wordpress:` <br>
+&emsp;&emsp;&emsp;&emsp;This service defines a WordPress container *(the application)*. <br>
+&emsp;&emsp;&emsp;&emsp;It will run the actual WordPress site, and it depends on the MariaDB database for data storage. <br> <br>
+&emsp;&emsp;&emsp;&emsp;
 
-`nginx:` <br>
-This service defines an Nginx container *(the web server)*. <br>
-Nginx acts as a reverse proxy that handles web traffic and directs it to the WordPress service. <br>
-
-`wordpress:` <br>
-This service defines a WordPress container *(the application)*. <br>
-It will run the actual WordPress site, and it depends on the MariaDB database for data storage. <br> <br>
-
-
-**4. Services Section** <br>
+**#️⃣4. Services Section** <br>
 For each component, you define a service. <br>
 A service represents a container and its associated configuration.<br>
 
-`Image:` What Docker image will be used *(e.g., mariadb, wordpress, or nginx)*? <br>
-`Build:` If you need a custom image, you specify a build section that tells Docker Compose where to find the Dockerfile. <br>
-`Environment Variables:` What configuration does the container need at runtime? For instance, databases need credentials. <br>
-`Volumes:` Do you need to store data persistently or share files between the container and the host? *(what ports to expose)* <br>
-`Ports:` Which ports need to be mapped between the host and the container? <br>
-`Network:` Do the containers need to communicate which each other? <br><br>
+&emsp;&emsp;`Image:` What Docker image will be used *(e.g., mariadb, wordpress, or nginx)*? <br>
+&emsp;&emsp;`Build:` If you need a custom image, you specify a build section that tells Docker Compose where to find the Dockerfile. <br>
+&emsp;&emsp;`Environment Variables:` What configuration does the container need at runtime? For instance, databases need credentials. <br>
+&emsp;&emsp;`Volumes:` Do you need to store data persistently or share files between the container and the host? *(what ports to expose)* <br>
+&emsp;&emsp;`Ports:` Which ports need to be mapped between the host and the container? <br>
+&emsp;&emsp;`Network:` Do the containers need to communicate which each other? <br><br>
 
-**5. Environment Variables** <br>
+**#️⃣5. Environment Variables** <br>
 Environment variables are commonly defined in a .env file for ease of management and security. <br>
 When using a .env file, you can reference it in your docker-compose.yml as: <br>
 ```yml
     env_file:
           - .env
 ```
-<br>
 
 But lets say yo don't have a .env file or you have variables that are executed after runtime. <br>
 You add the to your server like this: <br>
@@ -441,7 +446,7 @@ environment:
 1. ***args (Build Arguments):***
 - Build-time variables used exclusively during the image build process *(via docker build or docker-compose build)*.
 - Defined in the build section of docker-compose.yml and accessed using ARG in a Dockerfile.
-- Once the image is built, these values are no longer accessible. <br>
+- Once the image is built, these values are no longer accessible. <br><br>
 
 2. ***environment:***
 - Runtime variables available to the container during execution.
@@ -449,7 +454,7 @@ environment:
 - Accessible to the application within the container via environment variable methods (*e.g., process.env in Node.js or os.getenv in Python)*. <br>
 
 In summary, args are temporary and limited to the image build process, <br>
-while environment variables are persistent during the container's runtime and directly influence the application's behavior. <br>
+while environment variables are persistent during the container's runtime and directly influence the application's behavior. <br><br>
 **Example:**
 ```yml
                      -------- ARG --------
@@ -479,21 +484,21 @@ mariadb:                       |    FROM debian:buster
 ```
 <br>
 
-**6. Volumes** <br>
+**#️⃣6. Volumes** <br>
 Volumes ensure that critical data *(like the MariaDB database and WordPress content)* persists across container restarts.
-- MariaDB Volume *(mariadb:/var/lib/mysql)*:
+- MariaDB Volume *(mariadb:/var/lib/mysql)*: <br>
         &emsp;&emsp;&emsp;&emsp;Reason: MariaDB stores the actual database files in /var/lib/mysql within the container. <br>
                 &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;By binding this to a host directory, you ensure that your databases are persistent across container restarts. <br>
                 &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;Without this, any database data would be lost when the container stops.<br>
-- WordPress Volume *(wordpress:/var/www/html)*:
+- WordPress Volume *(wordpress:/var/www/html)*: <br>
         &emsp;&emsp;&emsp;&emsp;Reason: WordPress stores files such as themes, plugins, and uploads in /var/www/html.<br> 
                 &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;By binding this directory to the host, your WordPress website's content persists even when the container is restarted or removed.<br>
-- Nginx Volume *(nginx:/var/www/html)*: (NOT NECESSARY)
+- Nginx Volume *(nginx:/var/www/html)*: (NOT NECESSARY) <br>
         &emsp;&emsp;&emsp;&emsp;Optional Use Case: If you need to store static files, custom configurations, or logs, you can bind mount a directory for Nginx. <br>
                            &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;Since you're using WordPress and Nginx is just serving it, <br>
                            &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;this may not be necessary unless you're doing something like custom Nginx configurations.<br><br>
 
-**7. Networks**<br>
+**#️⃣7. Networks**<br>
 Networks allow your containers to communicate with each other internally on a dedicated Docker network.<br>
 **All three containers should have:**
 ```yaml
@@ -522,15 +527,18 @@ This setup provides a robust architecture for running a WordPress site backed by
 ensuring data persistence and internal communication. <br>
 
 ***Why do you need a custom network?*** <br>
-`Internal Communication:` All services in your Compose file *(mariadb, nginx, and wordpress)* are connected to the inception network.  <br>
-&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;This allows the services to communicate internally using container names as hostnames *(e.g., the WordPress service can talk to MariaDB by using mariadb as the hostname)*. <br>
-`Easy Service Discovery:` Docker automatically provides service discovery on custom networks.  <br>
+`Internal Communication:` <br>
+&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;All services in your Compose file *(mariadb, nginx, and wordpress)* are connected to the inception network.  <br>
+&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;This allows the services to communicate internally using container names as hostnames. <br>
+`Easy Service Discovery:` <br>
+&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;Docker automatically provides service discovery on custom networks.  <br>
 &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;**For example**, in your WordPress container, if you set DB_HOSTNAME: mariadb, Docker will know to resolve mariadb <br>
 &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;to the correct container's IP address because both services are on the same inception network. <br>
 
+<br> <br>
 
 <details>
-  <summary><strong>Example docker-compose.yml</strong></summary>
+  <summary><strong>❇️Example docker-compose.yml</strong></summary>
 
 ## Example docker-compose.yml:
 
@@ -614,10 +622,9 @@ volumes:
 
 </details>
 
+<br>
+
 </details>
-
-
----
 
 
 <details>
@@ -715,11 +722,11 @@ To execute the program, follow the steps below:
 ```bash
 $ make
 ```
-***3. Go to your web browser***
+***3. Go to your web browser*** *(Chrome, Firefox ...)*
 ```bash
 <DOMAIN_NAME>
 ```
-&emsp;&emsp;&emsp;&emsp;***OR***
+&emsp;&emsp;***OR***
 ```bash
 https://<DOMAIN_NAME>
 ```
@@ -732,6 +739,8 @@ https://<DOMAIN_NAME>
 <br>
 <br>
 <br>
+
+
 
 
 
