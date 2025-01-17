@@ -425,7 +425,7 @@ Each one represents a different container that is built and managed by Docker Co
 &emsp;&emsp;It will be used to store and serve data for your WordPress application. <br>
 &emsp;&emsp;`nginx:` <br>
 &emsp;&emsp;This service defines an Nginx container *(the web server)*. <br>
-&emsp;&emsp;Nginx acts as a reverse proxy that handles web traffic and directs it to the WordPress service. <br>
+&emsp;&emsp;Nginx acts as a reverse proxy that handles web traffic and directs it to the WP service. <br>
 &emsp;&emsp;`wordpress:` <br>
 &emsp;&emsp;This service defines a WordPress container *(the application)*. <br>
 &emsp;&emsp;It will run the actual WordPress site, and it depends on the MariaDB for data storage. <br> <br>
@@ -436,24 +436,24 @@ A service represents a container and its associated configuration.<br>
 
 &emsp;`Image:` What Docker image will be used *(e.g., mariadb, wordpress, or nginx)*? <br>
 &emsp;`Build:` If you need a custom image, you specify a build section that <br>
-&emsp;&emsp;&emsp;&emsp; tells Docker Compose where to find the Dockerfile. <br>
+&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; tells Docker Compose where to find the Dockerfile. <br>
 &emsp;`Environment Variables:` What configuration does the container need at runtime? <br>
-&emsp;&emsp;&emsp;&emsp; For instance, databases need credentials. <br>
+&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; For instance, databases need credentials. <br>
 &emsp;`Volumes:` Do you need to store data persistently or <br>
-&emsp;&emsp;&emsp;&emsp; share files between the container and the host? *(what ports to expose)* <br>
+&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; share files between the container and the host? *(what ports to expose)* <br>
 &emsp;`Ports:` Which ports need to be mapped between the host and the container? <br>
 &emsp;`Network:` Do the containers need to communicate which each other? <br><br>
 
 **#️⃣5. Environment Variables** <br>
-Environment variables are commonly defined in a .env file for ease of management and security. <br>
-When using a .env file, you can reference it in your docker-compose.yml as: <br>
+Environment variables are commonly defined in a .env file for ease of management and security. <br><br>
+**When using a .env file, you can reference it in your docker-compose.yml as:** <br>
 ```yml
 env_file:
     - .env
 ```
 
 But lets say yo don't have a .env file or you have variables that are executed after runtime. <br>
-You add the to your server like this: <br>
+**You add the to your server like this:** <br>
 ```yml
 environment:
       DOMAIN_NAME: ${DOMAIN_NAME}
@@ -561,12 +561,12 @@ ensuring data persistence and internal communication. <br>
 
 ***Why do you need a custom network?*** <br>
 - `Internal Communication:` <br>
-  • All services in your Compose file *(mariadb, nginx, and wordpress)* <br>
-   are connected to the inception network.  <br>
-  • This allows the services to communicate internally using container names as hostnames. <br>
+  - All services in your Compose file *(mariadb, nginx, and wordpress)* <br>
+    are connected to the inception network.  <br>
+  - This allows the services to communicate internally using container names as hostnames. <br>
 - `Easy Service Discovery:` <br>
-  • Docker automatically provides service discovery on custom networks.  <br>
-  • **For example**, in your WordPress container, if you set DB_HOSTNAME: mariadb, Docker will <br>
+  - Docker automatically provides service discovery on custom networks.  <br>
+  - **For example**, in your WordPress container, if you set DB_HOSTNAME: mariadb, Docker will <br>
     know to resolve mariadb to the correct container's IP address because both services <br>
     are on the same inception network. <br>
 
@@ -788,6 +788,28 @@ https://<DOMAIN_NAME>
 <br>
 
 
+
+
+
+
+
+
+
+### --------------------------------------------
+### Step 4 Explain -----------------------------
+
+
+MariaDB:
+WordPress relies on a database to store its data. The MariaDB container provides this, so it needs to be up and running first.
+This ensures WordPress can connect to the database as soon as it starts.
+
+Nginx:
+Nginx acts as a reverse proxy and web server for WordPress.
+It can only serve WordPress properly if the WordPress container is already up and running, so start Nginx last.
+
+WordPress:
+Once MariaDB is up, start the WordPress container. During startup, WordPress will try to connect to the database, so having MariaDB ready beforehand is essential.
+WordPress will connect to MariaDB using environment variables (like database host, username, and password) in your docker-compose.yml file or Docker run command.
 
 
 
