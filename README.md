@@ -745,7 +745,7 @@ volumes:
 
 
 
-### 🕸️MariaDB
+### 🕸MariaDB
 
 
 ---
@@ -799,7 +799,7 @@ https://<DOMAIN_NAME>
 
 ## 🫖Resources
 
-### Docker:
+***Docker:***
 - [Docker Compose Documentation](https://docs.docker.com/compose/)
 - [Multi-Container Applications](https://docs.docker.com/get-started/docker-concepts/running-containers/multi-container-applications/)
 - [Docker Volumes](https://docs.docker.com/engine/storage/volumes/)
@@ -807,16 +807,16 @@ https://<DOMAIN_NAME>
 - [Docker Overview](https://docs.docker.com/get-started/docker-overview/)
 - [GitHub ReadME](https://github.com/Forstman1/inception-42/blob/main/README.md)
 
-### Wordpress:
+***Wordpress:***
 - [WordPress Docker Setup](https://www.datanovia.com/en/lessons/wordpress-docker-setup-files-example-for-local-development/)
 - [WordPress and Dockerfiles](https://www.massolit-media.com/tech-writing/wordpress-and-docker-dockerfiles/)
 - [WordPress `wp-config`](https://developer.wordpress.org/advanced-administration/wordpress/wp-config/)
 - [WordPress Deployment](https://medium.com/swlh/wordpress-deployment-with-nginx-php-fpm-and-mariadb-using-docker-compose-55f59e5c1a)
 
-### MariaDB:
+***MariaDB:***
 - [MariaDB Custom Container Image](https://mariadb.com/kb/en/creating-a-custom-container-image/)
 
-### Nginx:
+***Nginx:***
 - [NGINX Docker Image](https://www.docker.com/blog/how-to-use-the-official-nginx-docker-image/)
 
 
