@@ -313,7 +313,7 @@ exit
 
 ## 🫖Set Up
 
-### 🎃Extra
+### 🫐Extra
 
 <details>
   <summary><strong>.env</strong></summary>
@@ -745,19 +745,19 @@ volumes:
 
 
 
-### 🕸MariaDB
+### 🫐MariaDB
 
 
 ---
 
 
-### 🗯WordPress
+### 🫐WordPress
 
 
 ---
 
 
-### 🗯️Nginx
+### 🫐Nginx
 
 
 <br> 
