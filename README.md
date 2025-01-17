@@ -745,7 +745,7 @@ volumes:
 
 
 
-## 🌬MariaDB
+## 🌬️MariaDB
 
 
 ---
@@ -757,7 +757,7 @@ volumes:
 ---
 
 
-## 🌈Nginx
+## 🌬️Nginx
 
 
 <br> 
