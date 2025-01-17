@@ -745,7 +745,7 @@ volumes:
 
 
 
-## ❄️MariaDB
+## ❄MariaDB
 
 
 ---
