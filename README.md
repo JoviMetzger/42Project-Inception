@@ -381,68 +381,68 @@ The Dockerfile is used to define the environment and dependencies required for y
 
 ### Dockerfile Directives
 **1. FROM** <br>
-- **Purpose:**  <br>
+- `Purpose:`  <br>
 Specifies the base image for the container. <br>
 The base image acts as the foundation of your container and may already include essential software or libraries. <br>
-- **Importance:** <br>
+- `Importance:` <br>
 This is a mandatory directive and must appear as the first line in any Dockerfile.<br>
-- **Details:** <br>
+- `Details:` <br>
     - It defines the starting point for your container’s filesystem. <br>
     - Choosing the right base image can significantly reduce build time and simplify your Dockerfile. <br>
     **For example**, using a lightweight image like alpine can save space, whereas more feature-rich images like debian or ubuntu are better for compatibility. <br>
 
 **2. WORKDIR** <br>
-- **Purpose:** <br>
+- `Purpose:` <br>
 Sets the working directory for any RUN, CMD, ENTRYPOINT, COPY, and ADD instructions that follow. <br>
-- **Importance:** <br>
+- `Importance:` <br>
 Optional, but useful when your application relies on relative paths or if you want a predictable directory structure within the container.<br>
-- **Details:**<br>
+- `Details:` <br>
     - Without WORKDIR, commands must use absolute paths, which can make your Dockerfile harder to read and maintain. <br>
     - If WORKDIR is not explicitly set, the default working directory is / *(the root directory)*. <br>
 
 **3. ENV** <br>
-- **Purpose:** <br>
+- `Purpose:` <br>
 Defines environment variables inside the container. <br>
 These variables can configure the application, store secrets, or control runtime behavior.<br>
-- **Importance:** <br>
+- `Importance:` <br>
 Optional, but highly recommended for flexibility and reusability.<br>
-- **Details:**<br>
+- `Details:`<br>
     - Environment variables can be overridden at runtime using the docker run --env or --env-file options.<br>
 
 **4. COPY** <br>
-- **Purpose:** <br>
+- `Purpose:` <br>
 Copies files and directories from the build context on your host machine into the container’s filesystem.<br>
-- **Importance:** <br>
+- `Importance:` <br>
 Essential if your application or script requires external files *(source code, configuration files)*.<br>
-- **Details:**<br>
+- `Details:`<br>
     - Use COPY for simple, static file transfers.<br>
     - For more complex operations like downloading files or extracting archives, <br>
      use ADD *(though ADD is less commonly recommended due to its broader functionality and potential for unintended side effects)*.<br>
 
 **5. EXPOSE** <br>
-- **Purpose:** <br>
+- `Purpose:` <br>
 Documents the port(s) the container listens on at runtime.<br>
-- **Importance:** <br>
+- `Importance:` <br>
 Optional and informational only—it does not actually expose the port on the host.<br>
-- **Details:**<br>
+- `Details:`<br>
     - While optional, using EXPOSE helps other developers or tools understand which ports the container is designed to use.<br>
     
 **6. ENTRYPOINT** <br>
-- **Purpose:** <br>
+- `Purpose:` <br>
 Specifies the main process that will run when the container starts. <br>
 It is used to make the container behave like a standalone executable.<br>
-- **Importance:** <br>
+- `Importance:` <br>
 Optional, but powerful for containers intended to run a single, dedicated task.<br>
-- **Details:**<br>
+- `Details:`<br>
     - ENTRYPOINT is designed to run as the container’s primary process and cannot be easily overridden with additional commands at runtime.<br>
     - It pairs well with CMD, which provides default arguments to the ENTRYPOINT.<br>
     
 **7. CMD** <br>
-- **Purpose:** <br>
+- `Purpose:` <br>
 Provides default instructions or arguments to be passed to the container’s main process.<br>
-- **Importance:** <br>
+- `Importance:` <br>
 Optional, but a best practice if you want your container to perform a default action.<br>
-- **Details:**<br>
+- `Details:`<br>
     - If both ENTRYPOINT and CMD are specified, CMD provides arguments to the ENTRYPOINT.<br>
     - If only CMD is used, it serves as the main command to execute.<br>
     - When no ENTRYPOINT is specified, CMD will directly run the provided command, making it sufficient for many simple containers.<br>
