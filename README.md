@@ -828,6 +828,306 @@ volumes:
 
 ### 🍿MariaDB
 
+WordPress relies on a database to store its data. <br>
+The MariaDB container provides this, so it needs to be up and running first.<br>
+This ensures WordPress can connect to the database as soon as it starts.<br> <br>
+
+Set up a MariaDB container with custom configuration: <br>
+- **Dockerfile** : <br>
+Defines the MariaDB image build process, including installing tools and copying configuration files.<br>
+- **Initialization Script (db-script.sh)** : <br>
+Automates database initialization, user creation, and permission setup, and ensures MariaDB runs in the foreground. <br>
+- **Custom Configuration File (db-config.cnf)** : <br>
+Configures MariaDB server settings such as ports, caching, logging, and character sets. <br> <br>
+
+### Script
+
+NOTE: <br>
+This is the "shebang" line ```#!/bin/bash``` <br>
+It tells the system that the script should be executed using /bin/bash, a common Unix shell. <br>
+You alway need this line at the top of your script.sh! <br> <br>
+
+
+The script prepares the environment, initializes the database, <br>
+configures security, and ensures MariaDB runs continuously. <br><br>
+
+***Initialization Script:*** *Key Steps* <br>
+- **1. Environment Setup:** <br>
+  - Create/move necessary directories for data and logs. <br>
+  - Set appropriate permissions for MariaDB access. <br>
+- **2. Database Initialization:** *(This Step can be different for everyone)* <br>
+  - Reloading privilege tables: <br>
+      - `CREATE DATABASE:` Adds a database with specified name. <br>
+      - `CREATE USER:` Adds a new user with a specified password. <br>
+      - `GRANT ALL PRIVILEGES:` Gives the new user full access to the specified database. <br>
+      - `FLUSH PRIVILEGES:` Refreshes the privilege tables to apply changes. <br>
+      - Use `--bootstrap` option *(Makes it easier)* <br>
+- **3. Keep MariaDB Running in the Foreground:** <br>
+  - Uses `exec mysqld` to keep MariaDB running in the foreground, essential for containerized environments. <br>
+
+
+### --bootstrap
+
+The --bootstrap option starts MariaDB in a lightweight, isolated mode for initialization. <br>
+***It:*** <br>
+- Disables networking and plugins for safe setup. <br>
+- Runs initialization scripts for tasks like: <br>
+    - Creating system databases. <br>
+    - Configuring initial users and permissions. <br>
+- Exits automatically after setup, ensuring efficient and conflict-free initialization. <br>
+- No external connections or conflicts occur during setup. <br>
+- It’s a safe way to run one-time initialization scripts programmatically without starting the full server. <br>
+
+### Configuration File: db-config.cnf
+
+***.conf and .cnf***
+
+Both `.conf` and `.cnf` are commonly used for configuration files, <br>
+but they are often associated with different types of applications or services. <br>
+
+
+| **File Extension** | **Usage**                                                                 | **Associated With**                                    |
+|--------------------|---------------------------------------------------------------------------|-------------------------------------------------------|
+| `.conf`            | General-purpose configuration files for many types of software.          | Operating system services and various servers.        |
+| `.cnf`             | Specialized configuration files, primarily for MySQL and MariaDB settings. | Database-related configurations.                      |
+
+<br> <br>
+
+
+The db_config.cnf file is a configuration file for the MariaDB server, <br>
+specifically for setting server-side options that control database behavior, storage, networking, and performance. <br>
+See examples on [IMB](https://www.ibm.com/docs/en/ztpf/2023?topic=performance-mariadb-configuration-file-example) or [GitHub](https://gist.github.com/fevangelou/fb72f36bbe333e059b66). <br><br>
+
+
+<details>
+  <summary><strong>Explaination of variable options</strong></summary>
+  <br>
+
+## Explaination of variable options:
+
+**Sections: General Server Configuration Sections** <br>
+The configuration file is divided into sections *(like [mysqld], [mariadb], etc.)* <br>
+that specify settings for different components of the MariaDB server. <br>
+Each section can contain specific settings related to that component. <br>
+- `[server]` : This section applies to the entire MariaDB server, both for standalone and embedded servers. <br>
+- `[mysqld]` : Settings in this section apply only to the mysqld standalone MariaDB server daemon. <br>
+- `[embedded]`, `[mariadb]`, `[mariadb-10.3]` : These sections define options specific to embedded servers, <br>
+MariaDB-specific options, and MariaDB version-specific settings, respectively.
+
+### Basic Settings
+**User and PID file settings**<br>
+- `user` : Sets the user under which the MariaDB server runs.<br>
+- `pid-file` : Path for the PID file, which helps manage the MariaDB process. <br><br>
+
+**Socket and Port settings** <br>
+- `socket` : Location of the MariaDB Unix socket file for local connections.<br>
+- `port` : Sets the port for TCP/IP connections *(default MySQL/MariaDB port)*.<br><br>
+
+**Directories settings**<br>
+- `basedir` : Base directory where MariaDB is installed.<br>
+- `datadir` : Directory for storing database files.<br>
+- `tmpdir` : Temporary files directory used by the server.<br>
+- `lc-messages-dir` : Directory for error messages and translations.<br><br>
+
+**Network settings**<br>
+- `bind-address` : Specifies the network interface on which MariaDB listens for incoming connections. <br>
+Setting this to 0.0.0.0 means it accepts connections from all interfaces.<br><br>
+
+**Fine Tuning**<br>
+This section contains various parameters that can fine-tune the performance of the server.<br>
+Example parameters:<br>
+- `key_buffer_size        = 16M`<br>
+- `max_allowed_packet     = 16M`<br>
+- `thread_stack           = 192K`<br>
+- `thread_cache_size      = 8`<br>
+- `myisam_recover_options = BACKUP`<br>
+- `max_connections        = 100`<br>
+- `table_cache            = 64`<br>
+- `thread_concurrency     = 10`<br><br>
+
+**Query Cache Configuration**<br>
+- `query_cache_size` : Size of the query cache, which stores results of queries to improve performance.<br><br>
+
+**Logging and Replication**<br>
+- `log_error` : Path to the error log file, which is crucial for troubleshooting.<br>
+- `expire_logs_days` : Number of days to keep binary logs before they are automatically removed.<br><br>
+
+**Settings for general logging and slow query logging if desired:**<br>
+- `general_log_file       = /var/log/mysql/mysql.log`<br>
+- `general_log            = 1`<br>
+- `slow_query_log_file    = /var/log/mysql/mariadb-slow.log`<br>
+- `long_query_time        = 10`<br>
+- `log_slow_rate_limit    = 1000`<br>
+- `log_slow_verbosity     = query_plan`<br>
+- `log-queries-not-using-indexes`<br><br>
+
+**Replication setup**<br>
+- `server-id              = 1`<br>
+- `log_bin                = /var/log/mysql/mysql-bin.log`<br>
+- `max_binlog_size        = 100M`<br>
+- `binlog_do_db           = include_database_name`<br>
+- `binlog_ignore_db       = exclude_database_name`<br><br>
+
+**Security Features**<br>
+Security configurations related to connections and SSL.<br>
+Uncomment and configure if required.<br>
+- `chroot = /var/lib/mysql/`<br>
+- `ssl-ca = /etc/mysql/cacert.pem`<br>
+- `ssl-cert = /etc/mysql/server-cert.pem`<br>
+- `ssl-key = /etc/mysql/server-key.pem`<br>
+- `ssl-cipher = TLSv1.2  # Ensure the latest TLS protocol is used for secure connections.`<br><br>
+
+**Character Sets**<br>
+Character set settings to support various languages and symbols.<br>
+- `character-set-server` : Defines the default character set for the server.<br>
+- `collation-server` : Defines the default collation for string comparison.<br><br>
+
+**Unix Socket Authentication Plugin**<br>
+This is for Unix socket authentication, allowing the root user to authenticate without a password when running as the Unix root user.<br>
+See https://mariadb.com/kb/en/unix_socket-authentication-plugin/ for details.<br><br>
+
+**this is only for embedded server**<br>
+[embedded]<br><br>
+
+**This group is only read by MariaDB servers, not by MySQL.**<br>
+**If you use the same .cnf file for MySQL and MariaDB,**<br>
+**you can put MariaDB-only options here.**<br>
+[mariadb]<br><br>
+
+**This group is only read by MariaDB-10.3 servers.**<br>
+**If you use the same .cnf file for MariaDB of different versions,**<br>
+**use this group for options that older servers don't understand.**<br>
+[mariadb-10.3]<br><br>
+
+<br> <br>
+
+</details>
+
+<details>
+  <summary><strong>Simple Config.cnf Example</strong></summary>
+  <br>
+
+## Simple Config.cnf Example:
+
+```config
+# MySQL Server Configuration File
+
+[server]
+# General server settings can be placed here. This section is commonly left blank
+# because most configurations are defined under the `[mysqld]` section.
+
+[mysqld]
+# Settings for the MySQL daemon (server).
+
+user                    = mysql                         # The user under which the MySQL server runs.
+pid-file                = /run/mysqld/mysqld.pid        # File containing the process ID of the MySQL server.
+socket                  = /var/run/mysqld/mysqld.sock   # Unix socket for local connections.
+port                    = 3306                          # Port for MySQL to listen on (default is 3306).
+basedir                 = /usr                          # Base directory of the MySQL installation.
+datadir                 = /var/lib/mysql                # Directory where MySQL data files are stored.
+tmpdir                  = /tmp                          # Temporary directory used for operations like sorting.
+lc-messages-dir         = /usr/share/mysql              # Directory containing language files for error messages.
+bind-address            = 0.0.0.0                       # Listen on all network interfaces to allow external connections.
+query_cache_size        = 16M                           # Amount of memory allocated for caching query results.
+log_error               = /var/log/mysql/error.log      # File to store error logs.
+log-bin                 = /var/log/mysql/mysql-bin.log  # Binary log file for replication and recovery.
+expire_logs_days        = 10                            # Automatically remove binary logs older than 10 days.
+character-set-server    = utf8mb4                       # Default character set for the server.
+collation-server        = utf8mb4_general_ci            # Default collation for the server.
+innodb_use_native_aio   = 0                             # Disable native asynchronous I/O (useful for certain environments).
+
+[client]
+# Configuration for MySQL client tools.
+
+default-character-set = utf8mb4               # Default character set for client connections.
+
+[embedded]
+# Settings for embedded MySQL server (if used). Typically left blank unless embedding is required.
+
+[mariadb]
+# Specific settings for MariaDB server. This section can be used for MariaDB-specific configurations.
+
+[mariadb-10.3]
+# Settings specific to MariaDB version 10.3. This section allows version-specific configurations.
+```
+<br> <br>
+
+</details>
+
+
+### Testing the MariaDB Setup 
+
+**1. Build and Start the Container:** <br>
+- View Logs: **(fix them first)**<br>
+```bash
+docker-compose logs mariadb
+```
+<br> <br>
+
+**2. Access MariaDB:** <br>
+```bash
+mysql -u root -p
+```
+<br> <br>
+ 
+**3. Verify Database Creation:** <br>
+```sql
+# SHOW DATABASES;
+```
+**->** Make sure your database *(your_database_name)& is listed. <br><br>
+
+**Should look like:**<br>
+```sql
+MariaDB [(none)]> SHOW DATABASES;
++--------------------+
+| Database           |
++--------------------+
+| information_schema |
+| mysql              |
+| performance_schema |
+| wordpress          |
++--------------------+
+```
+
+<br><br>
+
+**4. Verify User Creation:** <br>
+```sql
+# SELECT User, Host FROM mysql.user;
+```
+**->** This should list your USER. <br>
+**->** Your USER should have the %. <br><br>
+
+**Should look like:** <br>
+```sql
+MariaDB [(none)]> SELECT User, Host FROM mysql.user;
++------+-----------+
+| User | Host      |
++------+-----------+
+| bob  | %         |
+| root | localhost |
++------+-----------+
+```
+<br><br>
+
+**5. Check User Permissions:** <br>
+```sql
+# SHOW GRANTS FOR '<USER>'@'%';
+```
+<br>
+
+**Should look like:**
+```sql
+MariaDB [(none)]> SHOW GRANTS FOR 'bob'@'%';
++----------------------------------------------------------------------------------------------------+
+| Grants for bob@%                                                                                   |
++----------------------------------------------------------------------------------------------------+
+| GRANT USAGE ON *.* TO `bob`@`%` IDENTIFIED BY PASSWORD '*61584B76F6ECE8FB9A328E7CF198094B2FAC55C7' |
++----------------------------------------------------------------------------------------------------+
+```
+<br><br>
+
+**If all steps are successful, MariaDB is properly configured and running with the correct settings.** <br><br>
 
 ---
 
