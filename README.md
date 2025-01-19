@@ -762,7 +762,7 @@ volumes:
 
 
 <details>
-  <summary><strong>⭐Docker Compose Commands⭐</strong></summary>
+  <summary><strong>⭐Docker Compose Commands</strong></summary>
 
 ## 🧩Docker Compose Commands:
 
