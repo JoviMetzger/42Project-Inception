@@ -672,7 +672,7 @@ ensuring data persistence and internal communication. <br>
 <br>
 
 <details>
-  <summary><strong>❇️❇️Example docker-compose.yml❇️❇️</strong></summary>
+  <summary><strong>➡️Example docker-compose.yml⬅️</strong></summary>
 
 ## Example docker-compose.yml:
 
