@@ -23,9 +23,12 @@ You will virtualize several Docker images, creating them in your new personal vi
 4) [Installation:](#Installation)
 5) [Resources:](#Resources)
 
-<br>
+<br> 
 
 ---
+
+<br>
+<br>
 
 ## 🫖Read About 
 
@@ -679,7 +682,7 @@ volumes:
 
 
 <details>
-  <summary><strong>Docker Compose Commands</strong></summary>
+  <summary><strong>Docker Compose Commands⭐</strong></summary>
 
 ## 🧩Docker Compose Commands:
 
@@ -741,8 +744,6 @@ volumes:
 </details>
 
 ---
-
-
 
 
 ### 🍿MariaDB
