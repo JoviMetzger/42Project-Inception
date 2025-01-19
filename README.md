@@ -389,7 +389,8 @@ This is a mandatory directive and must appear as the first line in any Dockerfil
 - **Details:** <br>
     - It defines the starting point for your container’s filesystem. <br>
     - Choosing the right base image can significantly reduce build time and simplify your Dockerfile. <br>
-    **For example**, using a lightweight image like alpine can save space, whereas more feature-rich images like debian or ubuntu are better for compatibility.
+    **For example**, using a lightweight image like alpine can save space, whereas more feature-rich images like debian or ubuntu are better for compatibility. <br>
+
 **2. WORKDIR** <br>
 - **Purpose:** <br>
 Sets the working directory for any RUN, CMD, ENTRYPOINT, COPY, and ADD instructions that follow. <br>
@@ -398,6 +399,7 @@ Optional, but useful when your application relies on relative paths or if you wa
 - **Details:**<br>
     - Without WORKDIR, commands must use absolute paths, which can make your Dockerfile harder to read and maintain. <br>
     - If WORKDIR is not explicitly set, the default working directory is / *(the root directory)*. <br>
+
 **3. ENV** <br>
 - **Purpose:** <br>
 Defines environment variables inside the container. <br>
@@ -406,6 +408,7 @@ These variables can configure the application, store secrets, or control runtime
 Optional, but highly recommended for flexibility and reusability.<br>
 - **Details:**<br>
     - Environment variables can be overridden at runtime using the docker run --env or --env-file options.<br>
+
 **4. COPY** <br>
 - **Purpose:** <br>
 Copies files and directories from the build context on your host machine into the container’s filesystem.<br>
@@ -415,6 +418,7 @@ Essential if your application or script requires external files *(source code, c
     - Use COPY for simple, static file transfers.<br>
     - For more complex operations like downloading files or extracting archives, <br>
      use ADD *(though ADD is less commonly recommended due to its broader functionality and potential for unintended side effects)*.<br>
+
 **5. EXPOSE** <br>
 - **Purpose:** <br>
 Documents the port(s) the container listens on at runtime.<br>
@@ -422,6 +426,7 @@ Documents the port(s) the container listens on at runtime.<br>
 Optional and informational only—it does not actually expose the port on the host.<br>
 - **Details:**<br>
     - While optional, using EXPOSE helps other developers or tools understand which ports the container is designed to use.<br>
+    
 **6. ENTRYPOINT** <br>
 - **Purpose:** <br>
 Specifies the main process that will run when the container starts. <br>
@@ -431,6 +436,7 @@ Optional, but powerful for containers intended to run a single, dedicated task.<
 - **Details:**<br>
     - ENTRYPOINT is designed to run as the container’s primary process and cannot be easily overridden with additional commands at runtime.<br>
     - It pairs well with CMD, which provides default arguments to the ENTRYPOINT.<br>
+    
 **7. CMD** <br>
 - **Purpose:** <br>
 Provides default instructions or arguments to be passed to the container’s main process.<br>
