@@ -1167,7 +1167,7 @@ You alway need this line at the top of your script.sh! <br> <br>
     - *(Different wp commands [Subcommands](https://developer.wordpress.org/cli/commands/config/))* <br>
     - Install WordPress/ Wordpress Admin *(wp core install [Syntax](https://developer.wordpress.org/cli/commands/core/install/))* <br>
 		- Create a WordPress user *(wp user create [Syntax](https://developer.wordpress.org/cli/commands/user/create/))* <br>
- 		- Don't forget to add --role=editor or --role=author <br>
+ 		- Don't forget to add `--role=editor` or `--role=author` <br>
 - **4. Keep the Service Running:**
   - Ensure PHP-FPM runs in the foreground for Dockerized environments. *(/usr/sbin/php-fpm8.2 -F)* <br><br>
 
