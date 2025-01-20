@@ -1080,7 +1080,7 @@ mysql -u root -p
 ```sql
 # SHOW DATABASES;
 ```
-**->** Make sure your database *(your_database_name)& is listed. <br>
+**->** Make sure your database *(your_database_name)* is listed. <br>
 
 **Should look like:**<br>
 ```sql
@@ -1162,11 +1162,12 @@ You alway need this line at the top of your script.sh! <br> <br>
 - **2. Check for Configuration Files:** *(This Step can be different for everyone)* <br>
   - Verify if wp-config.php or index.php exists. If not, use WP-CLI to create them: <br>
     - Use `mysqladmin` to connect to the database (preferred over mysql). <br>
-    - Only do this if you ***DON'T** have a manuall wp-config.php <br>
-      - Create WordPress configuration *(wp config create [Syntax](https://developer.wordpress.org/cli/commands/config/create/))* <br>
+    - Only do this if you **DON'T** have a manuall wp-config.php <br>
+    	- Create WordPress configuration *(wp config create [Syntax](https://developer.wordpress.org/cli/commands/config/create/))* <br>
     - *(Different wp commands [Subcommands](https://developer.wordpress.org/cli/commands/config/))* <br>
     - Install WordPress/ Wordpress Admin *(wp core install [Syntax](https://developer.wordpress.org/cli/commands/core/install/))* <br>
-	  - Create a WordPress user *(wp user create [Syntax](https://developer.wordpress.org/cli/commands/user/create/))* <br>
+	- Create a WordPress user *(wp user create [Syntax](https://developer.wordpress.org/cli/commands/user/create/))* <br>
+ 	- Don't forget to add --role=editor or --role=author <br>
 - **4. Keep the Service Running:**
   - Ensure PHP-FPM runs in the foreground for Dockerized environments. *(/usr/sbin/php-fpm8.2 -F)* <br><br>
 
@@ -1196,9 +1197,9 @@ uses for encrypting information stored in user cookies. You can generate new one
         ------------------------------------|---------------------------------------------
                                             |
 define( 'WP_DATABASE_NAME', 'wordpress' );  |       define( 'WP_DATABASE_NAME', getenv('WP_DATABASE_NAME'));
-define( 'DB_USER', 'user' );                |       define( 'DB_USER', getenv('MYSQL_USER') ); 
-define( 'DB_USER_PASSWORD', 'pwd' );        |       define( 'DB_USER_PASSWORD', getenv('MYSQL_USER_PASSWORD') );
-define( 'DB_HOST', 'mariadb' );             |       define( 'DB_HOST', getenv('MYSQL_HOST') ); 
+define( 'DB_USER', 'user' );                |       define( 'DB_USER', getenv('MYSQL_USER')); 
+define( 'DB_USER_PASSWORD', 'pwd' );        |       define( 'DB_USER_PASSWORD', getenv('MYSQL_USER_PASSWORD'));
+define( 'DB_HOST', 'mariadb' );             |       define( 'DB_HOST', getenv('MYSQL_HOST')); 
 define( 'DB_CHARSET', 'utf8' );             |       define( 'DB_CHARSET', 'utf8' );
 define( 'DB_COLLATE', '' );                 |       define( 'DB_COLLATE', '' );
 
