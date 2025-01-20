@@ -55,6 +55,7 @@ if [ ! -f wp-config.php ]; then
 	wp user create ${WP_USER} ${WP_USER_EMAIL} \
         --path="/var/www/html/wordpress/" \
         --user_pass="${WP_USER_PASSWORD}" \
+	--role=editor
         --allow-root
 
     echo "WordPress setup complete."
