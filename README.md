@@ -1134,6 +1134,211 @@ MariaDB [(none)]> SHOW GRANTS FOR 'bob'@'%';
 
 ### 🍿WordPress
 
+Once MariaDB is up, start the WordPress container. <br>
+During startup, WordPress will try to connect to the database, so having MariaDB ready beforehand is essential. <br>
+WordPress will connect to MariaDB using environment variables *(like database host, username, and password)*<br>
+in your docker-compose.yml file or Docker run command. <br><br>
+
+***Important Considerations:*** <br>
+`PHP and Debian/Alpine:` Use the latest stable versions of PHP and your operating system. <br>
+Avoid specifying PHP versions like php-fpm7.4 or php-fpm8.2; instead, use php-fpm to default to the latest installed version. <br><br>
+
+### Script
+
+***NOTE:*** <br>
+This is the "shebang" line ```#!/bin/bash```<br>
+It tells the system that the script should be executed using */bin/bash*, a common Unix shell.<br>
+You alway need this line at the top of your script.sh!<br><br>
+
+***Initialization Script:*** *Key Steps* <br>
+
+- **1. Environment Setup:** <br>
+  - Create/move necessary directories. <br>
+  - Set up directories for data and logs with proper permissions. <br>
+- **2. Check for Configuration Files:** *(This Step can be different for everyone)* <br>
+  - Verify if wp-config.php or index.php exists. If not, use WP-CLI to create them: <br>
+    - Use `mysqladmin` to connect to the database (preferred over mysql). <br>
+    - Only do this if you ***DON'T** have a manuall wp-config.php <br>
+      - Create WordPress configuration *(wp config create [Syntax](https://developer.wordpress.org/cli/commands/config/create/))* <br>
+    - *(Different wp commands [Subcommands](https://developer.wordpress.org/cli/commands/config/))* <br>
+    - Install WordPress/ Wordpress Admin *(wp core install [Syntax](https://developer.wordpress.org/cli/commands/core/install/))* <br>
+	  - Create a WordPress user *(wp user create [Syntax](https://developer.wordpress.org/cli/commands/user/create/))* <br>
+- **4. Keep the Service Running:**
+  - Ensure PHP-FPM runs in the foreground for Dockerized environments. *(/usr/sbin/php-fpm8.2 -F)* <br><br>
+
+
+### Configuration Details: wp-config.php
+
+I don't recommand doing a wp-config manually **(for the Inception project)** <br>
+You need to pass the .env variables, but that is a bit more difficult, <br>
+because using `getenv()` is not working quite easily as you think it will. <br>
+You could hardcode the variables, which defeats the purpose of the .env variables. <br>
+The best way is creating WordPress Configuration with 'wp config create'. <br><br>
+
+
+<details>
+  <summary><strong>But If you want to create a wp-config.php manually</strong><em> Or for intrest</em></summary>
+
+## Manual Configuration (Optional):
+
+- 1. Refer to [this example wp-config.php](https://www.vodien.com/help/article/how-to-create-wp-config-php-file) <br>
+- 2. Generate security keys and salts using the [WordPress Secret Key Generator](https://api.wordpress.org/secret-key/1.1/salt/) <br>
+The values for AUTH_KEY, SECURE_AUTH_KEY, etc., are security keys and salts that WordPress <br>
+uses for encrypting information stored in user cookies. You can generate new ones with the URL. <br><br>
+
+**Example Comparison:** <br>
+```plaintext
+                    HardCoded Example               |           Recommended (using getenv)      
+        ------------------------------------|---------------------------------------------
+                                            |
+define( 'WP_DATABASE_NAME', 'wordpress' );  |       define( 'WP_DATABASE_NAME', getenv('WP_DATABASE_NAME'));
+define( 'DB_USER', 'user' );                |       define( 'DB_USER', getenv('MYSQL_USER') ); 
+define( 'DB_USER_PASSWORD', 'pwd' );        |       define( 'DB_USER_PASSWORD', getenv('MYSQL_USER_PASSWORD') );
+define( 'DB_HOST', 'mariadb' );             |       define( 'DB_HOST', getenv('MYSQL_HOST') ); 
+define( 'DB_CHARSET', 'utf8' );             |       define( 'DB_CHARSET', 'utf8' );
+define( 'DB_COLLATE', '' );                 |       define( 'DB_COLLATE', '' );
+
+```
+<br>
+
+</details>
+
+<br>
+
+### PHP-FPM Configuration (www.conf)
+
+The www.conf file plays a critical role in configuring PHP-FPM for your WordPress container. <br>
+By default, PHP-FPM uses its standard www.conf file, which may not meet your container’s requirements,<br>
+such as listening on the correct port or applying optimal resource limits. <br>
+If not properly configured, your container could experience performance issues or <br>
+fail to connect to NGINX or other services. <br><br>
+
+**Why Customize www.conf?** <br>
+- `Port Configuration:` Ensure PHP-FPM listens on the correct port (e.g., port 9000) <br>
+ for communication with services like NGINX. <br>
+- `Resource Management:` Adjust process management settings to match your container’s <br>
+ workload and prevent underutilization or resource waste. <br>
+- `Compatibility:` Avoid unexpected behavior caused by default settings <br>
+that may not align with your containerized environment. <br><br>
+
+**Applying a Custom www.conf** *(Dockerfile)* <br>
+- Copy to /etc/php/8.2/fpm/pool.d/ *(overwrite)* <br>
+This ensures your custom settings are applied when the container runs. <br><br>
+
+**Example www.conf:**
+```ini
+[www]
+user = www-data
+group = www-data
+
+listen = 9000                           ; PHP-FPM listens on port 9000
+
+pm = dynamic                            ; Process management style
+pm.max_children = 10                    ; Max number of child processes
+pm.start_servers = 3                    ; Start this many processes on startup
+pm.min_spare_servers = 2                ; Minimum spare workers
+pm.max_spare_servers = 5                ; Maximum spare workers
+
+; Logging settings
+access.log = /var/log/php-fpm/access.log
+error_log = /var/log/php-fpm/error.log
+log_level = notice
+
+; Security and permissions
+listen.owner = www-data
+listen.group = www-data
+listen.mode = 0660
+```
+<br><br>
+
+
+### Testing the WordPress Setup
+
+**1. Build and Start the Container:** <br>
+  - View Logs: **(fix them first)**
+```bash
+docker-compose logs mariadb
+```
+<br>
+
+**2. Enter the WordPress container:** <br>
+```bash
+docker exec -it <wordpress_container_name> bash
+```
+<br>
+
+**3. Navigate to the WordPress directory:**<br>
+```bash
+ls /var/www/html/wordpress
+```
+**->** Ensure required files *(e.g., index.php, wp-config.php)* are present. <br>
+**->** <details>
+  <summary><strong>Example</strong></summary>
+
+
+## Example:
+
+```plaintext
+total 240
+-rw-r--r--  1 root     root       405 Nov 24 17:17 index.php
+-rw-r--r--  1 root     root     19915 Nov 24 17:17 license.txt
+-rw-r--r--  1 root     root      7409 Nov 24 17:17 readme.html
+-rw-r--r--  1 root     root      7387 Nov 24 17:17 wp-activate.php
+drwxr-xr-x  9 root     root      4096 Nov 24 17:17 wp-admin
+-rw-r--r--  1 root     root       351 Nov 24 17:17 wp-blog-header.php
+-rw-r--r--  1 root     root      2323 Nov 24 17:17 wp-comments-post.php
+-rw-r--r--  1 root     root      3336 Nov 24 17:17 wp-config-sample.php
+-rwxrwx---  1 www-data www-data  1752 Nov 22 17:09 wp-config.php
+drwxr-xr-x  4 root     root      4096 Nov 24 17:17 wp-content
+-rw-r--r--  1 root     root      5617 Nov 24 17:17 wp-cron.php
+drwxr-xr-x 30 root     root     16384 Nov 24 17:17 wp-includes
+-rw-r--r--  1 root     root      2502 Nov 24 17:17 wp-links-opml.php
+-rw-r--r--  1 root     root      3937 Nov 24 17:17 wp-load.php
+-rw-r--r--  1 root     root     51367 Nov 24 17:17 wp-login.php
+-rw-r--r--  1 root     root      8543 Nov 24 17:17 wp-mail.php
+-rw-r--r--  1 root     root     29032 Nov 24 17:17 wp-settings.php
+-rw-r--r--  1 root     root     34385 Nov 24 17:17 wp-signup.php
+-rw-r--r--  1 root     root      5102 Nov 24 17:17 wp-trackback.php
+-rw-r--r--  1 root     root      3246 Nov 24 17:17 xmlrpc.php
+```
+
+<br>
+
+</details>
+
+<br>
+
+**4. Inspect the Docker network:** <br>
+```bash
+docker network inspect <network_name>
+```
+<br>
+
+
+**5. Verify all containers** *(WordPress, MariaDB, NGINX)* **are listed and reachable:** <br>
+**->** confirm the IPv4 Address are reachable on this network (172.18.0.x). <br>
+**Something like that:** 
+```plaintext
+[...]
+Network Name: inception_net
+Containers Connected:
+    wordpress:
+        [...]
+        IPv4 Address: 172.18.0.3
+    mariadb:
+        [...]
+        IPv4 Address: 172.18.0.2
+    nginx:
+        [...]
+        IPv4 Address: 172.18.0.4
+[...]
+```
+<br>
+
+**6. Access WordPress:** <br>
+Open your browser and navigate to: ```https://<DOMAIN_NAME>```
+
+<br>
 
 ---
 
