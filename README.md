@@ -1351,6 +1351,202 @@ Open your browser and navigate to: ```https://<DOMAIN_NAME>```
 
 ### 🍿Nginx
 
+# NGINX
+
+Nginx acts as a reverse proxy and web server for WordPress. <br>
+It can only serve WordPress properly if the WordPress container <br>
+is already up and running, so start Nginx last. <br><br>
+
+Set up a Nginx container with custom configuration:<br>
+- **Dockerfile:** <br>
+ Defines the Nginx image build, installs necessary tools, <br>
+ and copies configuration files into the container.<br>
+- **Custom Configuration File** *(nginx-config.conf):* <br>
+ Contains Nginx server configurations. <br>
+- **Optional Initialization Script** *(nginx-script.sh):* <br>
+ Performs tasks such as creating SSL certificates *(this can also be done within the Dockerfile)*. <br><br>
+
+### Script
+
+**NOTE:** <br>
+This is the "shebang" line ```#!/bin/bash``` <br>
+It tells the system that the script should be executed using */bin/bash*, a common Unix shell. <br>
+You alway need this line at the top of your script.sh! <br><br>
+
+The script *(nginx-script.sh)* is **optional** and can create a self-signed SSL certificate for TLS. <br>
+You may also integrate this step into the Dockerfile.<br><br>
+
+**script.sh:** <br>
+```bash
+echo "Creating a self-signed SSL certificate..."
+openssl req \
+    -x509 \
+    -nodes \
+    -days 365 \
+    -newkey rsa:2048 \
+    -subj "/C=NL/ST=Holland/L=Amsterdam/O=Codam/CN=${DOMAIN_NAME}" \
+    -out "/etc/nginx/ssl/selfsigned.crt" \
+    -keyout "/etc/nginx/ssl/selfsigned.key"
+```
+<br>
+
+**Explanation of Key Options:** <br>
+- `(-days 365)` : Generates a certificate valid for one year.<br>
+- `(-out) and (-keyout)` : Specify paths for the certificate and private key.<br>
+- `(-subj)` : Contains the certificate details:<br>
+  - `C=` : Country<br>
+  - `ST=` : State or Province<br>
+  - `L=` : Locality *(City)*<br>
+  - `O=` : Organization<br>
+  - `CN=` : Common Name *(Domain Name)*<br> <br>
+
+openssl req [syntax](https://knowledge.digicert.com/general-information/openssl-quick-reference-guide)
+<br><br>
+
+### Configuration File (nginx-config.conf)
+
+<details>
+  <summary><strong>Key Directives</strong></summary>
+  <br>
+
+## Key Directives:
+
+
+**Listening for SSL**
+```nginx
+listen 443 ssl;
+listen [::]:443 ssl;
+```
+These lines bind both IPv4 and IPv6 addresses to port 443 for SSL. <br>
+
+**Server Name**
+```nginx
+server_name $DOMAIN_NAME www.$DOMAIN_NAME localhost;
+```
+Defines the server's domain names. <br>
+
+**SSL Settings**
+```nginx
+ssl_certificate /etc/nginx/ssl/selfsigned.crt;
+ssl_certificate_key /etc/nginx/ssl/selfsigned.key;
+ssl_protocols TLSv1.2 TLSv1.3;
+ssl_ciphers HIGH:!aNULL:!MD5;
+ssl_prefer_server_ciphers on;
+```
+Ensure that the file paths match the generated certificate and key. <br>
+Modern TLS protocols *(1.2 and 1.3)* are enabled for security. <br>
+
+**Static File Handling**
+```nginx
+root /var/www/html;
+index index.html index.php;
+try_files $uri $uri/ =404;
+```
+`root:` Specifies the document root. <br>
+`index:` Defines default files to serve. <br>
+`try_files:` Attempts to load the requested file or directory; otherwise, returns a 404 error. <br>
+
+**PHP Support**
+```nginx
+location ~ \.php$ {
+    fastcgi_pass wordpress:9000;
+    fastcgi_index index.php;
+    include fastcgi_params;
+    fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+    fastcgi_param PATH_INFO $fastcgi_path_info;
+}
+```
+This block assumes a FastCGI server *(like PHP-FPM)* is available at wordpress:9000. <br><br>
+
+</details>
+
+<br>
+
+**Suggested Configuration** *(nginx-config.conf)*:
+```nginx
+server {
+    listen 443 ssl;
+    listen [::]:443 ssl;
+    server_name $DOMAIN_NAME www.$DOMAIN_NAME localhost;
+
+    # SSL Settings
+    ssl_certificate /etc/nginx/ssl/selfsigned.crt;
+    ssl_certificate_key /etc/nginx/ssl/selfsigned.key;
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_ciphers HIGH:!aNULL:!MD5;
+    ssl_prefer_server_ciphers on;
+
+    # File Handling
+    root /var/www/html;
+    index index.html index.php;
+    try_files $uri $uri/ =404;
+
+    # PHP Handling
+    location ~ \.php$ {
+        fastcgi_pass wordpress:9000;
+        fastcgi_index index.php;
+        include fastcgi_params;
+        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+        fastcgi_param PATH_INFO $fastcgi_path_info;
+    }
+}
+```
+<br>
+
+### Using DOMAIN_NAME
+
+To use a custom domain name *(e.g., https://<DOMAIN_NAME>)*, <br>
+add the following entry to your **/etc/hosts** file: ```127.0.0.1 <DOMAIN_NAME>```
+<br>
+
+### HTTP vs HTTPS
+
+**HTTPS** *(HyperText Transfer Protocol Secure)* offers significant advantages over **HTTP**,<br>
+**including:**<br>
+- `Encryption:` Secures data using SSL/TLS protocols. <br>
+- `Authentication:` Verifies server identity to prevent phishing attacks. <br>
+- `Trust:` Modern browsers display a padlock icon for HTTPS websites. <br>
+- `SEO Benefits:` Search engines favor HTTPS for better rankings. <br><br>
+
+
+### Testing the Nginx Setup
+
+**1. Build and Start the Container:** <br>
+- View Logs: **(fix them first)**
+```bash
+docker-compose logs nginx
+```
+<br>
+
+**2. Paths correct:** <br>
+Ensure the paths in the configuration file match the generated certificate and key. <br>
+**Espacilly:** <br>
+```plaintext
+ssl_certificate         /etc/ssl/certs/nginx-selfsigned.crt;      |       -out "/etc/nginx/ssl/selfsigned.crt" 
+ssl_certificate_key     /etc/ssl/private/nginx-selfsigned.key;    |       -keyout "/etc/nginx/ssl/selfsigned.key"
+
+```
+<br>
+
+**3. Permissions:** <br>
+Verify correct permissions for the **/etc/nginx/ssl** directory. <br>
+
+**4. Don't Panic:** <br>
+Your docker logs might print something like this: <br> 
+```objectivec
+Create a self-signed SSL certificate...
+.+...+.+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*...........+...
+[...]
+```
+This part is generated by the openssl req command, which is used to generate a self-signed SSL certificate. <br>
+The characters `+`, `*`, and `.` represent the progress of the SSL certificate generation process,<br>
+which is normal output for OpenSSL commands. <br>
+These are just indicators of the internal progress, <br>
+but they don't affect the result of the SSL certificate creation. <br>
+
+<br>
+
+
 
 <br> 
 
