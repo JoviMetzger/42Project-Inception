@@ -1209,15 +1209,15 @@ define( 'DB_COLLATE', '' );                 |       define( 'DB_COLLATE', '' );
 
 <br>
 
-### 👽PHP-FPM Configuration (.www.conf)
+### 👽PHP-FPM Configuration (.ww.conf)
 
-The .www.conf file plays a critical role in configuring PHP-FPM for your WordPress container. <br>
-By default, PHP-FPM uses its standard .www.conf file, which may not meet your container’s requirements,<br>
+The .ww.conf file plays a critical role in configuring PHP-FPM for your WordPress container. <br>
+By default, PHP-FPM uses its standard .ww.conf file, which may not meet your container’s requirements,<br>
 such as listening on the correct port or applying optimal resource limits. <br>
 If not properly configured, your container could experience performance issues or <br>
 fail to connect to NGINX or other services. <br><br>
 
-**Why Customize .www.conf?** <br>
+**Why Customize .ww.conf?** <br>
 - `Port Configuration:` <br>
 Ensure PHP-FPM listens on the correct port (e.g., port 9000) <br>
 for communication with services like NGINX. <br>
@@ -1228,11 +1228,11 @@ workload and prevent underutilization or resource waste. <br>
 Avoid unexpected behavior caused by default settings <br>
 that may not align with your containerized environment. <br><br>
 
-**Applying a Custom .www.conf** *(Dockerfile)* <br>
+**Applying a Custom .ww.conf** *(Dockerfile)* <br>
 - Copy to /etc/php/8.2/fpm/pool.d/ *(overwrite)* <br>
 This ensures your custom settings are applied when the container runs. <br><br>
 
-**Example .www.conf:**
+**Example .ww.conf:**
 ```ini
 [www]
 user = www-data
