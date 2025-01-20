@@ -833,16 +833,16 @@ The MariaDB container provides this, so it needs to be up and running first.<br>
 This ensures WordPress can connect to the database as soon as it starts.<br> <br>
 
 Set up a MariaDB container with custom configuration: <br>
-- **Dockerfile** : <br>
+- `Dockerfile` : <br>
 Defines the MariaDB image build process, including installing tools and copying configuration files.<br>
-- **Initialization Script (db-script.sh)** : <br>
+- `Initialization Script (db-script.sh)` : <br>
 Automates database initialization, user creation, and permission setup, and ensures MariaDB runs in the foreground. <br>
-- **Custom Configuration File (db-config.cnf)** : <br>
+- `Custom Configuration File (db-config.cnf)` : <br>
 Configures MariaDB server settings such as ports, caching, logging, and character sets. <br> <br>
 
-### Script
+### 👽SCRIPT
 
-NOTE: <br>
+❗NOTE: <br>
 This is the "shebang" line ```#!/bin/bash``` <br>
 It tells the system that the script should be executed using /bin/bash, a common Unix shell. <br>
 You alway need this line at the top of your script.sh! <br> <br>
@@ -863,24 +863,23 @@ configures security, and ensures MariaDB runs continuously. <br><br>
       - `FLUSH PRIVILEGES:` Refreshes the privilege tables to apply changes. <br>
       - Use `--bootstrap` option *(Makes it easier)* <br>
 - **3. Keep MariaDB Running in the Foreground:** <br>
-  - Uses `exec mysqld` to keep MariaDB running in the foreground, essential for containerized environments. <br>
+  - Uses `exec mysqld` to keep MariaDB running in the foreground, essential for containerized environments. <br><br>
 
 
-### --bootstrap
+### 👽--bootstrap
 
-The --bootstrap option starts MariaDB in a lightweight, isolated mode for initialization. <br>
-***It:*** <br>
+The --bootstrap option starts MariaDB in a lightweight, isolated mode for initialization: <br>
 - Disables networking and plugins for safe setup. <br>
 - Runs initialization scripts for tasks like: <br>
     - Creating system databases. <br>
     - Configuring initial users and permissions. <br>
 - Exits automatically after setup, ensuring efficient and conflict-free initialization. <br>
 - No external connections or conflicts occur during setup. <br>
-- It’s a safe way to run one-time initialization scripts programmatically without starting the full server. <br>
+- It’s a safe way to run one-time initialization scripts programmatically without starting the full server. <br><br>
 
-### Configuration File: db-config.cnf
+### 👽Configuration File: db-config.cnf
 
-***.conf and .cnf***
+### .conf and .cnf
 
 Both `.conf` and `.cnf` are commonly used for configuration files, <br>
 but they are often associated with different types of applications or services. <br>
@@ -891,19 +890,19 @@ but they are often associated with different types of applications or services. 
 | `.conf`            | General-purpose configuration files for many types of software.          | Operating system services and various servers.        |
 | `.cnf`             | Specialized configuration files, primarily for MySQL and MariaDB settings. | Database-related configurations.                      |
 
-<br> <br>
+<br>
 
 
 The db_config.cnf file is a configuration file for the MariaDB server, <br>
 specifically for setting server-side options that control database behavior, storage, networking, and performance. <br>
-See examples on [IMB](https://www.ibm.com/docs/en/ztpf/2023?topic=performance-mariadb-configuration-file-example) or [GitHub](https://gist.github.com/fevangelou/fb72f36bbe333e059b66). <br><br>
+See examples on [IMB](https://www.ibm.com/docs/en/ztpf/2023?topic=performance-mariadb-configuration-file-example) or [GitHub](https://gist.github.com/fevangelou/fb72f36bbe333e059b66). <br>
 
 
 <details>
-  <summary><strong>Explaination of variable options</strong></summary>
+  <summary><strong>🔸Explanation of variable options</strong></summary>
   <br>
 
-## Explaination of variable options:
+## Explanation of variable options:
 
 **Sections: General Server Configuration Sections** <br>
 The configuration file is divided into sections *(like [mysqld], [mariadb], etc.)* <br>
@@ -984,7 +983,7 @@ Character set settings to support various languages and symbols.<br>
 
 **Unix Socket Authentication Plugin**<br>
 This is for Unix socket authentication, allowing the root user to authenticate without a password when running as the Unix root user.<br>
-See https://mariadb.com/kb/en/unix_socket-authentication-plugin/ for details.<br><br>
+See [authentication plugin](https://mariadb.com/kb/en/unix_socket-authentication-plugin/) for details.<br><br>
 
 **this is only for embedded server**<br>
 [embedded]<br><br>
@@ -1004,7 +1003,7 @@ See https://mariadb.com/kb/en/unix_socket-authentication-plugin/ for details.<br
 </details>
 
 <details>
-  <summary><strong>Simple Config.cnf Example</strong></summary>
+  <summary><strong>🔸Simple Config.cnf Example</strong></summary>
   <br>
 
 ## Simple Config.cnf Example:
@@ -1056,31 +1055,32 @@ default-character-set = utf8mb4               # Default character set for client
 
 <br><br>
 
-### Testing the MariaDB Setup 
+### 👽Testing the MariaDB Setup 
 
 **1. Build and Start the Container:** <br>
 - View Logs: **(fix them first)**<br>
 ```bash
 docker-compose logs mariadb
 ```
-<br> <br>
+<br>
 
 **2. Enter the  container:** <br>
 ```bash
 docker exec -it <mariadb_container_name> bash
 ```
+<br>
 
 **3. Access MariaDB:** <br>
 ```bash
 mysql -u root -p
 ```
-<br> <br>
+<br>
  
 **4. Verify Database Creation:** <br>
 ```sql
 # SHOW DATABASES;
 ```
-**->** Make sure your database *(your_database_name)& is listed. <br><br>
+**->** Make sure your database *(your_database_name)& is listed. <br>
 
 **Should look like:**<br>
 ```sql
@@ -1095,14 +1095,14 @@ MariaDB [(none)]> SHOW DATABASES;
 +--------------------+
 ```
 
-<br><br>
+<br>
 
 **5. Verify User Creation:** <br>
 ```sql
 # SELECT User, Host FROM mysql.user;
 ```
 **->** This should list your USER. <br>
-**->** Your USER should have the %. <br><br>
+**->** Your USER should have the %. <br>
 
 **Should look like:** <br>
 ```sql
@@ -1114,13 +1114,12 @@ MariaDB [(none)]> SELECT User, Host FROM mysql.user;
 | root | localhost |
 +------+-----------+
 ```
-<br><br>
+<br>
 
 **6. Check User Permissions:** <br>
 ```sql
 # SHOW GRANTS FOR '<USER>'@'%';
 ```
-<br>
 
 **Should look like:**
 ```sql
@@ -1131,9 +1130,9 @@ MariaDB [(none)]> SHOW GRANTS FOR 'bob'@'%';
 | GRANT USAGE ON *.* TO `bob`@`%` IDENTIFIED BY PASSWORD '*61584B76F6ECE8FB9A328E7CF198094B2FAC55C7' |
 +----------------------------------------------------------------------------------------------------+
 ```
-<br><br>
+<br>
 
-**If all steps are successful, MariaDB is properly configured and running with the correct settings.** <br><br>
+🍀 **If all steps are successful, MariaDB is properly configured and running with the correct settings.** 🍀 <br><br>
 
 ---
 
@@ -1149,15 +1148,14 @@ in your docker-compose.yml file or Docker run command. <br><br>
 `PHP and Debian/Alpine:` Use the latest stable versions of PHP and your operating system. <br>
 Avoid specifying PHP versions like php-fpm7.4 or php-fpm8.2; instead, use php-fpm to default to the latest installed version. <br><br>
 
-### Script
+### 👽SCRIPT
 
-***NOTE:*** <br>
-This is the "shebang" line ```#!/bin/bash```<br>
-It tells the system that the script should be executed using */bin/bash*, a common Unix shell.<br>
-You alway need this line at the top of your script.sh!<br><br>
+❗NOTE: <br>
+This is the "shebang" line ```#!/bin/bash``` <br>
+It tells the system that the script should be executed using /bin/bash, a common Unix shell. <br>
+You alway need this line at the top of your script.sh! <br> <br>
 
 ***Initialization Script:*** *Key Steps* <br>
-
 - **1. Environment Setup:** <br>
   - Create/move necessary directories. <br>
   - Set up directories for data and logs with proper permissions. <br>
@@ -1173,7 +1171,7 @@ You alway need this line at the top of your script.sh!<br><br>
   - Ensure PHP-FPM runs in the foreground for Dockerized environments. *(/usr/sbin/php-fpm8.2 -F)* <br><br>
 
 
-### Configuration Details: wp-config.php
+### 👽Configuration Details: wp-config.php
 
 I don't recommand doing a wp-config manually **(for the Inception project)** <br>
 You need to pass the .env variables, but that is a bit more difficult, <br>
@@ -1183,18 +1181,18 @@ The best way is creating WordPress Configuration with 'wp config create'. <br><b
 
 
 <details>
-  <summary><strong>But If you want to create a wp-config.php manually</strong><em> Or for intrest</em></summary>
+  <summary><strong>🔸But If you want to create a wp-config.php manually</strong><em> OR for intrest</em></summary>
 
 ## Manual Configuration (Optional):
 
-- 1. Refer to [this example wp-config.php](https://www.vodien.com/help/article/how-to-create-wp-config-php-file) <br>
-- 2. Generate security keys and salts using the [WordPress Secret Key Generator](https://api.wordpress.org/secret-key/1.1/salt/) <br>
+1. Refer to [this example wp-config.php](https://www.vodien.com/help/article/how-to-create-wp-config-php-file) <br>
+2. Generate security keys and salts using the [WordPress Secret Key Generator](https://api.wordpress.org/secret-key/1.1/salt/) <br>
 The values for AUTH_KEY, SECURE_AUTH_KEY, etc., are security keys and salts that WordPress <br>
 uses for encrypting information stored in user cookies. You can generate new ones with the URL. <br><br>
 
 **Example Comparison:** <br>
 ```plaintext
-                    HardCoded Example               |           Recommended (using getenv)      
+                    HardCoded Example       |           Recommended (using getenv)      
         ------------------------------------|---------------------------------------------
                                             |
 define( 'WP_DATABASE_NAME', 'wordpress' );  |       define( 'WP_DATABASE_NAME', getenv('WP_DATABASE_NAME'));
@@ -1211,27 +1209,30 @@ define( 'DB_COLLATE', '' );                 |       define( 'DB_COLLATE', '' );
 
 <br>
 
-### PHP-FPM Configuration (www.conf)
+### 👽PHP-FPM Configuration (.www.conf)
 
-The www.conf file plays a critical role in configuring PHP-FPM for your WordPress container. <br>
-By default, PHP-FPM uses its standard www.conf file, which may not meet your container’s requirements,<br>
+The .www.conf file plays a critical role in configuring PHP-FPM for your WordPress container. <br>
+By default, PHP-FPM uses its standard .www.conf file, which may not meet your container’s requirements,<br>
 such as listening on the correct port or applying optimal resource limits. <br>
 If not properly configured, your container could experience performance issues or <br>
 fail to connect to NGINX or other services. <br><br>
 
-**Why Customize www.conf?** <br>
-- `Port Configuration:` Ensure PHP-FPM listens on the correct port (e.g., port 9000) <br>
- for communication with services like NGINX. <br>
-- `Resource Management:` Adjust process management settings to match your container’s <br>
- workload and prevent underutilization or resource waste. <br>
-- `Compatibility:` Avoid unexpected behavior caused by default settings <br>
+**Why Customize .www.conf?** <br>
+- `Port Configuration:` <br>
+Ensure PHP-FPM listens on the correct port (e.g., port 9000) <br>
+for communication with services like NGINX. <br>
+- `Resource Management:` <br>
+Adjust process management settings to match your container’s <br>
+workload and prevent underutilization or resource waste. <br>
+- `Compatibility:` <br>
+Avoid unexpected behavior caused by default settings <br>
 that may not align with your containerized environment. <br><br>
 
-**Applying a Custom www.conf** *(Dockerfile)* <br>
+**Applying a Custom .www.conf** *(Dockerfile)* <br>
 - Copy to /etc/php/8.2/fpm/pool.d/ *(overwrite)* <br>
 This ensures your custom settings are applied when the container runs. <br><br>
 
-**Example www.conf:**
+**Example .www.conf:**
 ```ini
 [www]
 user = www-data
@@ -1258,7 +1259,7 @@ listen.mode = 0660
 <br><br>
 
 
-### Testing the WordPress Setup
+### 👽Testing the WordPress Setup
 
 **1. Build and Start the Container:** <br>
   - View Logs: **(fix them first)**
@@ -1278,7 +1279,7 @@ docker exec -it <wordpress_container_name> bash
 ls /var/www/html/wordpress
 ```
 **->** Ensure required files *(e.g., index.php, wp-config.php)* are present. <br>
-**->** <details>
+<details>
   <summary><strong>Example</strong></summary>
 
 
@@ -1358,20 +1359,20 @@ It can only serve WordPress properly if the WordPress container <br>
 is already up and running, so start Nginx last. <br><br>
 
 Set up a Nginx container with custom configuration:<br>
-- **Dockerfile:** <br>
+- `Dockerfile:` <br>
  Defines the Nginx image build, installs necessary tools, <br>
  and copies configuration files into the container.<br>
-- **Custom Configuration File** *(nginx-config.conf):* <br>
+- `Custom Configuration File (nginx-config.conf):` <br>
  Contains Nginx server configurations. <br>
-- **Optional Initialization Script** *(nginx-script.sh):* <br>
+- `Optional Initialization Script (nginx-script.sh):` <br>
  Performs tasks such as creating SSL certificates *(this can also be done within the Dockerfile)*. <br><br>
 
-### Script
+### 👽SCRIPT
 
-**NOTE:** <br>
+❗NOTE: <br>
 This is the "shebang" line ```#!/bin/bash``` <br>
-It tells the system that the script should be executed using */bin/bash*, a common Unix shell. <br>
-You alway need this line at the top of your script.sh! <br><br>
+It tells the system that the script should be executed using /bin/bash, a common Unix shell. <br>
+You alway need this line at the top of your script.sh! <br> <br>
 
 The script *(nginx-script.sh)* is **optional** and can create a self-signed SSL certificate for TLS. <br>
 You may also integrate this step into the Dockerfile.<br><br>
@@ -1398,15 +1399,15 @@ openssl req \
   - `ST=` : State or Province<br>
   - `L=` : Locality *(City)*<br>
   - `O=` : Organization<br>
-  - `CN=` : Common Name *(Domain Name)*<br> <br>
-
+  - `CN=` : Common Name *(Domain Name)*<br>
+  
 openssl req [syntax](https://knowledge.digicert.com/general-information/openssl-quick-reference-guide)
 <br><br>
 
-### Configuration File (nginx-config.conf)
+### 👽Configuration File (nginx-config.conf)
 
 <details>
-  <summary><strong>Key Directives</strong></summary>
+  <summary><strong>🔸Key Directives</strong></summary>
   <br>
 
 ## Key Directives:
@@ -1462,7 +1463,7 @@ This block assumes a FastCGI server *(like PHP-FPM)* is available at wordpress:9
 
 <br>
 
-**Suggested Configuration** *(nginx-config.conf)*:
+***Suggested Configuration*** *(nginx-config.conf)*:
 ```nginx
 server {
     listen 443 ssl;
@@ -1493,13 +1494,13 @@ server {
 ```
 <br>
 
-### Using DOMAIN_NAME
+### 👽Using DOMAIN_NAME
 
 To use a custom domain name *(e.g., https://<DOMAIN_NAME>)*, <br>
 add the following entry to your **/etc/hosts** file: ```127.0.0.1 <DOMAIN_NAME>```
-<br>
+<br> <br>
 
-### HTTP vs HTTPS
+### 👽HTTP vs HTTPS
 
 **HTTPS** *(HyperText Transfer Protocol Secure)* offers significant advantages over **HTTP**,<br>
 **including:**<br>
@@ -1509,7 +1510,7 @@ add the following entry to your **/etc/hosts** file: ```127.0.0.1 <DOMAIN_NAME>`
 - `SEO Benefits:` Search engines favor HTTPS for better rankings. <br><br>
 
 
-### Testing the Nginx Setup
+### 👽Testing the Nginx Setup
 
 **1. Build and Start the Container:** <br>
 - View Logs: **(fix them first)**
@@ -1543,10 +1544,6 @@ The characters `+`, `*`, and `.` represent the progress of the SSL certificate g
 which is normal output for OpenSSL commands. <br>
 These are just indicators of the internal progress, <br>
 but they don't affect the result of the SSL certificate creation. <br>
-
-<br>
-
-
 
 <br> 
 
