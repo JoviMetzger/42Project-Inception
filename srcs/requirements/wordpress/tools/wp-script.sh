@@ -18,8 +18,8 @@ if [ ! -f wp-config.php ]; then
     
     	# Downloading WordPress"
    	wp core download \
-        --path="/var/www/html/wordpress/" \
-        --allow-root
+        	--path="/var/www/html/wordpress/" \
+        	--allow-root
     	echo "WordPress downloaded."
 
    	# Wait for MariaDB to be ready
