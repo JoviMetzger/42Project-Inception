@@ -206,7 +206,6 @@ sudo apt-get update
 sudo apt-get upgrade
 sudo apt-get install build-essential
 sudo apt-get install git-all
-sudo apt-get install clang
 sudo apt-get -y install make
 sudo apt-get install curl
 
