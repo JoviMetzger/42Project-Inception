@@ -11,10 +11,10 @@ You will virtualize several Docker images, creating them in your new personal vi
     - [What is a Docker Image?](#4️⃣What-is-a-Docker-Image)
     - [What Are Volumes?](#5️⃣What-Are-Volumes)
     - [Virtual Machine vs Docker](#6️⃣Virtual-Machine-vs-Docker)
-2) [Set up your Virtual Machine:](#7️⃣Set-up-your-Virtual-Machine)
-    - [How to set up your Virtual Machine](#1️⃣how-to-set-up-your-Virtual-Machine)
-    - [Create a Shared Folder *(between your VM and host)*](#2️⃣Create-a-Shared-Folder)
-    - [Connect to your host terminal *(because VM terminal sucks)*](#3️⃣Connect-to-your-host-terminal)
+2) [Set up your Virtual Machine:](#Set-up-your-Virtual-Machine)
+    - [How to set up your Virtual Machine](#vm-install))
+    - [Create a Shared Folder *(between your VM and host)*](#shared-folder)
+    - [Connect to your host terminal *(because VM terminal sucks)*](#host-terminal)
 3) [Set Up:](#Set-up)
     - [Extra *(getting started)*](#extra)
     - [MariaDB](#mariadb)
@@ -186,8 +186,8 @@ and will be preserved even if the container is destroyed.
 <details>
   <summary><strong>1️⃣How to set up your Virtual Machine</strong></summary>
   <br>
-
-## 📌How to set up your Virtual Machine
+<h2 id="vm-install" />
+## 1️⃣How to set up your Virtual Machine
 
 This guide will help you easily install **Linux** *(Ubuntu)* on a VirtualBox.
 
@@ -240,11 +240,11 @@ sudo reboot
 </details>
 
 <details>
-  <summary><strong>2️⃣Create a shared folder</strong></summary>
+  <summary><strong>2️⃣Create a shared folder (Optinal)</strong></summary>
   <br>
 
-
-## 🔦Create a Shared Folder: *(OPTINAL)* <br>
+<h2 id="shared-folder" />
+## 2️⃣Create a Shared Folder: *(OPTINAL)* <br>
 This is for the Oracle VirtualBox. <br>
 If drag-and-drop doesn't work. <br>
 Set up shared folders in VirtualBox to easily transfer files between the host and guest. <br> <br>
@@ -272,8 +272,8 @@ Set up shared folders in VirtualBox to easily transfer files between the host an
   <summary><strong>3️⃣Connect to your host terminal</strong></summary>
   <br>
 
-
-## 🔦Connect your host terminal: <br>
+<h2 id="host-terminal" />
+## 3️⃣Connect your host terminal: <br>
 Connecting to your VM through the terminal simplifies your workflow. <br>
 It allows for easy copy-pasting, regular terminal is faster then VM-terminal, <br>
 and feels just like working locally with VS Code and your regular terminal, <br>
