@@ -12,7 +12,7 @@ You will virtualize several Docker images, creating them in your new personal vi
     - [What Are Volumes?](#5️⃣What-Are-Volumes)
     - [Virtual Machine vs Docker](#6️⃣Virtual-Machine-vs-Docker)
 2) [Set up your Virtual Machine:](#Set-up-your-Virtual-Machine)
-    - [How to set up your Virtual Machine](#vm-install))
+    - [How to set up your Virtual Machine](#vm-install)
     - [Create a Shared Folder *(between your VM and host)*](#shared-folder)
     - [Connect to your host terminal *(because VM terminal sucks)*](#host-terminal)
 3) [Set Up:](#Set-up)
@@ -184,13 +184,12 @@ and will be preserved even if the container is destroyed.
 ## 🫖Set up your Virtual Machine
 
 <details>
-  <summary><strong>1️⃣How to set up your Virtual Machine</strong></summary>
+  <summary id="vm-install"><strong>1️⃣How to set up your Virtual Machine</strong></summary>
   <br>
-<h2 id="vm-install" />
+
 ## 1️⃣How to set up your Virtual Machine
 
 This guide will help you easily install **Linux** *(Ubuntu)* on a VirtualBox.
-
 
 📣 **TIP:** Watch the video from Step3, it explains everything ***step by step.***
 <br>
@@ -240,10 +239,9 @@ sudo reboot
 </details>
 
 <details>
-  <summary><strong>2️⃣Create a shared folder (Optinal)</strong></summary>
+  <summary id="shared-folder"><strong>2️⃣Create a shared folder (Optinal)</strong></summary>
   <br>
 
-<h2 id="shared-folder" />
 ## 2️⃣Create a Shared Folder: *(OPTINAL)* <br>
 This is for the Oracle VirtualBox. <br>
 If drag-and-drop doesn't work. <br>
@@ -269,10 +267,9 @@ Set up shared folders in VirtualBox to easily transfer files between the host an
 </details>
 
 <details>
-  <summary><strong>3️⃣Connect to your host terminal</strong></summary>
+  <summary id="host-terminal"><strong>3️⃣Connect to your host terminal</strong></summary>
   <br>
 
-<h2 id="host-terminal" />
 ## 3️⃣Connect your host terminal: <br>
 Connecting to your VM through the terminal simplifies your workflow. <br>
 It allows for easy copy-pasting, regular terminal is faster then VM-terminal, <br>
