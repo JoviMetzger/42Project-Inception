@@ -187,35 +187,48 @@ and will be preserved even if the container is destroyed.
   <summary><strong>1️⃣How to set up your Virtual Machine</strong></summary>
   <br>
 
-## 1️⃣How to set up your Virtual Machine
+## 📌How to set up your Virtual Machine
 
-You can either use as OS Ubuntu or POP!_OS (Or something else).
+This guide will help you easily install **Linux** *(Ubuntu)* on a VirtualBox.
+
+
+📣 **TIP:** Watch the video from Step3, it explains everything ***step by step.***
+<br>
 
 ### Step 1: <br>
-&ensp; - [Downloading Ubuntu](https://ubuntu.com/) &ensp; OR &ensp; [Downloading POP!_OS](https://pop.system76.com/)
+&ensp; - [Link for Downloading Oracle VirtualBox](https://www.virtualbox.org/) *(If you don't have it yet)*
+
+### Step 2: <br>
+&ensp; - [Link for Downloading Linux (Ubuntu version)](https://ubuntu.com/)
 
 ### Step 3: <br>
-&ensp; - [Set up a VirtualBox with Ubuntu](https://www.youtube.com/watch?v=v1JVqd8M3Yc) &ensp; OR &ensp; [Set up a VirtualBox with POP!_OS](https://www.youtube.com/watch?v=NTK4a0sDgvA)
+&ensp; - [Video for Installing VirtualMachine and Ubuntu](https://www.youtube.com/watch?v=v1JVqd8M3Yc)
 
 ### Step 4: <br>
 &ensp; - **Installing the Rest.** <br>
-## Installation via Terminal:
+&emsp;&emsp; - [Install Git](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git) <br>
+&emsp;&emsp; - [Install Make](https://askubuntu.com/questions/161104/how-do-i-install-make) <br>
+&emsp;&emsp; - [Install curl](https://www.tecmint.com/install-curl-in-linux/#curldeb) <br>
+&emsp;&emsp; - [Install Docker](https://www.digitalocean.com/community/tutorials/how-to-install-and-use-docker-on-ubuntu-20-04) <br>
+
+## 🔍 Installation via Terminal:
 ``` bash
-### Basic
 sudo apt-get update
 sudo apt-get upgrade
 sudo apt-get install build-essential
 sudo apt-get install git-all
 sudo apt-get -y install make
 sudo apt-get install curl
+sudo reboot
 
-### For Docker
+```
+### Docker
+```bash
 sudo apt-get install apt-transport-https ca-certificates curl software-properties-common
 curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
 sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
 sudo curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
 sudo chmod +x /usr/local/bin/docker-compose
-docker-compose --version
 sudo apt-get install docker-ce
 sudo systemctl status docker
 sudo reboot
@@ -231,10 +244,10 @@ sudo reboot
   <br>
 
 
-## 2️⃣Create a Shared Folder
-
-This is for the Oracle VirtualBox.
-Set up shared folders in VirtualBox to easily transfer files between the host and guest. <br> <br> 
+## 🔦Create a Shared Folder: *(OPTINAL)* <br>
+This is for the Oracle VirtualBox. <br>
+If drag-and-drop doesn't work. <br>
+Set up shared folders in VirtualBox to easily transfer files between the host and guest. <br> <br>
 
 - Go to VM `Settings` -> `Shared Folders`
 - Click the `+` icon to add a new shared folder
@@ -260,21 +273,20 @@ Set up shared folders in VirtualBox to easily transfer files between the host an
   <br>
 
 
-## 3️⃣Connect to your host terminal
-
+## 🔦Connect your host terminal: <br>
 Connecting to your VM through the terminal simplifies your workflow. <br>
 It allows for easy copy-pasting, regular terminal is faster then VM-terminal, <br>
 and feels just like working locally with VS Code and your regular terminal, <br>
 NO NEED to switch between multiple tools.
 
-### First: 
+### 🫖 First: 
 - Go to VM `Settings` **->** `Network` **->** `Advanced` **->** `Port Forwarding`<br>
 - Click the `+` icon to add a new port <br>
 ***Host IP:*** 127.0.0.1 <br>
 ***Host Port:*** 2222 *(could be any port number)* <br>
 ***Guest Port:*** 22 *(default SSH port on the guest)* <br>
 
-### Second:
+### 🫖 Second:
 In VM terminal: <br>
 *(only for the first time connecting to the VM)*
 ```bash
@@ -282,8 +294,9 @@ sudo apt install openssh-server
 sudo systemctl start ssh
 ```
 
-### Third:
-*(This command everytime you connect to the VM)*
+### 🫖 Third:
+*(You need to do this command everytime you connect to the VM)* <br>
+***\<port> = Host Port***
 ```bash
 ssh -p <port> <username>@127.0.0.1
 ```
